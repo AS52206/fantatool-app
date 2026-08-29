@@ -3,6 +3,7 @@
 	import { asta } from '$lib/stores/auction.svelte';
 	import { caricaBundle } from '$lib/data/load';
 	import { stemmiDisponibili } from '$lib/assets';
+	import { importaRoseDaFile, type RisultatoImport } from '$lib/data/importRose';
 	import { MODULI_MANTRA } from '$lib/engine/mantra';
 	import Crest from '$lib/ui/Crest.svelte';
 	import type { Ruolo } from '$lib/domain/types';
@@ -106,12 +107,38 @@
 	async function importaFile(ev: Event) {
 		const f = (ev.target as HTMLInputElement).files?.[0];
 		if (!f) return;
+		(ev.target as HTMLInputElement).value = '';
 		try {
 			asta.importa(await f.text());
 			mostraSetup = false;
 		} catch (e) {
-			alert('Import fallito: ' + (e instanceof Error ? e.message : e));
+			alert('Ripristino fallito: ' + (e instanceof Error ? e.message : e));
 		}
+	}
+
+	// --- Importa rose da file esterno (backup app precedente, CSV, Excel) ---
+	let roseInput: HTMLInputElement;
+	let anteprima = $state<RisultatoImport | null>(null);
+	let importando = $state(false);
+	async function scegliRoseFile(ev: Event) {
+		const f = (ev.target as HTMLInputElement).files?.[0];
+		(ev.target as HTMLInputElement).value = '';
+		if (!f) return;
+		importando = true;
+		try {
+			anteprima = await importaRoseDaFile(f, asta.giocatori);
+		} catch (e) {
+			alert('Import rose fallito: ' + (e instanceof Error ? e.message : e));
+		} finally {
+			importando = false;
+		}
+	}
+	function confermaImportRose() {
+		if (!anteprima) return;
+		asta.applicaImportRose(anteprima.squadre, anteprima.acquisti);
+		anteprima = null;
+		mostraSetup = false;
+		tab = 'rose';
 	}
 	function ora(ts: number | null) {
 		return ts
@@ -134,10 +161,56 @@
 				<button onclick={() => scarica(asta.esportaCsv(), `rose-${oggi()}.csv`, 'text/csv')}>⬇︎ CSV</button>
 				<button onclick={esportaXlsx} disabled={esportandoXlsx}>{esportandoXlsx ? '…' : '⬇︎ Excel'}</button>
 			{/if}
+			<button onclick={() => roseInput.click()} disabled={importando} title="Carica una rosa già fatta (backup app precedente, CSV o Excel)">
+				{importando ? '…' : '📥 Importa asta'}
+			</button>
 			<button onclick={() => fileInput.click()}>⬆︎ Ripristina</button>
 			<input bind:this={fileInput} type="file" accept=".json" style="display:none" onchange={importaFile} />
+			<input bind:this={roseInput} type="file" accept=".json,.csv,.tsv,.txt,.xlsx,.xls" style="display:none" onchange={scegliRoseFile} />
 		</div>
 	</header>
+
+	{#if anteprima}
+		{@const p = anteprima}
+		<div class="panel" style="border-color:var(--accent);margin-bottom:12px;">
+			<h2 style="margin-top:0;font-size:16px;">Importa asta — {asta.config.modalita.toUpperCase()}</h2>
+			<p class="muted" style="font-size:12px;margin:4px 0;">Fonte: {p.fonte}</p>
+			<div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px;margin:8px 0;">
+				<span><strong style="color:var(--ok);">{p.acquisti.length}</strong> giocatori riconosciuti</span>
+				<span><strong>{p.squadre.length}</strong> squadre</span>
+				{#if p.nonTrovati.length}<span style="color:var(--warn);"><strong>{p.nonTrovati.length}</strong> non riconosciuti</span>{/if}
+			</div>
+			<table style="width:100%;border-collapse:collapse;font-size:12px;max-width:520px;">
+				<thead><tr style="text-align:left;"><th>Squadra</th><th>Giocatori</th><th>Crediti spesi</th></tr></thead>
+				<tbody>
+					{#each p.squadre as s}
+						<tr style="border-top:1px solid var(--border);">
+							<td>{s}</td>
+							<td class="mono">{p.acquisti.filter((a) => a.proprietario === s).length}</td>
+							<td class="mono" style="color:var(--cyan);">{p.speso[s] ?? 0}</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+			{#if p.nonTrovati.length}
+				<details style="margin-top:8px;font-size:12px;">
+					<summary class="muted" style="cursor:pointer;">Non riconosciuti ({p.nonTrovati.length}) — resteranno fuori</summary>
+					<div class="muted" style="max-height:120px;overflow:auto;margin-top:4px;">
+						{#each p.nonTrovati as n}<div>{n}</div>{/each}
+					</div>
+				</details>
+			{/if}
+			<div style="margin-top:12px;display:flex;gap:8px;">
+				<button class="primary" onclick={confermaImportRose} disabled={!p.acquisti.length}>
+					Importa in {asta.config.modalita.toUpperCase()} e apri le Rose
+				</button>
+				<button onclick={() => (anteprima = null)}>Annulla</button>
+			</div>
+			<p class="muted" style="font-size:11px;margin-top:6px;">
+				Sostituisce l'asta {asta.config.modalita.toUpperCase()} corrente. L'altra modalità non viene toccata.
+			</p>
+		</div>
+	{/if}
 
 	{#if statoDati === 'carico'}
 		<div class="panel">Carico i dati…</div>

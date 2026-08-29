@@ -721,6 +721,26 @@ export class Asta {
 		this.applicaSnapshot(null, m);
 	}
 
+	/**
+	 * Applica una rosa importata da file alla modalità corrente: ricostruisce
+	 * le squadre partecipanti dai proprietari e popola gli acquisti.
+	 */
+	applicaImportRose(squadre: string[], acquisti: Acquisto[]) {
+		const stemmiEsistenti = new Map(
+			this.config.squadre.map((s) => [s.nome, s.stemma] as const)
+		);
+		const miaAttuale = this.miaSquadra;
+		const nuove: Squadra[] = squadre.map((nome) => ({
+			nome,
+			isMia: nome === miaAttuale,
+			stemma: stemmiEsistenti.get(nome)
+		}));
+		if (nuove.length && !nuove.some((s) => s.isMia)) nuove[0].isMia = true;
+		this.config.squadre = nuove.length ? nuove : this.config.squadre;
+		this.acquisti = acquisti;
+		this.avviata = true;
+	}
+
 	// ---------------------------------------------------------------- SCENARI
 	private giocatorePerChiave(chiave: string): Giocatore | undefined {
 		return this.giocatori.find((g) => g.chiave === chiave || String(g.id) === chiave);
