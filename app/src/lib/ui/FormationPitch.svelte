@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Crest from '$lib/ui/Crest.svelte';
+	import Jersey from '$lib/ui/Jersey.svelte';
 
 	export interface SlotCampo {
 		etichetta?: string;
@@ -23,11 +23,6 @@
 		LIBERO: 'var(--cyan)',
 		VUOTO: 'var(--border-strong)'
 	};
-	const tinta: Record<string, string> = {
-		PRESO: 'color-mix(in srgb, var(--ok) 12%, #0a1510)',
-		LIBERO: 'color-mix(in srgb, var(--cyan) 10%, #0a1510)',
-		VUOTO: '#0a1510'
-	};
 	const titColor = (t: number) => (t >= 70 ? 'var(--ok)' : t >= 45 ? 'var(--warn)' : 'var(--bad)');
 </script>
 
@@ -41,19 +36,21 @@
 				<div class="line" style="--n:{linea.slot.length};">
 					{#each linea.slot as s}
 						{@const st = s.stato ?? 'VUOTO'}
-						<div class="slot" style="border-color:{colStato[st]};background:{tinta[st]};">
+						<div class="slot" class:libero={st === 'LIBERO'}>
 							{#if s.nome}
-								<Crest nome={s.club} size={18} />
+								<div class="kit" title={s.club ?? ''}>
+									<Jersey club={s.club} size={44} />
+									<span class="dot" style="background:{colStato[st]};"></span>
+								</div>
 								<div class="name">{s.nome}</div>
 								<div class="sub">
 									{#if s.etichetta}<span class="muted">{s.etichetta}</span>{/if}
 									{#if s.prezzo != null}<span style="color:var(--cyan);">{s.prezzo}</span>{/if}
-								</div>
-								<div class="sub">
 									{#if s.titolarita != null && s.titolarita > 0}<span style="color:{titColor(s.titolarita)};">{Math.round(s.titolarita)}%</span>{/if}
 									{#if s.pmaFl != null && s.pmaFl > 0}<span class="muted">FL{s.pmaFl}</span>{/if}
 								</div>
 							{:else}
+								<Jersey ghost size={44} />
 								<div class="empty">{s.etichetta ?? s.ruolo ?? '—'}</div>
 							{/if}
 						</div>
@@ -128,16 +125,30 @@
 	.slot {
 		width: 100%;
 		max-width: 96px;
-		height: 78px;
-		border: 1.5px solid var(--border-strong);
-		border-radius: 9px;
-		padding: 5px 4px;
+		min-height: 82px;
+		padding: 2px;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: center;
-		gap: 2px;
+		justify-content: flex-start;
+		gap: 3px;
 		text-align: center;
+	}
+	.slot.libero {
+		opacity: 0.72;
+	}
+	.kit {
+		position: relative;
+		filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
+	}
+	.dot {
+		position: absolute;
+		right: -1px;
+		bottom: 2px;
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		box-shadow: 0 0 0 1.5px #0b1a13;
 	}
 	.name {
 		font-size: 11px;
