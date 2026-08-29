@@ -87,7 +87,7 @@
 						<strong>{g.nome}</strong>
 						<span class="muted">{g.squadra}</span>
 						<span style="margin-left:auto;" class="muted mono">
-							Qt {g.quotazione}{#if g.fc?.pma}· PMA {g.fc.pma}{/if}{#if g.fc?.expectedFantamedia}· FM~ {g.fc.expectedFantamedia.toFixed(1)}{/if}
+							Qt {g.quotazione}{#if g.fc?.pma}· PMA {g.fc.pma}{/if}{#if g.fantalab?.prezzo_atteso}· FL {g.fantalab.prezzo_atteso}{/if}{#if g.fc?.expectedTitolarita}· {Math.round(g.fc.expectedTitolarita)}%{/if}
 						</span>
 					</button>
 				{:else}
@@ -107,7 +107,7 @@
 					<RoleTag ruolo={selezionato.ruolo} ruoloMantra={selezionato.ruoloMantra} />
 					<span class="muted">{selezionato.squadra}</span>
 					<span class="mono muted" style="margin-left:auto;font-size:11px;">
-						Qt {selezionato.quotazione}{#if selezionato.fc}· PMA {selezionato.fc.pma} · PFC {selezionato.fc.pfc} · Slot {selezionato.fc.slot ?? '—'}{/if}{#if selezionato.fantalab}· FL {selezionato.fantalab.pma_pct}%{/if}
+						Qt {selezionato.quotazione}{#if selezionato.fc}· PMA {selezionato.fc.pma} · PFC {selezionato.fc.pfc} · Slot {selezionato.fc.slot ?? '—'} · tit {Math.round(selezionato.fc.expectedTitolarita)}%{/if}{#if selezionato.fantalab}· FL {selezionato.fantalab.prezzo_atteso} ({selezionato.fantalab.pma_pct}%){/if}
 					</span>
 				</div>
 

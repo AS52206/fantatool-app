@@ -7,7 +7,7 @@
 	import type { Ruolo } from '$lib/domain/types';
 
 	const RUOLI: Ruolo[] = ['P', 'D', 'C', 'A'];
-	type Ord = 'quotazione' | 'pma' | 'fm' | 'nome';
+	type Ord = 'quotazione' | 'pma' | 'fl' | 'tit' | 'fm' | 'nome';
 
 	let query = $state('');
 	let ruoloFiltro = $state<Ruolo | 'TUTTI'>('TUTTI');
@@ -22,7 +22,17 @@
 		if (soloConPma) list = list.filter((g) => g.fc?.pma);
 		if (q) list = list.filter((g) => g.chiave.includes(q) || normalizzaNome(g.squadra).includes(q));
 		const key = (g: (typeof list)[number]) =>
-			ord === 'nome' ? g.nome : ord === 'pma' ? g.fc?.pma ?? 0 : ord === 'fm' ? g.fc?.expectedFantamedia ?? 0 : g.quotazione;
+			ord === 'nome'
+				? g.nome
+				: ord === 'pma'
+					? (g.fc?.pma ?? 0)
+					: ord === 'fl'
+						? (g.fantalab?.prezzo_atteso ?? 0)
+						: ord === 'tit'
+							? (g.fc?.expectedTitolarita ?? 0)
+							: ord === 'fm'
+								? (g.fc?.expectedFantamedia ?? 0)
+								: g.quotazione;
 		return [...list].sort((a, b) => {
 			const ka = key(a);
 			const kb = key(b);
@@ -65,7 +75,9 @@
 		</select>
 		<select bind:value={ord}>
 			<option value="quotazione">Quotazione</option>
-			<option value="pma">PMA</option>
+			<option value="pma">PMA Fantacrediti</option>
+			<option value="fl">PMA Fantalab</option>
+			<option value="tit">% titolarità</option>
 			<option value="fm">FM attesa</option>
 			<option value="nome">Nome</option>
 		</select>
@@ -77,10 +89,11 @@
 	<div style="max-height:65vh;overflow:auto;">
 		<table style="width:100%;border-collapse:collapse;font-size:12px;">
 			<thead><tr style="text-align:left;position:sticky;top:0;background:var(--panel);">
-				<th>R</th><th>Giocatore</th><th>Club</th><th>Qt</th><th>PMA</th><th>PFC</th><th>Slot</th><th>FM~</th>
+				<th>R</th><th>Giocatore</th><th>Club</th><th>Qt</th><th title="PMA Fantacrediti">PMA</th><th>PFC</th><th title="PMA Fantalab">FL</th><th title="% titolarità attesa">%TIT</th><th>Slot</th><th>FM~</th>
 			</tr></thead>
 			<tbody>
 				{#each liberi.slice(0, 300) as g (g.id)}
+					{@const tit = g.fc?.expectedTitolarita ?? 0}
 					<tr style="border-top:1px solid var(--border);">
 						<td><RoleTag ruolo={g.ruolo} ruoloMantra={g.ruoloMantra} /></td>
 						<td>{g.nome}</td>
@@ -88,6 +101,8 @@
 						<td class="mono">{g.quotazione}</td>
 						<td class="mono" style="color:var(--cyan);">{g.fc?.pma ?? '—'}</td>
 						<td class="mono">{g.fc?.pfc ?? '—'}</td>
+						<td class="mono" style="color:var(--warn);">{g.fantalab?.prezzo_atteso ?? '—'}</td>
+						<td class="mono" style:color={tit >= 70 ? 'var(--ok)' : tit >= 45 ? 'var(--warn)' : tit > 0 ? 'var(--bad)' : 'var(--muted)'}>{tit ? Math.round(tit) + '%' : '—'}</td>
 						<td class="mono">{g.fc?.slot ?? '—'}</td>
 						<td class="mono">{g.fc?.expectedFantamedia ? g.fc.expectedFantamedia.toFixed(1) : '—'}</td>
 					</tr>

@@ -57,6 +57,8 @@
 		ruolo: r.ruolo || 'C',
 		ruoloMantra: r.ruoloMantra,
 		prezzo: r.stato === 'PRESO' ? r.prezzoEffettivo : r.max,
+		titolarita: r.giocatore?.fc?.expectedTitolarita ?? null,
+		pmaFl: r.giocatore?.fantalab?.prezzo_atteso ?? null,
 		stato: r.stato === 'PRESO' ? 'PRESO' : 'LIBERO'
 	}))}
 	{@const campo = asta.isMantra ? buildCampoMantra(campoInput, modulo) : buildCampoClassic(campoInput, modulo)}
@@ -105,7 +107,9 @@
 								<RoleTag ruolo={g.ruolo} ruoloMantra={g.ruoloMantra} />
 								<Crest nome={g.squadra} size={15} />
 								<strong>{g.nome}</strong><span class="muted">{g.squadra}</span>
-								<span class="muted mono" style="margin-left:auto;">cons. {cons}</span>
+								<span class="muted mono" style="margin-left:auto;">
+									{#if g.fantalab?.prezzo_atteso}FL {g.fantalab.prezzo_atteso} · {/if}cons. {cons}
+								</span>
 							</button>
 						{/each}
 					</div>
@@ -113,18 +117,21 @@
 			</div>
 
 			<table style="width:100%;border-collapse:collapse;font-size:13px;">
-				<thead><tr style="text-align:left;"><th>R</th><th>Giocatore</th><th>Max</th><th>Cons.</th><th>Stato</th><th></th></tr></thead>
+				<thead><tr style="text-align:left;"><th>R</th><th>Giocatore</th><th>Max</th><th>Cons.</th><th title="PMA Fantalab">FL</th><th title="% titolarità">%TIT</th><th>Stato</th><th></th></tr></thead>
 				<tbody>
 					{#each righe as r (r.chiave)}
+						{@const tit = r.giocatore?.fc?.expectedTitolarita ?? 0}
 						<tr style="border-top:1px solid var(--border);">
 							<td><RoleTag ruolo={r.ruolo} ruoloMantra={r.ruoloMantra} /></td>
 							<td style="white-space:nowrap;">
 								<Crest nome={r.giocatore?.squadra} size={14} /> {r.nome}{#if r.stato !== 'LIBERO'}<span class="muted" style="font-size:11px;"> · {r.proprietario} {r.prezzoEffettivo}</span>{/if}</td>
 							<td>
-								<input type="number" min="1" value={r.max} style="width:70px;"
+								<input type="number" min="1" value={r.max} style="width:64px;"
 									onchange={(e) => asta.setTargetScenario(attivo, r.chiave, +(e.target as HTMLInputElement).value)} />
 							</td>
 							<td class="mono muted">{r.consigliato ?? '—'}</td>
+							<td class="mono" style="color:var(--warn);">{r.giocatore?.fantalab?.prezzo_atteso ?? '—'}</td>
+							<td class="mono" style:color={tit >= 70 ? 'var(--ok)' : tit >= 45 ? 'var(--warn)' : tit > 0 ? 'var(--bad)' : 'var(--muted)'}>{tit ? Math.round(tit) + '%' : '—'}</td>
 							<td class="mono" style="color:{stColor[r.stato]};">{r.stato}</td>
 							<td><button style="padding:0 6px;font-size:11px;" onclick={() => asta.rimuoviDaScenario(attivo, r.chiave)}>✕</button></td>
 						</tr>

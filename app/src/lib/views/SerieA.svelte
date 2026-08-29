@@ -37,7 +37,7 @@
 					<RoleTag ruolo={g.ruolo} ruoloMantra={g.ruoloMantra} />
 					<span>{g.nome}</span>
 					<span class="muted mono" style="margin-left:auto;">
-						{#if a}{a.proprietario} · {a.prezzo}{:else}Qt {g.quotazione}{#if g.fc?.pma}· PMA {g.fc.pma}{/if}{/if}
+						{#if a}{a.proprietario} · {a.prezzo}{:else}Qt {g.quotazione}{#if g.fc?.pma}· PMA {g.fc.pma}{/if}{#if g.fantalab?.prezzo_atteso}· FL {g.fantalab.prezzo_atteso}{/if}{#if g.fc?.expectedTitolarita}· {Math.round(g.fc.expectedTitolarita)}%{/if}{/if}
 					</span>
 				</div>
 			{/each}

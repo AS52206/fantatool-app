@@ -7,6 +7,8 @@
 		club?: string;
 		ruolo?: string;
 		prezzo?: number | null;
+		titolarita?: number | null;
+		pmaFl?: number | null;
 		stato?: 'PRESO' | 'LIBERO' | 'VUOTO';
 	}
 	export interface LineaCampo {
@@ -36,6 +38,10 @@
 							<div class="slot-sub mono">
 								{#if s.etichetta}<span class="muted">{s.etichetta}</span>{/if}
 								{#if s.prezzo != null}· <span style="color:var(--cyan);">{s.prezzo}</span>{/if}
+							</div>
+							<div class="slot-sub mono muted">
+								{#if s.titolarita != null && s.titolarita > 0}<span style:color={s.titolarita >= 70 ? 'var(--ok)' : s.titolarita >= 45 ? 'var(--warn)' : 'var(--bad)'}>{Math.round(s.titolarita)}%</span> tit{/if}
+								{#if s.pmaFl != null && s.pmaFl > 0}· FL {s.pmaFl}{/if}
 							</div>
 						{:else}
 							<div class="slot-empty">{s.etichetta ?? s.ruolo ?? '—'}</div>
@@ -75,8 +81,8 @@
 		gap: 8px;
 	}
 	.slot {
-		width: 80px;
-		min-height: 58px;
+		width: 84px;
+		min-height: 70px;
 		background: rgba(6, 12, 9, 0.7);
 		border: 1.5px solid var(--border-strong);
 		border-radius: 8px;

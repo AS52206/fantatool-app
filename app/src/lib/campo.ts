@@ -17,6 +17,8 @@ export interface GiocatoreCampo {
 	ruolo: string; // classico P/D/C/A
 	ruoloMantra?: string;
 	prezzo?: number | null;
+	titolarita?: number | null;
+	pmaFl?: number | null;
 	stato?: 'PRESO' | 'LIBERO' | 'VUOTO';
 	punteggio?: number;
 }
@@ -52,7 +54,10 @@ export function buildCampoClassic(giocatori: GiocatoreCampo[], modulo: string): 
 			const g = pool.find((x) => !usati.has(x.chiave));
 			if (g) {
 				usati.add(g.chiave);
-				slot.push({ nome: g.nome, club: g.club, ruolo, prezzo: g.prezzo, stato: g.stato ?? 'PRESO' });
+				slot.push({
+					nome: g.nome, club: g.club, ruolo, prezzo: g.prezzo,
+					titolarita: g.titolarita, pmaFl: g.pmaFl, stato: g.stato ?? 'PRESO'
+				});
 			} else {
 				slot.push({ ruolo, stato: 'VUOTO' });
 			}
@@ -121,6 +126,8 @@ function slotDa(etichetta: string, g: GiocatoreCampo | null): SlotCampo {
 		club: g.club,
 		ruolo: g.ruoloMantra || g.ruolo,
 		prezzo: g.prezzo,
+		titolarita: g.titolarita,
+		pmaFl: g.pmaFl,
 		stato: g.stato ?? 'PRESO'
 	};
 }

@@ -47,11 +47,13 @@
 				</div>
 				{#if vista === 'giocatore'}
 					{#each gr as a}
+						{@const tit = a.player?.fc?.expectedTitolarita ?? 0}
 						<div style="display:flex;gap:6px;font-size:12px;padding:2px 0;align-items:center;">
 							<Crest nome={a.squadraSerieA} size={14} />
 							<span>{a.nome}</span>
 							{#if asta.isMantra && a.player?.ruoloMantra}<span class="muted mono" style="font-size:10px;">{a.player.ruoloMantra}</span>{/if}
-							<span class="muted">{a.squadraSerieA}</span>
+							{#if tit}<span class="mono" style="font-size:10px;color:{tit >= 70 ? 'var(--ok)' : tit >= 45 ? 'var(--warn)' : 'var(--bad)'};">{Math.round(tit)}%</span>{/if}
+							{#if a.player?.fantalab?.prezzo_atteso}<span class="mono muted" style="font-size:10px;">FL{a.player.fantalab.prezzo_atteso}</span>{/if}
 							<span class="mono" style="margin-left:auto;color:var(--cyan);">{a.prezzo}</span>
 							<span class="mono muted" style="width:44px;text-align:right;">{pct(a.prezzo)}</span>
 						</div>
