@@ -34,8 +34,12 @@
 
 	const stColor = { PRESO: 'var(--ok)', PERSO: 'var(--bad)', LIBERO: 'var(--muted)' } as Record<string, string>;
 
-	function aggiungi(chiave: string, consigliato: number | null) {
-		asta.setTargetScenario(attivo, chiave, consigliato ?? 1);
+	/** Prezzo di default per un obiettivo: PMA Fantalab, poi consigliato, poi 1. */
+	function prezzoDefault(g: { fantalab?: { prezzo_atteso: number } | null }, consigliato: number | null) {
+		return Math.max(1, Math.round(g.fantalab?.prezzo_atteso || consigliato || 1));
+	}
+	function aggiungi(chiave: string, prezzo: number) {
+		asta.setTargetScenario(attivo, chiave, prezzo);
 		query = '';
 	}
 </script>
@@ -103,12 +107,13 @@
 					<div class="panel" style="position:absolute;z-index:5;left:0;right:0;padding:4px;">
 						{#each suggerimenti as g}
 							{@const cons = asta.valutazione(g).fascia.riferimento}
-							<button class="row-player" onclick={() => aggiungi(g.chiave, cons)}>
+							{@const def = prezzoDefault(g, cons)}
+							<button class="row-player" onclick={() => aggiungi(g.chiave, def)}>
 								<RoleTag ruolo={g.ruolo} ruoloMantra={g.ruoloMantra} />
 								<Crest nome={g.squadra} size={15} />
 								<strong>{g.nome}</strong><span class="muted">{g.squadra}</span>
 								<span class="muted mono" style="margin-left:auto;">
-									{#if g.fantalab?.prezzo_atteso}FL {g.fantalab.prezzo_atteso} · {/if}cons. {cons}
+									{#if g.fantalab?.prezzo_atteso}FL {g.fantalab.prezzo_atteso} · {/if}cons. {cons} → <span style="color:var(--cyan);">{def}</span>
 								</span>
 							</button>
 						{/each}
@@ -125,9 +130,13 @@
 							<td><RoleTag ruolo={r.ruolo} ruoloMantra={r.ruoloMantra} /></td>
 							<td style="white-space:nowrap;">
 								<Crest nome={r.giocatore?.squadra} size={14} /> {r.nome}{#if r.stato !== 'LIBERO'}<span class="muted" style="font-size:11px;"> · {r.proprietario} {r.prezzoEffettivo}</span>{/if}</td>
-							<td>
-								<input type="number" min="1" value={r.max} style="width:64px;"
+							<td style="white-space:nowrap;">
+								<input type="number" min="1" value={r.max} style="width:58px;"
 									onchange={(e) => asta.setTargetScenario(attivo, r.chiave, +(e.target as HTMLInputElement).value)} />
+								{#if r.giocatore?.fantalab?.prezzo_atteso && r.giocatore.fantalab.prezzo_atteso !== r.max}
+									<button style="padding:1px 5px;font-size:10px;" title="Imposta al PMA Fantalab"
+										onclick={() => asta.setTargetScenario(attivo, r.chiave, r.giocatore!.fantalab!.prezzo_atteso)}>→FL</button>
+								{/if}
 							</td>
 							<td class="mono muted">{r.consigliato ?? '—'}</td>
 							<td class="mono" style="color:var(--warn);">{r.giocatore?.fantalab?.prezzo_atteso ?? '—'}</td>
