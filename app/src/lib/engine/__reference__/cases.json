@@ -1,0 +1,1604 @@
+{
+ "prezzo": [
+  {
+   "nome": "A top",
+   "input": {
+    "ruolo": "A",
+    "fm": 8.2,
+    "pg": 34,
+    "quotazione": 40,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 254,
+    "etichetta": "Inamovibile / Top Slot (⚖️ Trend Normale)"
+   }
+  },
+  {
+   "nome": "A rotazione",
+   "input": {
+    "ruolo": "A",
+    "fm": 6.4,
+    "pg": 20,
+    "quotazione": 12,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 30,
+    "etichetta": "Punta di Rotazione (⚖️ Trend Normale)"
+   }
+  },
+  {
+   "nome": "A scommessa",
+   "input": {
+    "ruolo": "A",
+    "fm": 5.5,
+    "pg": 15,
+    "quotazione": 5,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 1,
+    "etichetta": "Scommessa / Slot di Copertura (⚖️ Trend Normale)"
+   }
+  },
+  {
+   "nome": "C offensivo",
+   "input": {
+    "ruolo": "C",
+    "fm": 7.1,
+    "pg": 32,
+    "quotazione": 25,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 75,
+    "etichetta": "Centrocampista Offensivo (⚖️ Trend Normale)"
+   }
+  },
+  {
+   "nome": "C da voto",
+   "input": {
+    "ruolo": "C",
+    "fm": 6.0,
+    "pg": 28,
+    "quotazione": 10,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 20,
+    "etichetta": "Titolare da Voto (⚖️ Trend Normale)"
+   }
+  },
+  {
+   "nome": "D top reparto",
+   "input": {
+    "ruolo": "D",
+    "fm": 6.6,
+    "pg": 33,
+    "quotazione": 18,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 51,
+    "etichetta": "Top di Reparto (1°-2° Slot) (⚖️ Trend Normale)"
+   }
+  },
+  {
+   "nome": "D modificatore",
+   "input": {
+    "ruolo": "D",
+    "fm": 5.9,
+    "pg": 30,
+    "quotazione": 8,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 19,
+    "etichetta": "Regolarista da Modificatore (⚖️ Trend Normale)"
+   }
+  },
+  {
+   "nome": "P titolare",
+   "input": {
+    "ruolo": "P",
+    "fm": 5.6,
+    "pg": 34,
+    "quotazione": 16,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 15,
+    "etichetta": "Portiere Titolare (⚖️ Trend Normale)"
+   }
+  },
+  {
+   "nome": "P low cost",
+   "input": {
+    "ruolo": "P",
+    "fm": 5.1,
+    "pg": 20,
+    "quotazione": 5,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 2,
+    "etichetta": "Portiere Low-Cost (⚖️ Trend Normale)"
+   }
+  },
+  {
+   "nome": "slot copertura",
+   "input": {
+    "ruolo": "C",
+    "fm": 5.0,
+    "pg": 25,
+    "quotazione": 1,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 1,
+    "etichetta": "Scommessa / Slot di Copertura (⚖️ Trend Normale)"
+   }
+  },
+  {
+   "nome": "nuovo arrivo A top",
+   "input": {
+    "ruolo": "A",
+    "fm": 0,
+    "pg": 0,
+    "quotazione": 30,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 72,
+    "etichetta": "🌟 Nuovo Arrivo TOP"
+   }
+  },
+  {
+   "nome": "nuovo arrivo A rotazione",
+   "input": {
+    "ruolo": "A",
+    "fm": 0,
+    "pg": 0,
+    "quotazione": 6,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 8,
+    "etichetta": "Nuovo Arrivo (Rotazione)"
+   }
+  },
+  {
+   "nome": "nuovo arrivo sconosciuto",
+   "input": {
+    "ruolo": "A",
+    "fm": 0,
+    "pg": 0,
+    "quotazione": 2,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 1,
+    "etichetta": "Scommessa / Sconosciuto"
+   }
+  },
+  {
+   "nome": "rientro TOP storico",
+   "input": {
+    "ruolo": "C",
+    "fm": 0,
+    "pg": 2,
+    "quotazione": 20,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 6.8,
+    "pgOld": 30,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 43,
+    "etichetta": "🌟 Rientro Confermato TOP (storico solido)"
+   }
+  },
+  {
+   "nome": "rientro affidabile storico",
+   "input": {
+    "ruolo": "C",
+    "fm": 0,
+    "pg": 2,
+    "quotazione": 20,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 6.2,
+    "pgOld": 25,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 25,
+    "etichetta": "Rientro Affidabile (storico buono)"
+   }
+  },
+  {
+   "nome": "A infortunato",
+   "input": {
+    "ruolo": "A",
+    "fm": 7.5,
+    "pg": 30,
+    "quotazione": 30,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "🔴 Infortunato/Dubbio",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 75,
+    "etichetta": "Inamovibile / Top Slot (⚖️ Trend Normale · 🔴 Infortunato/Dubbio)"
+   }
+  },
+  {
+   "nome": "A rigorista",
+   "input": {
+    "ruolo": "A",
+    "fm": 7.5,
+    "pg": 30,
+    "quotazione": 30,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "🎯 Rigorista designato",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 172,
+    "etichetta": "Inamovibile / Top Slot (⚖️ Trend Normale · 🎯 Rigorista designato)"
+   }
+  },
+  {
+   "nome": "A ballottaggio",
+   "input": {
+    "ruolo": "A",
+    "fm": 7.5,
+    "pg": 30,
+    "quotazione": 30,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "🟡 Ballottaggio",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 112,
+    "etichetta": "Inamovibile / Top Slot (⚖️ Trend Normale · 🟡 Ballottaggio)"
+   }
+  },
+  {
+   "nome": "A con inflazione ruolo alta",
+   "input": {
+    "ruolo": "A",
+    "fm": 7.5,
+    "pg": 30,
+    "quotazione": 30,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [
+     {
+      "ruolo": "A",
+      "prezzo": 60,
+      "squadraSerieA": "Inter",
+      "proprietario": "Rivale1",
+      "giocatoreId": 0
+     },
+     {
+      "ruolo": "A",
+      "prezzo": 61,
+      "squadraSerieA": "Inter",
+      "proprietario": "Rivale1",
+      "giocatoreId": 0
+     },
+     {
+      "ruolo": "A",
+      "prezzo": 62,
+      "squadraSerieA": "Inter",
+      "proprietario": "Rivale1",
+      "giocatoreId": 0
+     },
+     {
+      "ruolo": "A",
+      "prezzo": 63,
+      "squadraSerieA": "Inter",
+      "proprietario": "Rivale1",
+      "giocatoreId": 0
+     }
+    ],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 198,
+    "etichetta": "Inamovibile / Top Slot (🔥 Asta Calda)"
+   }
+  },
+  {
+   "nome": "A con inflazione ruolo bassa",
+   "input": {
+    "ruolo": "A",
+    "fm": 7.5,
+    "pg": 30,
+    "quotazione": 30,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [
+     {
+      "ruolo": "A",
+      "prezzo": 8,
+      "squadraSerieA": "Inter",
+      "proprietario": "Rivale1",
+      "giocatoreId": 0
+     },
+     {
+      "ruolo": "A",
+      "prezzo": 9,
+      "squadraSerieA": "Inter",
+      "proprietario": "Rivale1",
+      "giocatoreId": 0
+     },
+     {
+      "ruolo": "A",
+      "prezzo": 10,
+      "squadraSerieA": "Inter",
+      "proprietario": "Rivale1",
+      "giocatoreId": 0
+     },
+     {
+      "ruolo": "A",
+      "prezzo": 11,
+      "squadraSerieA": "Inter",
+      "proprietario": "Rivale1",
+      "giocatoreId": 0
+     }
+    ],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 120,
+    "etichetta": "Inamovibile / Top Slot (❄️ Asta Fredda)"
+   }
+  },
+  {
+   "nome": "A con inflazione globale",
+   "input": {
+    "ruolo": "A",
+    "fm": 7.5,
+    "pg": 30,
+    "quotazione": 30,
+    "budgetMax": 500,
+    "bilancioGlobal": {
+     "Io": {
+      "c_rimasti": 380,
+      "g_presi": 3
+     },
+     "Rivale1": {
+      "c_rimasti": 380,
+      "g_presi": 3
+     },
+     "Rivale2": {
+      "c_rimasti": 380,
+      "g_presi": 3
+     },
+     "Rivale3": {
+      "c_rimasti": 380,
+      "g_presi": 3
+     },
+     "Rivale4": {
+      "c_rimasti": 380,
+      "g_presi": 3
+     },
+     "Rivale5": {
+      "c_rimasti": 380,
+      "g_presi": 3
+     },
+     "Rivale6": {
+      "c_rimasti": 500,
+      "g_presi": 0
+     },
+     "Rivale7": {
+      "c_rimasti": 500,
+      "g_presi": 0
+     }
+    },
+    "acquisti": [
+     {
+      "ruolo": "A",
+      "prezzo": 60,
+      "squadraSerieA": "Inter",
+      "proprietario": "Rivale1",
+      "giocatoreId": 0
+     },
+     {
+      "ruolo": "A",
+      "prezzo": 60,
+      "squadraSerieA": "Inter",
+      "proprietario": "Rivale1",
+      "giocatoreId": 0
+     },
+     {
+      "ruolo": "A",
+      "prezzo": 60,
+      "squadraSerieA": "Inter",
+      "proprietario": "Rivale1",
+      "giocatoreId": 0
+     }
+    ],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 219,
+    "etichetta": "Inamovibile / Top Slot (🔥 Asta Calda)"
+   }
+  },
+  {
+   "nome": "D difesa solida",
+   "input": {
+    "ruolo": "D",
+    "fm": 6.6,
+    "pg": 33,
+    "quotazione": 18,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "Inter",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": {
+     "Como": 1.19,
+     "Inter": 1.18,
+     "Roma": 1.16,
+     "Juventus": 1.12,
+     "Napoli": 1.11,
+     "Milan": 1.09,
+     "Bologna": 1.08,
+     "Atalanta": 1.05,
+     "Venezia": 0.85,
+     "Frosinone": 0.85,
+     "Monza": 0.85
+    }
+   },
+   "atteso": {
+    "prezzo": 60,
+    "etichetta": "Top di Reparto (1°-2° Slot) (⚖️ Trend Normale · 🛡️ +18% (difesa solida))"
+   }
+  },
+  {
+   "nome": "D difesa fragile",
+   "input": {
+    "ruolo": "D",
+    "fm": 6.6,
+    "pg": 33,
+    "quotazione": 18,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "Monza",
+    "miaSquadraScelta": "",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": {
+     "Como": 1.19,
+     "Inter": 1.18,
+     "Roma": 1.16,
+     "Juventus": 1.12,
+     "Napoli": 1.11,
+     "Milan": 1.09,
+     "Bologna": 1.08,
+     "Atalanta": 1.05,
+     "Venezia": 0.85,
+     "Frosinone": 0.85,
+     "Monza": 0.85
+    }
+   },
+   "atteso": {
+    "prezzo": 43,
+    "etichetta": "Top di Reparto (1°-2° Slot) (⚖️ Trend Normale · 🕳️ -15% (difesa fragile/neopromossa))"
+   }
+  },
+  {
+   "nome": "A doppione singolo",
+   "input": {
+    "ruolo": "A",
+    "fm": 7.5,
+    "pg": 30,
+    "quotazione": 30,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [
+     {
+      "ruolo": "C",
+      "prezzo": 20,
+      "squadraSerieA": "Inter",
+      "proprietario": "Io",
+      "giocatoreId": 0
+     }
+    ],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "Inter",
+    "miaSquadraScelta": "Io",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 135,
+    "etichetta": "Inamovibile / Top Slot (⚖️ Trend Normale · ⚠️ [RISCHIO PALINSESTO: Troppi doppioni dello stesso club])"
+   }
+  },
+  {
+   "nome": "A doppione multiplo",
+   "input": {
+    "ruolo": "A",
+    "fm": 7.5,
+    "pg": 30,
+    "quotazione": 30,
+    "budgetMax": 500,
+    "bilancioGlobal": null,
+    "acquisti": [
+     {
+      "ruolo": "C",
+      "prezzo": 20,
+      "squadraSerieA": "Inter",
+      "proprietario": "Io",
+      "giocatoreId": 0
+     },
+     {
+      "ruolo": "D",
+      "prezzo": 15,
+      "squadraSerieA": "Inter",
+      "proprietario": "Io",
+      "giocatoreId": 0
+     }
+    ],
+    "flagManuale": "Normale",
+    "listaAllenatori": [
+     "Io",
+     "Rivale1",
+     "Rivale2",
+     "Rivale3",
+     "Rivale4",
+     "Rivale5",
+     "Rivale6",
+     "Rivale7"
+    ],
+    "limitiRuoli": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6,
+     "TOT": 25
+    },
+    "fmOld": 0.0,
+    "pgOld": 0,
+    "squadraSerieA": "Inter",
+    "miaSquadraScelta": "Io",
+    "quoteRuolo": null,
+    "moltiplicatoriDifesa": null
+   },
+   "atteso": {
+    "prezzo": 105,
+    "etichetta": "Inamovibile / Top Slot (⚖️ Trend Normale · ⚠️ [RISCHIO PALINSESTO: Troppi doppioni dello stesso club])"
+   }
+  }
+ ],
+ "inflazioneRuolo": [
+  {
+   "nome": "meno di 3",
+   "acquisti": [
+    {
+     "ruolo": "A",
+     "prezzo": 30
+    },
+    {
+     "ruolo": "A",
+     "prezzo": 30
+    }
+   ],
+   "atteso": 1.0
+  },
+  {
+   "nome": "3 medi",
+   "acquisti": [
+    {
+     "ruolo": "A",
+     "prezzo": 40
+    },
+    {
+     "ruolo": "A",
+     "prezzo": 40
+    },
+    {
+     "ruolo": "A",
+     "prezzo": 40
+    }
+   ],
+   "atteso": 1.0
+  },
+  {
+   "nome": "5 costosi",
+   "acquisti": [
+    {
+     "ruolo": "A",
+     "prezzo": 70
+    },
+    {
+     "ruolo": "A",
+     "prezzo": 70
+    },
+    {
+     "ruolo": "A",
+     "prezzo": 70
+    },
+    {
+     "ruolo": "A",
+     "prezzo": 70
+    },
+    {
+     "ruolo": "A",
+     "prezzo": 70
+    }
+   ],
+   "atteso": 1.5
+  },
+  {
+   "nome": "4 economici",
+   "acquisti": [
+    {
+     "ruolo": "A",
+     "prezzo": 5
+    },
+    {
+     "ruolo": "A",
+     "prezzo": 5
+    },
+    {
+     "ruolo": "A",
+     "prezzo": 5
+    },
+    {
+     "ruolo": "A",
+     "prezzo": 5
+    }
+   ],
+   "atteso": 0.7
+  }
+ ],
+ "flag": [
+  {
+   "nome": "nessuna riga",
+   "fc": null,
+   "atteso": "Normale"
+  },
+  {
+   "nome": "infortunato",
+   "fc": {
+    "pma": 0,
+    "pfc": 0,
+    "slot": null,
+    "expectedTitolarita": 0,
+    "expectedFantamedia": 0,
+    "penaltyProbability": 0,
+    "unavailableUntilRound": 3,
+    "playerStatus": "",
+    "fasciaFc": "",
+    "newArrival": false
+   },
+   "atteso": "🔴 Infortunato/Dubbio"
+  },
+  {
+   "nome": "rigorista",
+   "fc": {
+    "pma": 0,
+    "pfc": 0,
+    "slot": null,
+    "expectedTitolarita": 80,
+    "expectedFantamedia": 0,
+    "penaltyProbability": 60,
+    "unavailableUntilRound": 0,
+    "playerStatus": "",
+    "fasciaFc": "",
+    "newArrival": false
+   },
+   "atteso": "🎯 Rigorista designato"
+  },
+  {
+   "nome": "ballottaggio titolarita",
+   "fc": {
+    "pma": 0,
+    "pfc": 0,
+    "slot": null,
+    "expectedTitolarita": 40,
+    "expectedFantamedia": 0,
+    "penaltyProbability": 0,
+    "unavailableUntilRound": 0,
+    "playerStatus": "",
+    "fasciaFc": "",
+    "newArrival": false
+   },
+   "atteso": "🟡 Ballottaggio"
+  },
+  {
+   "nome": "ballottaggio status B",
+   "fc": {
+    "pma": 0,
+    "pfc": 0,
+    "slot": null,
+    "expectedTitolarita": 70,
+    "expectedFantamedia": 0,
+    "penaltyProbability": 0,
+    "unavailableUntilRound": 0,
+    "playerStatus": "B",
+    "fasciaFc": "",
+    "newArrival": false
+   },
+   "atteso": "🟡 Ballottaggio"
+  },
+  {
+   "nome": "rigorista in ballottaggio",
+   "fc": {
+    "pma": 0,
+    "pfc": 0,
+    "slot": null,
+    "expectedTitolarita": 40,
+    "expectedFantamedia": 0,
+    "penaltyProbability": 55,
+    "unavailableUntilRound": 0,
+    "playerStatus": "",
+    "fasciaFc": "",
+    "newArrival": false
+   },
+   "atteso": "🎯🟡 Rigorista in Ballottaggio"
+  },
+  {
+   "nome": "riserva fascia",
+   "fc": {
+    "pma": 0,
+    "pfc": 0,
+    "slot": null,
+    "expectedTitolarita": 70,
+    "expectedFantamedia": 0,
+    "penaltyProbability": 0,
+    "unavailableUntilRound": 0,
+    "playerStatus": "",
+    "fasciaFc": "Riserva",
+    "newArrival": false
+   },
+   "atteso": "🪑 Riserva Fissa (da fasciaFc)"
+  },
+  {
+   "nome": "normale",
+   "fc": {
+    "pma": 0,
+    "pfc": 0,
+    "slot": null,
+    "expectedTitolarita": 90,
+    "expectedFantamedia": 0,
+    "penaltyProbability": 10,
+    "unavailableUntilRound": 0,
+    "playerStatus": "",
+    "fasciaFc": "",
+    "newArrival": false
+   },
+   "atteso": "Normale"
+  }
+ ],
+ "arrotonda": [
+  {
+   "valore": 0,
+   "atteso": 1
+  },
+  {
+   "valore": -3,
+   "atteso": 1
+  },
+  {
+   "valore": 1,
+   "atteso": 1
+  },
+  {
+   "valore": 1.0,
+   "atteso": 1
+  },
+  {
+   "valore": 72.0,
+   "atteso": 72
+  },
+  {
+   "valore": 72.0,
+   "atteso": 72
+  },
+  {
+   "valore": 71.2,
+   "atteso": 72
+  },
+  {
+   "valore": 0.3,
+   "atteso": 1
+  },
+  {
+   "valore": "abc",
+   "atteso": 1
+  },
+  {
+   "valore": null,
+   "atteso": 1
+  }
+ ],
+ "nomi": [
+  {
+   "input": "Martinez L.",
+   "atteso": "martinez l"
+  },
+  {
+   "input": "O'Brien",
+   "atteso": "obrien"
+  },
+  {
+   "input": "N'Golo Kanté",
+   "atteso": "ngolo kante"
+  },
+  {
+   "input": "  Doppio   Spazio ",
+   "atteso": "doppio spazio"
+  },
+  {
+   "input": "Peña",
+   "atteso": "pena"
+  },
+  {
+   "input": "D-Ambrosio",
+   "atteso": "dambrosio"
+  },
+  {
+   "input": "José María",
+   "atteso": "jose maria"
+  },
+  {
+   "input": "Çalhanoğlu",
+   "atteso": "calhanoglu"
+  }
+ ],
+ "scarsita": {
+  "liberi": [
+   {
+    "id": 1,
+    "ruolo": "A",
+    "slot": 1
+   },
+   {
+    "id": 2,
+    "ruolo": "A",
+    "slot": 1
+   },
+   {
+    "id": 3,
+    "ruolo": "A",
+    "slot": 2
+   },
+   {
+    "id": 4,
+    "ruolo": "A",
+    "slot": 2
+   },
+   {
+    "id": 5,
+    "ruolo": "A",
+    "slot": 3
+   },
+   {
+    "id": 6,
+    "ruolo": "D",
+    "slot": 1
+   }
+  ],
+  "casi": [
+   {
+    "idTarget": 1,
+    "ruolo": "A",
+    "slotTarget": 1,
+    "domandaSquadre": 3,
+    "atteso": {
+     "slot": 1,
+     "offerta": 1,
+     "domanda": 3,
+     "pressione": 3.0,
+     "livello": "CRITICA"
+    }
+   },
+   {
+    "idTarget": 3,
+    "ruolo": "A",
+    "slotTarget": 2,
+    "domandaSquadre": 2,
+    "atteso": {
+     "slot": 2,
+     "offerta": 1,
+     "domanda": 2,
+     "pressione": 2.0,
+     "livello": "CRITICA"
+    }
+   },
+   {
+    "idTarget": 5,
+    "ruolo": "A",
+    "slotTarget": 3,
+    "domandaSquadre": 5,
+    "atteso": {
+     "slot": 3,
+     "offerta": 0,
+     "domanda": 5,
+     "pressione": 5.0,
+     "livello": "CRITICA"
+    }
+   },
+   {
+    "idTarget": 6,
+    "ruolo": "D",
+    "slotTarget": 1,
+    "domandaSquadre": 1,
+    "atteso": {
+     "slot": 1,
+     "offerta": 0,
+     "domanda": 1,
+     "pressione": 1.0,
+     "livello": "CRITICA"
+    }
+   },
+   {
+    "idTarget": 1,
+    "ruolo": "A",
+    "slotTarget": 1,
+    "domandaSquadre": 8,
+    "atteso": {
+     "slot": 1,
+     "offerta": 1,
+     "domanda": 8,
+     "pressione": 8.0,
+     "livello": "CRITICA"
+    }
+   }
+  ]
+ },
+ "domandaSlot": {
+  "bilanci": {
+   "Io": {
+    "A": 1
+   },
+   "R1": {
+    "A": 0
+   },
+   "R2": {
+    "A": 6
+   },
+   "R3": {
+    "A": 2
+   }
+  },
+  "acquisti": [
+   {
+    "proprietario": "R1",
+    "ruolo": "A",
+    "slot": 1
+   },
+   {
+    "proprietario": "R3",
+    "ruolo": "A",
+    "slot": 4
+   }
+  ],
+  "limiti": {
+   "A": 6
+  },
+  "casi": [
+   {
+    "slotTarget": null,
+    "atteso": 2.0
+   },
+   {
+    "slotTarget": 1,
+    "atteso": 1.4
+   },
+   {
+    "slotTarget": 3,
+    "atteso": 1.4
+   }
+  ]
+ },
+ "limiti": {
+  "P": 3,
+  "D": 8,
+  "C": 8,
+  "A": 6,
+  "TOT": 25
+ },
+ "allenatori": [
+  "Io",
+  "Rivale1",
+  "Rivale2",
+  "Rivale3",
+  "Rivale4",
+  "Rivale5",
+  "Rivale6",
+  "Rivale7"
+ ]
+}

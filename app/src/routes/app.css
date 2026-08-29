@@ -1,0 +1,237 @@
+/* Tema "Trading Terminal" — port del tema cyberpunk di fantatool/theme.py.
+   Numeri in monospace, un colore fisso per ruolo, profondità da bordi e
+   livelli di sfondo, glow riservato al solo prezzo consigliato. */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Inter:wght@400;500;600;700;800&family=Oxanium:wght@600;700;800&display=swap');
+
+:root {
+	--bg: #090c11;
+	--panel: #0a0f16;
+	--panel-2: #111923;
+	--panel-3: #0e141c;
+	--border: #2b3847;
+	--border-strong: #344356;
+	--text: #e1e7ee;
+	--text-strong: #f5f7fa;
+	--muted: #8795a7;
+	--muted-dim: #718096;
+
+	--accent: #5eff9c; /* verde terminale: focus, hover, positivo */
+	--cyan: #5ce1ff; /* valori, prezzo */
+	--warn: #ffcd4d;
+	--bad: #ff6b6b;
+	--ok: #5eff9c;
+
+	/* colori ruolo — identici all'app Streamlit */
+	--role-p: #ffcd4d;
+	--role-d: #5eff9c;
+	--role-c: #3f8cff;
+	--role-a: #ff5c5c;
+
+	--mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+	--sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+	color-scheme: dark;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	background-color: var(--bg);
+	/* reticolo tenue da terminale */
+	background-image:
+		linear-gradient(rgba(129, 151, 177, 0.02) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(129, 151, 177, 0.02) 1px, transparent 1px);
+	background-size: 40px 40px;
+	color: var(--text);
+	font: 400 14px/1.5 var(--sans);
+	-webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+	font-family: 'Oxanium', var(--sans);
+	color: var(--text-strong);
+	letter-spacing: 0.2px;
+}
+
+/* numeri / valori: monospace ovunque */
+input[type='number'],
+.mono,
+table td:nth-child(n + 2) {
+	font-family: var(--mono);
+	font-feature-settings: 'tnum' 1;
+}
+
+button {
+	font: 600 13px/1 var(--sans);
+	color: var(--text);
+	background: var(--panel-2);
+	border: 1px solid var(--border-strong);
+	border-radius: 6px;
+	padding: 7px 13px;
+	cursor: pointer;
+	transition:
+		border-color 0.15s ease,
+		background 0.15s ease,
+		color 0.15s ease;
+}
+button:hover {
+	border-color: var(--accent);
+	color: var(--text-strong);
+}
+button.primary {
+	background: #12201e;
+	border: 1px solid #315344;
+	color: #f2f7f4;
+	font-weight: 700;
+	box-shadow: inset 0 0 0 1px rgba(94, 255, 156, 0.12);
+}
+button.primary:hover {
+	border-color: var(--accent);
+	background: #16302a;
+}
+button:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+input,
+select {
+	font: inherit;
+	color: var(--text-strong);
+	background: var(--panel-2);
+	border: 1px solid var(--border-strong);
+	border-radius: 6px;
+	padding: 6px 9px;
+}
+input:focus,
+select:focus {
+	outline: none;
+	border-color: var(--accent);
+	box-shadow: 0 0 0 1px rgba(94, 255, 156, 0.25);
+}
+
+.panel {
+	background: var(--panel);
+	border: 1px solid var(--border);
+	border-radius: 9px;
+	padding: 16px;
+	box-shadow: 0 5px 18px rgba(0, 0, 0, 0.38);
+}
+
+.muted {
+	color: var(--muted);
+}
+
+/* badge ruolo — colore fisso, look da terminale */
+.tag {
+	display: inline-flex;
+	align-items: center;
+	padding: 1px 7px;
+	border-radius: 4px;
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid var(--border-strong);
+	font: 700 11px/1.4 var(--mono);
+	letter-spacing: 0.5px;
+	color: var(--muted);
+}
+.tag[data-ruolo='P'] {
+	color: var(--role-p);
+	border-color: color-mix(in srgb, var(--role-p) 45%, transparent);
+}
+.tag[data-ruolo='D'] {
+	color: var(--role-d);
+	border-color: color-mix(in srgb, var(--role-d) 45%, transparent);
+}
+.tag[data-ruolo='C'] {
+	color: var(--role-c);
+	border-color: color-mix(in srgb, var(--role-c) 45%, transparent);
+}
+.tag[data-ruolo='A'] {
+	color: var(--role-a);
+	border-color: color-mix(in srgb, var(--role-a) 45%, transparent);
+}
+
+/* pillola decisione COMPRA / VALUTA / LASCIA */
+.pill {
+	display: inline-block;
+	padding: 3px 12px;
+	border-radius: 999px;
+	font: 800 12px/1.4 var(--mono);
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	background: transparent;
+	border: 1px solid currentColor;
+}
+.pill--buy {
+	color: var(--ok);
+}
+.pill--consider {
+	color: var(--warn);
+}
+.pill--stop {
+	color: var(--bad);
+}
+
+/* il prezzo consigliato: unico elemento con glow */
+.prezzo-hero {
+	font: 800 36px/1 var(--mono);
+	color: var(--cyan);
+	text-shadow: 0 0 18px rgba(92, 225, 255, 0.45);
+	letter-spacing: -0.5px;
+}
+
+/* lista giocatori: righe come voci di terminale */
+.row-player {
+	width: 100%;
+	text-align: left;
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	margin-bottom: 4px;
+	background: var(--panel-3);
+	border: 1px solid var(--border);
+	border-left: 3px solid transparent;
+	border-radius: 6px;
+	padding: 6px 10px;
+}
+.row-player:hover {
+	border-color: var(--border-strong);
+	border-left-color: var(--accent);
+	background: var(--panel-2);
+}
+.row-player.sel {
+	border-color: var(--accent);
+	border-left-color: var(--accent);
+}
+
+table {
+	font-family: var(--mono);
+}
+table th {
+	font-family: var(--sans);
+	font-weight: 600;
+	color: var(--muted);
+	text-transform: uppercase;
+	font-size: 11px;
+	letter-spacing: 0.5px;
+}
+
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+::-webkit-scrollbar-track {
+	background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+	background: #2a3644;
+	border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+	background: var(--accent);
+}

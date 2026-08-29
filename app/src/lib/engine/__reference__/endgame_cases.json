@@ -1,0 +1,1114 @@
+{
+ "candidati": [
+  {
+   "chiave": "p1",
+   "nome": "Port Uno",
+   "ruolo": "P",
+   "prezzo": 12,
+   "punteggio": 62
+  },
+  {
+   "chiave": "p2",
+   "nome": "Port Due",
+   "ruolo": "P",
+   "prezzo": 5,
+   "punteggio": 48
+  },
+  {
+   "chiave": "p3",
+   "nome": "Port Tre",
+   "ruolo": "P",
+   "prezzo": 1,
+   "punteggio": 30
+  },
+  {
+   "chiave": "d1",
+   "nome": "Dif Uno",
+   "ruolo": "D",
+   "prezzo": 20,
+   "punteggio": 70
+  },
+  {
+   "chiave": "d2",
+   "nome": "Dif Due",
+   "ruolo": "D",
+   "prezzo": 9,
+   "punteggio": 58
+  },
+  {
+   "chiave": "d3",
+   "nome": "Dif Tre",
+   "ruolo": "D",
+   "prezzo": 4,
+   "punteggio": 44
+  },
+  {
+   "chiave": "d4",
+   "nome": "Dif Quattro",
+   "ruolo": "D",
+   "prezzo": 2,
+   "punteggio": 33
+  },
+  {
+   "chiave": "d5",
+   "nome": "Dif Cinque",
+   "ruolo": "D",
+   "prezzo": 1,
+   "punteggio": 20
+  },
+  {
+   "chiave": "c1",
+   "nome": "Cen Uno",
+   "ruolo": "C",
+   "prezzo": 30,
+   "punteggio": 78
+  },
+  {
+   "chiave": "c2",
+   "nome": "Cen Due",
+   "ruolo": "C",
+   "prezzo": 14,
+   "punteggio": 63
+  },
+  {
+   "chiave": "c3",
+   "nome": "Cen Tre",
+   "ruolo": "C",
+   "prezzo": 6,
+   "punteggio": 50
+  },
+  {
+   "chiave": "c4",
+   "nome": "Cen Quattro",
+   "ruolo": "C",
+   "prezzo": 2,
+   "punteggio": 35
+  },
+  {
+   "chiave": "a1",
+   "nome": "Att Uno",
+   "ruolo": "A",
+   "prezzo": 45,
+   "punteggio": 85
+  },
+  {
+   "chiave": "a2",
+   "nome": "Att Due",
+   "ruolo": "A",
+   "prezzo": 22,
+   "punteggio": 68
+  },
+  {
+   "chiave": "a3",
+   "nome": "Att Tre",
+   "ruolo": "A",
+   "prezzo": 8,
+   "punteggio": 52
+  },
+  {
+   "chiave": "a4",
+   "nome": "Att Quattro",
+   "ruolo": "A",
+   "prezzo": 3,
+   "punteggio": 38
+  }
+ ],
+ "casi": [
+  {
+   "nome": "2P+2D+1C+1A, budget largo",
+   "input": {
+    "budgetResiduo": 120,
+    "slotVuoti": 6,
+    "conteggiRuolo": {
+     "P": 1,
+     "D": 6,
+     "C": 7,
+     "A": 5
+    },
+    "limitiRuolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    },
+    "sogliaAttivazione": 10
+   },
+   "atteso": {
+    "attivo": true,
+    "stato": "OK",
+    "motivo": "Percorsi completi trovati.",
+    "percorsi": [
+     {
+      "profilo": "QUALITA",
+      "modulo": null,
+      "giocatori": [
+       {
+        "chiave": "a1",
+        "nome": "Att Uno",
+        "ruolo": "A",
+        "prezzo": 45,
+        "punteggio": 85.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "c1",
+        "nome": "Cen Uno",
+        "ruolo": "C",
+        "prezzo": 30,
+        "punteggio": 78.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "d2",
+        "nome": "Dif Due",
+        "ruolo": "D",
+        "prezzo": 9,
+        "punteggio": 58.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "d1",
+        "nome": "Dif Uno",
+        "ruolo": "D",
+        "prezzo": 20,
+        "punteggio": 70.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "p3",
+        "nome": "Port Tre",
+        "ruolo": "P",
+        "prezzo": 1,
+        "punteggio": 30.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "p1",
+        "nome": "Port Uno",
+        "ruolo": "P",
+        "prezzo": 12,
+        "punteggio": 62.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       }
+      ],
+      "costo": 117,
+      "residuo": 3,
+      "punteggio_medio": 63.8,
+      "copertura": null,
+      "modulo_completo": null
+     },
+     {
+      "profilo": "EQUILIBRIO",
+      "modulo": null,
+      "giocatori": [
+       {
+        "chiave": "a4",
+        "nome": "Att Quattro",
+        "ruolo": "A",
+        "prezzo": 3,
+        "punteggio": 38.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "c4",
+        "nome": "Cen Quattro",
+        "ruolo": "C",
+        "prezzo": 2,
+        "punteggio": 35.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "d5",
+        "nome": "Dif Cinque",
+        "ruolo": "D",
+        "prezzo": 1,
+        "punteggio": 20.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "d4",
+        "nome": "Dif Quattro",
+        "ruolo": "D",
+        "prezzo": 2,
+        "punteggio": 33.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "p3",
+        "nome": "Port Tre",
+        "ruolo": "P",
+        "prezzo": 1,
+        "punteggio": 30.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "p2",
+        "nome": "Port Due",
+        "ruolo": "P",
+        "prezzo": 5,
+        "punteggio": 48.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       }
+      ],
+      "costo": 14,
+      "residuo": 106,
+      "punteggio_medio": 34.0,
+      "copertura": null,
+      "modulo_completo": null
+     },
+     {
+      "profilo": "RISPARMIO",
+      "modulo": null,
+      "giocatori": [
+       {
+        "chiave": "a4",
+        "nome": "Att Quattro",
+        "ruolo": "A",
+        "prezzo": 3,
+        "punteggio": 38.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "c4",
+        "nome": "Cen Quattro",
+        "ruolo": "C",
+        "prezzo": 2,
+        "punteggio": 35.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "d5",
+        "nome": "Dif Cinque",
+        "ruolo": "D",
+        "prezzo": 1,
+        "punteggio": 20.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "d4",
+        "nome": "Dif Quattro",
+        "ruolo": "D",
+        "prezzo": 2,
+        "punteggio": 33.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "p3",
+        "nome": "Port Tre",
+        "ruolo": "P",
+        "prezzo": 1,
+        "punteggio": 30.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "p1",
+        "nome": "Port Uno",
+        "ruolo": "P",
+        "prezzo": 12,
+        "punteggio": 62.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       }
+      ],
+      "costo": 21,
+      "residuo": 99,
+      "punteggio_medio": 36.3,
+      "copertura": null,
+      "modulo_completo": null
+     }
+    ],
+    "candidati_considerati": 16,
+    "ipotesi": "Prezzi teorici: PMA principale, PFC o quotazione solo come fallback; nessuna previsione dei rilanci avversari."
+   }
+  },
+  {
+   "nome": "stretto sul budget",
+   "input": {
+    "budgetResiduo": 20,
+    "slotVuoti": 6,
+    "conteggiRuolo": {
+     "P": 1,
+     "D": 6,
+     "C": 7,
+     "A": 5
+    },
+    "limitiRuolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    },
+    "sogliaAttivazione": 10
+   },
+   "atteso": {
+    "attivo": true,
+    "stato": "OK",
+    "motivo": "Percorsi completi trovati.",
+    "percorsi": [
+     {
+      "profilo": "QUALITA",
+      "modulo": null,
+      "giocatori": [
+       {
+        "chiave": "a4",
+        "nome": "Att Quattro",
+        "ruolo": "A",
+        "prezzo": 3,
+        "punteggio": 38.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "c4",
+        "nome": "Cen Quattro",
+        "ruolo": "C",
+        "prezzo": 2,
+        "punteggio": 35.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "d4",
+        "nome": "Dif Quattro",
+        "ruolo": "D",
+        "prezzo": 2,
+        "punteggio": 33.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "d3",
+        "nome": "Dif Tre",
+        "ruolo": "D",
+        "prezzo": 4,
+        "punteggio": 44.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "p3",
+        "nome": "Port Tre",
+        "ruolo": "P",
+        "prezzo": 1,
+        "punteggio": 30.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "p2",
+        "nome": "Port Due",
+        "ruolo": "P",
+        "prezzo": 5,
+        "punteggio": 48.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       }
+      ],
+      "costo": 17,
+      "residuo": 3,
+      "punteggio_medio": 38.0,
+      "copertura": null,
+      "modulo_completo": null
+     },
+     {
+      "profilo": "EQUILIBRIO",
+      "modulo": null,
+      "giocatori": [
+       {
+        "chiave": "a4",
+        "nome": "Att Quattro",
+        "ruolo": "A",
+        "prezzo": 3,
+        "punteggio": 38.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "c4",
+        "nome": "Cen Quattro",
+        "ruolo": "C",
+        "prezzo": 2,
+        "punteggio": 35.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "d5",
+        "nome": "Dif Cinque",
+        "ruolo": "D",
+        "prezzo": 1,
+        "punteggio": 20.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "d4",
+        "nome": "Dif Quattro",
+        "ruolo": "D",
+        "prezzo": 2,
+        "punteggio": 33.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "p3",
+        "nome": "Port Tre",
+        "ruolo": "P",
+        "prezzo": 1,
+        "punteggio": 30.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "p2",
+        "nome": "Port Due",
+        "ruolo": "P",
+        "prezzo": 5,
+        "punteggio": 48.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       }
+      ],
+      "costo": 14,
+      "residuo": 6,
+      "punteggio_medio": 34.0,
+      "copertura": null,
+      "modulo_completo": null
+     },
+     {
+      "profilo": "RISPARMIO",
+      "modulo": null,
+      "giocatori": [
+       {
+        "chiave": "a4",
+        "nome": "Att Quattro",
+        "ruolo": "A",
+        "prezzo": 3,
+        "punteggio": 38.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "c4",
+        "nome": "Cen Quattro",
+        "ruolo": "C",
+        "prezzo": 2,
+        "punteggio": 35.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "d5",
+        "nome": "Dif Cinque",
+        "ruolo": "D",
+        "prezzo": 1,
+        "punteggio": 20.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "d3",
+        "nome": "Dif Tre",
+        "ruolo": "D",
+        "prezzo": 4,
+        "punteggio": 44.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "p3",
+        "nome": "Port Tre",
+        "ruolo": "P",
+        "prezzo": 1,
+        "punteggio": 30.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "p2",
+        "nome": "Port Due",
+        "ruolo": "P",
+        "prezzo": 5,
+        "punteggio": 48.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       }
+      ],
+      "costo": 16,
+      "residuo": 4,
+      "punteggio_medio": 35.8,
+      "copertura": null,
+      "modulo_completo": null
+     }
+    ],
+    "candidati_considerati": 16,
+    "ipotesi": "Prezzi teorici: PMA principale, PFC o quotazione solo come fallback; nessuna previsione dei rilanci avversari."
+   }
+  },
+  {
+   "nome": "solo attaccanti",
+   "input": {
+    "budgetResiduo": 60,
+    "slotVuoti": 2,
+    "conteggiRuolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 4
+    },
+    "limitiRuolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    },
+    "sogliaAttivazione": 10
+   },
+   "atteso": {
+    "attivo": true,
+    "stato": "OK",
+    "motivo": "Percorsi completi trovati.",
+    "percorsi": [
+     {
+      "profilo": "QUALITA",
+      "modulo": null,
+      "giocatori": [
+       {
+        "chiave": "a3",
+        "nome": "Att Tre",
+        "ruolo": "A",
+        "prezzo": 8,
+        "punteggio": 52.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "a1",
+        "nome": "Att Uno",
+        "ruolo": "A",
+        "prezzo": 45,
+        "punteggio": 85.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       }
+      ],
+      "costo": 53,
+      "residuo": 7,
+      "punteggio_medio": 68.5,
+      "copertura": null,
+      "modulo_completo": null
+     },
+     {
+      "profilo": "EQUILIBRIO",
+      "modulo": null,
+      "giocatori": [
+       {
+        "chiave": "a4",
+        "nome": "Att Quattro",
+        "ruolo": "A",
+        "prezzo": 3,
+        "punteggio": 38.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "a3",
+        "nome": "Att Tre",
+        "ruolo": "A",
+        "prezzo": 8,
+        "punteggio": 52.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       }
+      ],
+      "costo": 11,
+      "residuo": 49,
+      "punteggio_medio": 45.0,
+      "copertura": null,
+      "modulo_completo": null
+     },
+     {
+      "profilo": "RISPARMIO",
+      "modulo": null,
+      "giocatori": [
+       {
+        "chiave": "a4",
+        "nome": "Att Quattro",
+        "ruolo": "A",
+        "prezzo": 3,
+        "punteggio": 38.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       },
+       {
+        "chiave": "a2",
+        "nome": "Att Due",
+        "ruolo": "A",
+        "prezzo": 22,
+        "punteggio": 68.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       }
+      ],
+      "costo": 25,
+      "residuo": 35,
+      "punteggio_medio": 53.0,
+      "copertura": null,
+      "modulo_completo": null
+     }
+    ],
+    "candidati_considerati": 16,
+    "ipotesi": "Prezzi teorici: PMA principale, PFC o quotazione solo come fallback; nessuna previsione dei rilanci avversari."
+   }
+  },
+  {
+   "nome": "un solo slot D",
+   "input": {
+    "budgetResiduo": 15,
+    "slotVuoti": 1,
+    "conteggiRuolo": {
+     "P": 3,
+     "D": 7,
+     "C": 8,
+     "A": 6
+    },
+    "limitiRuolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    },
+    "sogliaAttivazione": 10
+   },
+   "atteso": {
+    "attivo": true,
+    "stato": "OK",
+    "motivo": "Percorsi completi trovati.",
+    "percorsi": [
+     {
+      "profilo": "QUALITA",
+      "modulo": null,
+      "giocatori": [
+       {
+        "chiave": "d2",
+        "nome": "Dif Due",
+        "ruolo": "D",
+        "prezzo": 9,
+        "punteggio": 58.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       }
+      ],
+      "costo": 9,
+      "residuo": 6,
+      "punteggio_medio": 58.0,
+      "copertura": null,
+      "modulo_completo": null
+     },
+     {
+      "profilo": "EQUILIBRIO",
+      "modulo": null,
+      "giocatori": [
+       {
+        "chiave": "d5",
+        "nome": "Dif Cinque",
+        "ruolo": "D",
+        "prezzo": 1,
+        "punteggio": 20.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       }
+      ],
+      "costo": 1,
+      "residuo": 14,
+      "punteggio_medio": 20.0,
+      "copertura": null,
+      "modulo_completo": null
+     },
+     {
+      "profilo": "RISPARMIO",
+      "modulo": null,
+      "giocatori": [
+       {
+        "chiave": "d4",
+        "nome": "Dif Quattro",
+        "ruolo": "D",
+        "prezzo": 2,
+        "punteggio": 33.0,
+        "ruoli_mantra": [],
+        "fonte_prezzo": "STIMA"
+       }
+      ],
+      "costo": 2,
+      "residuo": 13,
+      "punteggio_medio": 33.0,
+      "copertura": null,
+      "modulo_completo": null
+     }
+    ],
+    "candidati_considerati": 16,
+    "ipotesi": "Prezzi teorici: PMA principale, PFC o quotazione solo come fallback; nessuna previsione dei rilanci avversari."
+   }
+  },
+  {
+   "nome": "rosa completa",
+   "input": {
+    "budgetResiduo": 30,
+    "slotVuoti": 0,
+    "conteggiRuolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    },
+    "limitiRuolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    },
+    "sogliaAttivazione": 10
+   },
+   "atteso": {
+    "attivo": false,
+    "stato": "COMPLETA",
+    "motivo": "Rosa gia' completa.",
+    "percorsi": []
+   }
+  },
+  {
+   "nome": "troppo presto",
+   "input": {
+    "budgetResiduo": 100,
+    "slotVuoti": 15,
+    "conteggiRuolo": {
+     "P": 0,
+     "D": 0,
+     "C": 0,
+     "A": 0
+    },
+    "limitiRuolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    },
+    "sogliaAttivazione": 10
+   },
+   "atteso": {
+    "attivo": false,
+    "stato": "PRESTO",
+    "motivo": "Si attiva automaticamente a 10 slot residui; ora ne restano 15.",
+    "percorsi": []
+   }
+  },
+  {
+   "nome": "budget impossibile",
+   "input": {
+    "budgetResiduo": 3,
+    "slotVuoti": 6,
+    "conteggiRuolo": {
+     "P": 1,
+     "D": 6,
+     "C": 7,
+     "A": 5
+    },
+    "limitiRuolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    },
+    "sogliaAttivazione": 10
+   },
+   "atteso": {
+    "attivo": false,
+    "stato": "IMPOSSIBILE",
+    "motivo": "Servono almeno 6 crediti per 6 acquisti.",
+    "percorsi": []
+   }
+  },
+  {
+   "nome": "incoerente slot/limiti",
+   "input": {
+    "budgetResiduo": 50,
+    "slotVuoti": 3,
+    "conteggiRuolo": {
+     "P": 1,
+     "D": 6,
+     "C": 7,
+     "A": 5
+    },
+    "limitiRuolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    },
+    "sogliaAttivazione": 10
+   },
+   "atteso": {
+    "attivo": false,
+    "stato": "INCOERENTE",
+    "motivo": "Gli slot residui non coincidono con i limiti dei reparti.",
+    "percorsi": []
+   }
+  },
+  {
+   "nome": "nessun percorso (budget al minimo)",
+   "input": {
+    "budgetResiduo": 6,
+    "slotVuoti": 6,
+    "conteggiRuolo": {
+     "P": 1,
+     "D": 6,
+     "C": 7,
+     "A": 5
+    },
+    "limitiRuolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    },
+    "sogliaAttivazione": 10
+   },
+   "atteso": {
+    "attivo": false,
+    "stato": "NESSUN_PERCORSO",
+    "motivo": "Nessuna combinazione completa rispetta budget, ruoli e disponibilita'.",
+    "percorsi": [],
+    "candidati_considerati": 16,
+    "ipotesi": "Prezzi teorici: PMA principale, PFC o quotazione solo come fallback; nessuna previsione dei rilanci avversari."
+   }
+  }
+ ],
+ "mantra": {
+  "rosa": [
+   {
+    "chiave": "r0",
+    "ruoli": "Por",
+    "punteggio": 55
+   },
+   {
+    "chiave": "r1",
+    "ruoli": "Dc",
+    "punteggio": 55
+   },
+   {
+    "chiave": "r2",
+    "ruoli": "Dc",
+    "punteggio": 55
+   },
+   {
+    "chiave": "r3",
+    "ruoli": "Dc;B",
+    "punteggio": 55
+   },
+   {
+    "chiave": "r4",
+    "ruoli": "Ds",
+    "punteggio": 55
+   },
+   {
+    "chiave": "r5",
+    "ruoli": "E",
+    "punteggio": 55
+   },
+   {
+    "chiave": "r6",
+    "ruoli": "M",
+    "punteggio": 55
+   },
+   {
+    "chiave": "r7",
+    "ruoli": "M;C",
+    "punteggio": 55
+   },
+   {
+    "chiave": "r8",
+    "ruoli": "W;A",
+    "punteggio": 55
+   },
+   {
+    "chiave": "r9",
+    "ruoli": "A;Pc",
+    "punteggio": 55
+   }
+  ],
+  "candidati": [
+   {
+    "chiave": "cm1",
+    "nome": "Cand T",
+    "ruoli_mantra": "T",
+    "prezzo": 12,
+    "punteggio": 60
+   },
+   {
+    "chiave": "cm2",
+    "nome": "Cand A",
+    "ruoli_mantra": "A;Pc",
+    "prezzo": 20,
+    "punteggio": 70
+   },
+   {
+    "chiave": "cm3",
+    "nome": "Cand Por",
+    "ruoli_mantra": "Por",
+    "prezzo": 3,
+    "punteggio": 40
+   },
+   {
+    "chiave": "cm4",
+    "nome": "Cand E",
+    "ruoli_mantra": "E;W",
+    "prezzo": 8,
+    "punteggio": 52
+   },
+   {
+    "chiave": "cm5",
+    "nome": "Cand C",
+    "ruoli_mantra": "C;M",
+    "prezzo": 6,
+    "punteggio": 48
+   },
+   {
+    "chiave": "cm6",
+    "nome": "Cand Dc",
+    "ruoli_mantra": "Dc",
+    "prezzo": 5,
+    "punteggio": 44
+   },
+   {
+    "chiave": "cm7",
+    "nome": "Cand T2",
+    "ruoli_mantra": "T;W",
+    "prezzo": 2,
+    "punteggio": 35
+   }
+  ],
+  "casi": [
+   {
+    "nome": "chiude 3-4-1-2",
+    "input": {
+     "budgetResiduo": 60,
+     "slotVuoti": 5,
+     "moduliTarget": [
+      "3-4-1-2"
+     ]
+    },
+    "atteso": {
+     "stato": "OK",
+     "attivo": true,
+     "percorsi": [
+      {
+       "profilo": "RISPARMIO",
+       "modulo": "3-4-1-2",
+       "costo": 24,
+       "copertura": 11,
+       "modulo_completo": true,
+       "chiavi": [
+        "cm7",
+        "cm3",
+        "cm6",
+        "cm5",
+        "cm4"
+       ]
+      },
+      {
+       "profilo": "QUALITA",
+       "modulo": "3-4-1-2",
+       "costo": 49,
+       "copertura": 11,
+       "modulo_completo": true,
+       "chiavi": [
+        "cm3",
+        "cm5",
+        "cm4",
+        "cm1",
+        "cm2"
+       ]
+      }
+     ]
+    }
+   },
+   {
+    "nome": "due moduli target",
+    "input": {
+     "budgetResiduo": 60,
+     "slotVuoti": 5,
+     "moduliTarget": [
+      "3-4-1-2",
+      "4-3-3"
+     ]
+    },
+    "atteso": {
+     "stato": "OK",
+     "attivo": true,
+     "percorsi": [
+      {
+       "profilo": "RISPARMIO",
+       "modulo": "3-4-1-2",
+       "costo": 24,
+       "copertura": 11,
+       "modulo_completo": true,
+       "chiavi": [
+        "cm7",
+        "cm3",
+        "cm6",
+        "cm5",
+        "cm4"
+       ]
+      },
+      {
+       "profilo": "QUALITA",
+       "modulo": "3-4-1-2",
+       "costo": 49,
+       "copertura": 11,
+       "modulo_completo": true,
+       "chiavi": [
+        "cm3",
+        "cm5",
+        "cm4",
+        "cm1",
+        "cm2"
+       ]
+      }
+     ]
+    }
+   },
+   {
+    "nome": "budget stretto",
+    "input": {
+     "budgetResiduo": 15,
+     "slotVuoti": 5,
+     "moduliTarget": [
+      "3-4-1-2"
+     ]
+    },
+    "atteso": {
+     "stato": "NESSUN_PERCORSO",
+     "attivo": false,
+     "percorsi": []
+    }
+   }
+  ]
+ }
+}

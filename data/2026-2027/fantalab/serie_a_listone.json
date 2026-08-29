@@ -1,0 +1,3271 @@
+[
+  {
+    "ruolo": "P",
+    "squadra": "Roma",
+    "nome": "Svilar",
+    "prezzo": "48",
+    "pma": "9.5%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Juventus",
+    "nome": "Vicario",
+    "prezzo": "40",
+    "pma": "8%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Milan",
+    "nome": "Maignan",
+    "prezzo": "40",
+    "pma": "8%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Inter",
+    "nome": "Martinez Jo.",
+    "prezzo": "38",
+    "pma": "7.6%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Atalanta",
+    "nome": "Carnesecchi",
+    "prezzo": "37",
+    "pma": "7.4%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Como",
+    "nome": "Butez",
+    "prezzo": "37",
+    "pma": "7.4%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Napoli",
+    "nome": "Meret",
+    "prezzo": "30",
+    "pma": "6%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Fiorentina",
+    "nome": "De Gea",
+    "prezzo": "20",
+    "pma": "4%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Udinese",
+    "nome": "Okoye",
+    "prezzo": "10",
+    "pma": "2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Bologna",
+    "nome": "Skorupski",
+    "prezzo": "8",
+    "pma": "1.6%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Napoli",
+    "nome": "Milinkovic-Savic V.",
+    "prezzo": "8",
+    "pma": "1.6%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Cagliari",
+    "nome": "Caprile",
+    "prezzo": "7",
+    "pma": "1.4%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Inter",
+    "nome": "Provedel",
+    "prezzo": "7",
+    "pma": "1.4%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Lecce",
+    "nome": "Falcone",
+    "prezzo": "6",
+    "pma": "1.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Lazio",
+    "nome": "Mandas",
+    "prezzo": "5",
+    "pma": "1%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Genoa",
+    "nome": "Bijlow",
+    "prezzo": "3",
+    "pma": "0.6%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Sassuolo",
+    "nome": "Muric",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Juventus",
+    "nome": "Di Gregorio",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Frosinone",
+    "nome": "Palmisani",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Parma",
+    "nome": "Corvi",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Torino",
+    "nome": "Mascardi",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Venezia",
+    "nome": "Stankovic F.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Monza",
+    "nome": "Pizzignacco",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Lecce",
+    "nome": "Bleve",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Fiorentina",
+    "nome": "Christensen O.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Napoli",
+    "nome": "Contini",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Parma",
+    "nome": "Daffara",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Roma",
+    "nome": "De Marzi",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Frosinone",
+    "nome": "Desplanches",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Inter",
+    "nome": "Di Gennaro",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Roma",
+    "nome": "Gollini",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Venezia",
+    "nome": "Grandi",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Bologna",
+    "nome": "Happonen",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Fiorentina",
+    "nome": "Lezzerini",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Frosinone",
+    "nome": "Lolic",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Venezia",
+    "nome": "Montipò",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Lazio",
+    "nome": "Motta",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Udinese",
+    "nome": "Padelli",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Torino",
+    "nome": "Paleari",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Lecce",
+    "nome": "Penev",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Juventus",
+    "nome": "Perin",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Bologna",
+    "nome": "Pessina Mas.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Udinese",
+    "nome": "Piana",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Juventus",
+    "nome": "Pinsoglio",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Cagliari",
+    "nome": "Radunovic",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Lazio",
+    "nome": "Renzetti",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Sassuolo",
+    "nome": "Russo A.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Cagliari",
+    "nome": "Sherri",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Torino",
+    "nome": "Siviero",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Genoa",
+    "nome": "Sommariva",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Atalanta",
+    "nome": "Sportiello",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Genoa",
+    "nome": "Stolz",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Milan",
+    "nome": "Terracciano",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Monza",
+    "nome": "Thiam",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Como",
+    "nome": "Tornqvist",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Milan",
+    "nome": "Torriani",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Sassuolo",
+    "nome": "Turati",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Como",
+    "nome": "Vigorito",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "P",
+    "squadra": "Atalanta",
+    "nome": "Vismara",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Inter",
+    "nome": "Dimarco",
+    "prezzo": "71",
+    "pma": "14.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Roma",
+    "nome": "Wesley",
+    "prezzo": "41",
+    "pma": "8.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Roma",
+    "nome": "Molina N.",
+    "prezzo": "36",
+    "pma": "7.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Juventus",
+    "nome": "Bremer",
+    "prezzo": "29",
+    "pma": "5.8%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Inter",
+    "nome": "Bastoni",
+    "prezzo": "28",
+    "pma": "5.6%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Inter",
+    "nome": "Akanji",
+    "prezzo": "27",
+    "pma": "5.4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Udinese",
+    "nome": "Solet",
+    "prezzo": "26",
+    "pma": "5.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Inter",
+    "nome": "Spence",
+    "prezzo": "26",
+    "pma": "5.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Juventus",
+    "nome": "Kalulu",
+    "prezzo": "23",
+    "pma": "4.6%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Roma",
+    "nome": "Mancini",
+    "prezzo": "23",
+    "pma": "4.6%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Napoli",
+    "nome": "Di Lorenzo",
+    "prezzo": "21",
+    "pma": "4.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Milan",
+    "nome": "Pavlovic",
+    "prezzo": "21",
+    "pma": "4.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Napoli",
+    "nome": "Rrahmani",
+    "prezzo": "20",
+    "pma": "4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Genoa",
+    "nome": "Ostigard",
+    "prezzo": "18",
+    "pma": "3.6%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Milan",
+    "nome": "Gila",
+    "prezzo": "17",
+    "pma": "3.4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Roma",
+    "nome": "N'Dicka",
+    "prezzo": "17",
+    "pma": "3.4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Como",
+    "nome": "Ramon",
+    "prezzo": "17",
+    "pma": "3.4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Inter",
+    "nome": "Stones",
+    "prezzo": "16",
+    "pma": "3.1%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Como",
+    "nome": "Chalobah T.",
+    "prezzo": "15",
+    "pma": "3%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Fiorentina",
+    "nome": "Jimenez A.",
+    "prezzo": "15",
+    "pma": "3%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Juventus",
+    "nome": "Cambiaso",
+    "prezzo": "14",
+    "pma": "2.8%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Como",
+    "nome": "Couto",
+    "prezzo": "14",
+    "pma": "2.8%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Inter",
+    "nome": "Bisseck",
+    "prezzo": "12",
+    "pma": "2.4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Fiorentina",
+    "nome": "Dragusin",
+    "prezzo": "11",
+    "pma": "2.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Udinese",
+    "nome": "Vojvoda",
+    "prezzo": "10",
+    "pma": "2.1%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Napoli",
+    "nome": "Spinazzola",
+    "prezzo": "10",
+    "pma": "2.1%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Genoa",
+    "nome": "Norton-Cuffy",
+    "prezzo": "10",
+    "pma": "2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Milan",
+    "nome": "Bartesaghi",
+    "prezzo": "9",
+    "pma": "1.8%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Bologna",
+    "nome": "Miranda J.",
+    "prezzo": "8",
+    "pma": "1.6%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Atalanta",
+    "nome": "Scalvini",
+    "prezzo": "8",
+    "pma": "1.6%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Juventus",
+    "nome": "Lucumì",
+    "prezzo": "8",
+    "pma": "1.6%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Genoa",
+    "nome": "Vasquez",
+    "prezzo": "8",
+    "pma": "1.5%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Fiorentina",
+    "nome": "Valdepenas",
+    "prezzo": "8",
+    "pma": "1.5%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Atalanta",
+    "nome": "Zappacosta",
+    "prezzo": "7",
+    "pma": "1.4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Parma",
+    "nome": "Valeri",
+    "prezzo": "7",
+    "pma": "1.4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Atalanta",
+    "nome": "Bernasconi",
+    "prezzo": "7",
+    "pma": "1.4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Juventus",
+    "nome": "Celik",
+    "prezzo": "6",
+    "pma": "1.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Fiorentina",
+    "nome": "Dodò",
+    "prezzo": "6",
+    "pma": "1.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Atalanta",
+    "nome": "Kristensen T.",
+    "prezzo": "6",
+    "pma": "1.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Parma",
+    "nome": "Delprato",
+    "prezzo": "5",
+    "pma": "1%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Roma",
+    "nome": "Hermoso",
+    "prezzo": "5",
+    "pma": "1%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Roma",
+    "nome": "Koulierakis",
+    "prezzo": "5",
+    "pma": "1%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Como",
+    "nome": "Kaiki",
+    "prezzo": "5",
+    "pma": "1%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Cagliari",
+    "nome": "Mina",
+    "prezzo": "4",
+    "pma": "0.8%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Lecce",
+    "nome": "Tiago Gabriel",
+    "prezzo": "4",
+    "pma": "0.7%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Lazio",
+    "nome": "Doekhi",
+    "prezzo": "4",
+    "pma": "0.7%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Napoli",
+    "nome": "Badiashile",
+    "prezzo": "4",
+    "pma": "0.7%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Inter",
+    "nome": "Carlos Augusto",
+    "prezzo": "4",
+    "pma": "0.7%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Como",
+    "nome": "Kempf",
+    "prezzo": "4",
+    "pma": "0.7%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Milan",
+    "nome": "Gabbia",
+    "prezzo": "3",
+    "pma": "0.6%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Torino",
+    "nome": "Pedersen",
+    "prezzo": "3",
+    "pma": "0.6%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Bologna",
+    "nome": "Zortea",
+    "prezzo": "3",
+    "pma": "0.6%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Como",
+    "nome": "Valle",
+    "prezzo": "3",
+    "pma": "0.6%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Atalanta",
+    "nome": "Bellanova",
+    "prezzo": "3",
+    "pma": "0.6%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Juventus",
+    "nome": "Kelly L.",
+    "prezzo": "2",
+    "pma": "0.5%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Torino",
+    "nome": "Comuzzo",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Genoa",
+    "nome": "Marcandalli",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Lecce",
+    "nome": "Gallo",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Monza",
+    "nome": "Mangas",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Venezia",
+    "nome": "Bella-Kotchap",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Napoli",
+    "nome": "Buongiorno",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Sassuolo",
+    "nome": "Idzes",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Como",
+    "nome": "Van Der Brempt",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Fiorentina",
+    "nome": "Viery",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Milan",
+    "nome": "De Winter",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Venezia",
+    "nome": "Correia T.",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Milan",
+    "nome": "Estupinan",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Monza",
+    "nome": "Carboni A.",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Torino",
+    "nome": "Coco",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Venezia",
+    "nome": "Haps",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Venezia",
+    "nome": "Schingtienne",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Torino",
+    "nome": "Biraghi",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Juventus",
+    "nome": "Gatti",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Cagliari",
+    "nome": "Kofler",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Lazio",
+    "nome": "Lazzari",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Inter",
+    "nome": "Pavard",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Lazio",
+    "nome": "Tavares N.",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Milan",
+    "nome": "Tomori",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Udinese",
+    "nome": "Kamara H.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Lecce",
+    "nome": "Veiga D.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Lecce",
+    "nome": "Gaspar K.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Udinese",
+    "nome": "Palma",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Cagliari",
+    "nome": "Rodriguez Ju.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Lecce",
+    "nome": "Siebert",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Monza",
+    "nome": "Bakoune",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Frosinone",
+    "nome": "Bracaglia",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Frosinone",
+    "nome": "Calvani",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Sassuolo",
+    "nome": "Doig",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Torino",
+    "nome": "Fortini",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Bologna",
+    "nome": "Helland",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Bologna",
+    "nome": "Holm",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Torino",
+    "nome": "Ismajli",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Atalanta",
+    "nome": "Kolasinac",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Lazio",
+    "nome": "Marusic",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Parma",
+    "nome": "Ndiaye",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Cagliari",
+    "nome": "Obert",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Frosinone",
+    "nome": "Oyono A.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Lazio",
+    "nome": "Pedraza",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Parma",
+    "nome": "Troilo",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Cagliari",
+    "nome": "Zappa",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Udinese",
+    "nome": "Abankwah",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Monza",
+    "nome": "Birindelli",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Frosinone",
+    "nome": "Cittadini",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Lazio",
+    "nome": "Floriani Mussolini",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Venezia",
+    "nome": "Hainaut",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Atalanta",
+    "nome": "Kossounou",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Napoli",
+    "nome": "Marin R.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Lazio",
+    "nome": "Provstgaard",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Frosinone",
+    "nome": "Terzic",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Bologna",
+    "nome": "Heggem",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Fiorentina",
+    "nome": "Joao Mario",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Monza",
+    "nome": "Kouadio",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Frosinone",
+    "nome": "Monterisi",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Fiorentina",
+    "nome": "Ranieri L.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Cagliari",
+    "nome": "Zè Pedro",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Genoa",
+    "nome": "Otoa",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Atalanta",
+    "nome": "Ahanor",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Frosinone",
+    "nome": "Akpoguma",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Udinese",
+    "nome": "Bertola",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Napoli",
+    "nome": "Beukema",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Parma",
+    "nome": "Britschgi",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Juventus",
+    "nome": "Cabal",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Sassuolo",
+    "nome": "Candè",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Parma",
+    "nome": "Carboni F.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Bologna",
+    "nome": "Casale",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Torino",
+    "nome": "Comert",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Monza",
+    "nome": "Delli Carri",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Bologna",
+    "nome": "De Silvestri",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Milan",
+    "nome": "Diawara S.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Napoli",
+    "nome": "Favasuli",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Roma",
+    "nome": "Ghilardi",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Como",
+    "nome": "Goldaniga",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Venezia",
+    "nome": "Halhal",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Atalanta",
+    "nome": "Hien",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Udinese",
+    "nome": "Kabasele",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Napoli",
+    "nome": "Marianucci",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Genoa",
+    "nome": "Martin",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Napoli",
+    "nome": "Mazzocchi",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Sassuolo",
+    "nome": "Missori",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Genoa",
+    "nome": "Mitaj",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Venezia",
+    "nome": "Moreno M.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Sassuolo",
+    "nome": "Obrador",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Napoli",
+    "nome": "Olivera",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Frosinone",
+    "nome": "Oyono J.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Fiorentina",
+    "nome": "Parisi",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Lazio",
+    "nome": "Patric",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Lazio",
+    "nome": "Pellegrini Lu.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Sassuolo",
+    "nome": "Pieragnolo",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Fiorentina",
+    "nome": "Pongracic",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Genoa",
+    "nome": "Puczka",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Roma",
+    "nome": "Rensch",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Lazio",
+    "nome": "Romagnoli",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Juventus",
+    "nome": "Rugani",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Como",
+    "nome": "Smolcic I.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Lazio",
+    "nome": "Sutalo J.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Parma",
+    "nome": "Valenti",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Bologna",
+    "nome": "Vitik",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Sassuolo",
+    "nome": "Walukiewicz",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Udinese",
+    "nome": "Zanoli",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "D",
+    "squadra": "Roma",
+    "nome": "Ziolkowski",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Como",
+    "nome": "Paz N.",
+    "prezzo": "82",
+    "pma": "16.3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Napoli",
+    "nome": "McTominay",
+    "prezzo": "75",
+    "pma": "15%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Inter",
+    "nome": "Calhanoglu",
+    "prezzo": "66",
+    "pma": "13.3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Bologna",
+    "nome": "Orsolini",
+    "prezzo": "61",
+    "pma": "12.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Milan",
+    "nome": "Pulisic",
+    "prezzo": "58",
+    "pma": "11.6%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Como",
+    "nome": "Baturina",
+    "prezzo": "46",
+    "pma": "9.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Fiorentina",
+    "nome": "Atta",
+    "prezzo": "40",
+    "pma": "8%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Udinese",
+    "nome": "Zaniolo",
+    "prezzo": "39",
+    "pma": "7.8%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Fiorentina",
+    "nome": "Mastantuono",
+    "prezzo": "38",
+    "pma": "7.5%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Como",
+    "nome": "Da Cunha",
+    "prezzo": "35",
+    "pma": "7%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Milan",
+    "nome": "Rabiot",
+    "prezzo": "34",
+    "pma": "6.8%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Juventus",
+    "nome": "Alajbegovic",
+    "prezzo": "34",
+    "pma": "6.8%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Lazio",
+    "nome": "Zaccagni",
+    "prezzo": "32",
+    "pma": "6.4%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Napoli",
+    "nome": "De Bruyne",
+    "prezzo": "30",
+    "pma": "6.1%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Roma",
+    "nome": "Mora",
+    "prezzo": "30",
+    "pma": "6%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Torino",
+    "nome": "Vlasic",
+    "prezzo": "30",
+    "pma": "6%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Inter",
+    "nome": "Barella",
+    "prezzo": "28",
+    "pma": "5.6%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Juventus",
+    "nome": "McKennie",
+    "prezzo": "26",
+    "pma": "5.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Juventus",
+    "nome": "Conceicao",
+    "prezzo": "24",
+    "pma": "4.8%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Inter",
+    "nome": "Zielinski",
+    "prezzo": "22",
+    "pma": "4.4%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Milan",
+    "nome": "Moreira",
+    "prezzo": "22",
+    "pma": "4.3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Bologna",
+    "nome": "Rowe",
+    "prezzo": "21",
+    "pma": "4.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Atalanta",
+    "nome": "Samardzic",
+    "prezzo": "20",
+    "pma": "4%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Fiorentina",
+    "nome": "Gudmundsson A.",
+    "prezzo": "20",
+    "pma": "4%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Atalanta",
+    "nome": "Ederson D.S.",
+    "prezzo": "15",
+    "pma": "3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Roma",
+    "nome": "Konè M.",
+    "prezzo": "15",
+    "pma": "3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Inter",
+    "nome": "Jones C.",
+    "prezzo": "15",
+    "pma": "3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Lazio",
+    "nome": "Taylor K.",
+    "prezzo": "14",
+    "pma": "2.7%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Lazio",
+    "nome": "Frattesi",
+    "prezzo": "13",
+    "pma": "2.6%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Udinese",
+    "nome": "Ekkelenkamp",
+    "prezzo": "13",
+    "pma": "2.6%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Milan",
+    "nome": "Modric",
+    "prezzo": "12",
+    "pma": "2.5%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Milan",
+    "nome": "Saelemaekers",
+    "prezzo": "11",
+    "pma": "2.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Napoli",
+    "nome": "Politano",
+    "prezzo": "10",
+    "pma": "2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Inter",
+    "nome": "Diouf",
+    "prezzo": "9",
+    "pma": "1.8%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Juventus",
+    "nome": "Thuram K.",
+    "prezzo": "9",
+    "pma": "1.8%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Bologna",
+    "nome": "Bernardeschi",
+    "prezzo": "8",
+    "pma": "1.6%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Genoa",
+    "nome": "Baldanzi",
+    "prezzo": "7",
+    "pma": "1.4%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Frosinone",
+    "nome": "Calò",
+    "prezzo": "7",
+    "pma": "1.4%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Napoli",
+    "nome": "Zambo Anguissa",
+    "prezzo": "7",
+    "pma": "1.4%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Como",
+    "nome": "Rodriguez Je.",
+    "prezzo": "6",
+    "pma": "1.3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Como",
+    "nome": "Perrone",
+    "prezzo": "6",
+    "pma": "1.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Sassuolo",
+    "nome": "Thorstvedt",
+    "prezzo": "5",
+    "pma": "1%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Torino",
+    "nome": "Casadei",
+    "prezzo": "5",
+    "pma": "1%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Parma",
+    "nome": "Bernabè",
+    "prezzo": "4",
+    "pma": "0.8%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Monza",
+    "nome": "Colpani",
+    "prezzo": "4",
+    "pma": "0.8%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Milan",
+    "nome": "Chukwueze",
+    "prezzo": "3",
+    "pma": "0.6%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Atalanta",
+    "nome": "Gaetano",
+    "prezzo": "3",
+    "pma": "0.6%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Inter",
+    "nome": "Sucic P.",
+    "prezzo": "3",
+    "pma": "0.6%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Lazio",
+    "nome": "Isaksen",
+    "prezzo": "3",
+    "pma": "0.6%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Como",
+    "nome": "Liberali",
+    "prezzo": "3",
+    "pma": "0.6%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Juventus",
+    "nome": "Locatelli",
+    "prezzo": "3",
+    "pma": "0.6%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Fiorentina",
+    "nome": "Ndour",
+    "prezzo": "3",
+    "pma": "0.6%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Cagliari",
+    "nome": "Fazzini",
+    "prezzo": "3",
+    "pma": "0.6%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Sassuolo",
+    "nome": "Adzic",
+    "prezzo": "2",
+    "pma": "0.5%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Lecce",
+    "nome": "Ngom",
+    "prezzo": "2",
+    "pma": "0.5%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Napoli",
+    "nome": "Vergara",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Lecce",
+    "nome": "Maleh",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Venezia",
+    "nome": "Busio",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Torino",
+    "nome": "Cacciamani",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Juventus",
+    "nome": "Douglas Luiz",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Fiorentina",
+    "nome": "Mandragora",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Milan",
+    "nome": "Cissè A.",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Roma",
+    "nome": "Cristante",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Cagliari",
+    "nome": "Deiola",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Frosinone",
+    "nome": "Hasa",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Frosinone",
+    "nome": "Masini",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Atalanta",
+    "nome": "Zalewski",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Juventus",
+    "nome": "Zhegrova",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Monza",
+    "nome": "Ciurria",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Fiorentina",
+    "nome": "Fabbian",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Sassuolo",
+    "nome": "Lipani",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Genoa",
+    "nome": "Venturino",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Cagliari",
+    "nome": "Romano",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Roma",
+    "nome": "Pisilli",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Lecce",
+    "nome": "Coulibaly L.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Cagliari",
+    "nome": "Adopo",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Genoa",
+    "nome": "Amorim",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Milan",
+    "nome": "Jashari",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Udinese",
+    "nome": "Karlstrom",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Napoli",
+    "nome": "Lobotka",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Sassuolo",
+    "nome": "Matic",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Como",
+    "nome": "Milla",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Torino",
+    "nome": "Njie",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Lazio",
+    "nome": "Rovella",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Sassuolo",
+    "nome": "Volpato",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Parma",
+    "nome": "Almqvist",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Sassuolo",
+    "nome": "Bakola",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Parma",
+    "nome": "Diallo O.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Sassuolo",
+    "nome": "Dominguez B.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Cagliari",
+    "nome": "Felici",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Bologna",
+    "nome": "Ferguson",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Torino",
+    "nome": "Fitz-Jim",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Monza",
+    "nome": "Forson O.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Genoa",
+    "nome": "Frendrup",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Parma",
+    "nome": "Keita M.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Inter",
+    "nome": "Luis Henrique",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Genoa",
+    "nome": "Messias",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Milan",
+    "nome": "Musah",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Fiorentina",
+    "nome": "Oulai",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Lecce",
+    "nome": "Pierotti",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Cagliari",
+    "nome": "Winks",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Frosinone",
+    "nome": "Zerbin",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Venezia",
+    "nome": "Basic",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Fiorentina",
+    "nome": "Brescianini",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Lazio",
+    "nome": "Dele-Bashiru",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Genoa",
+    "nome": "Ellertsson",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Milan",
+    "nome": "Loftus-Cheek",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Genoa",
+    "nome": "Meichtry",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Atalanta",
+    "nome": "Pasalic",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Venezia",
+    "nome": "Perez K.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Udinese",
+    "nome": "Piotrowski",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Genoa",
+    "nome": "Sow",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Bologna",
+    "nome": "Cambiaghi",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Lazio",
+    "nome": "Cancellieri",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Fiorentina",
+    "nome": "Fagioli",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Bologna",
+    "nome": "Odgaard",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Venezia",
+    "nome": "Dagasso",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Frosinone",
+    "nome": "Schmid",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Como",
+    "nome": "Addai",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Monza",
+    "nome": "Akinsanmiro",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Bologna",
+    "nome": "Amondarain",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Torino",
+    "nome": "Anjorin",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Lazio",
+    "nome": "Belahyane",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Lecce",
+    "nome": "Berisha M.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Como",
+    "nome": "Caqueret",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Lazio",
+    "nome": "Cataldi",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Monza",
+    "nome": "Colombo L.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Parma",
+    "nome": "Cremaschi",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Atalanta",
+    "nome": "De Roon",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Roma",
+    "nome": "El Aynaoui",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Frosinone",
+    "nome": "El Azzouzi A.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Atalanta",
+    "nome": "Elmas",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Cagliari",
+    "nome": "Fadera",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Milan",
+    "nome": "Fofana Y.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Napoli",
+    "nome": "Folorunsho",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Lecce",
+    "nome": "Gandelman",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Napoli",
+    "nome": "Gilmour",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Frosinone",
+    "nome": "Grillitsch",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Sassuolo",
+    "nome": "Iannoni",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Torino",
+    "nome": "Ilic",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Lecce",
+    "nome": "Kaba",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Frosinone",
+    "nome": "Kone B.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Sassuolo",
+    "nome": "Konè I.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Juventus",
+    "nome": "Koopmeiners",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Frosinone",
+    "nome": "Koutsoupias",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Cagliari",
+    "nome": "Liteta",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Juventus",
+    "nome": "Miretti",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Inter",
+    "nome": "Mkhitaryan",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Bologna",
+    "nome": "Moro N.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Parma",
+    "nome": "Nicolussi Caviglia",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Torino",
+    "nome": "Oristanio",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Roma",
+    "nome": "Pellegrini Lo.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Monza",
+    "nome": "Pessina",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Bologna",
+    "nome": "Pobega",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Lazio",
+    "nome": "Przyborek",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Milan",
+    "nome": "Ricci S.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Venezia",
+    "nome": "Sohm",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Inter",
+    "nome": "Stankovic A.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Atalanta",
+    "nome": "Sulemana I.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Monza",
+    "nome": "Tourè I.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Genoa",
+    "nome": "Traorè Hj.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Udinese",
+    "nome": "Unai Gomez",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "C",
+    "squadra": "Udinese",
+    "nome": "Zarraga",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Roma",
+    "nome": "Malen",
+    "prezzo": "160",
+    "pma": "31.9%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Inter",
+    "nome": "Martinez L.",
+    "prezzo": "156",
+    "pma": "31.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Milan",
+    "nome": "Ramos G.",
+    "prezzo": "119",
+    "pma": "23.8%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Juventus",
+    "nome": "Kolo Muani",
+    "prezzo": "115",
+    "pma": "23%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Inter",
+    "nome": "Thuram",
+    "prezzo": "110",
+    "pma": "22%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Napoli",
+    "nome": "Hojlund",
+    "prezzo": "105",
+    "pma": "21%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Juventus",
+    "nome": "Yildiz",
+    "prezzo": "86",
+    "pma": "17.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Fiorentina",
+    "nome": "Kean",
+    "prezzo": "84",
+    "pma": "16.8%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Como",
+    "nome": "Douvikas",
+    "prezzo": "68",
+    "pma": "13.5%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Udinese",
+    "nome": "Davis K.",
+    "prezzo": "52",
+    "pma": "10.4%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Atalanta",
+    "nome": "Scamacca",
+    "prezzo": "45",
+    "pma": "9%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Torino",
+    "nome": "Simeone",
+    "prezzo": "40",
+    "pma": "8%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Bologna",
+    "nome": "Dovbyk",
+    "prezzo": "34",
+    "pma": "6.9%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Sassuolo",
+    "nome": "Berardi",
+    "prezzo": "33",
+    "pma": "6.6%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Roma",
+    "nome": "Dybala",
+    "prezzo": "32",
+    "pma": "6.4%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Inter",
+    "nome": "Esposito F.P.",
+    "prezzo": "26",
+    "pma": "5.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Atalanta",
+    "nome": "Krstovic",
+    "prezzo": "26",
+    "pma": "5.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Atalanta",
+    "nome": "De Ketelaere",
+    "prezzo": "26",
+    "pma": "5.1%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Sassuolo",
+    "nome": "Laurientè",
+    "prezzo": "21",
+    "pma": "4.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Napoli",
+    "nome": "Santos A.",
+    "prezzo": "21",
+    "pma": "4.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Genoa",
+    "nome": "Colombo",
+    "prezzo": "19",
+    "pma": "3.8%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Milan",
+    "nome": "Leao",
+    "prezzo": "19",
+    "pma": "3.8%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Atalanta",
+    "nome": "Raspadori",
+    "prezzo": "16",
+    "pma": "3.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Roma",
+    "nome": "Castro S.",
+    "prezzo": "16",
+    "pma": "3.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Fiorentina",
+    "nome": "Pellegrino M.",
+    "prezzo": "13",
+    "pma": "2.6%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Sassuolo",
+    "nome": "Pinamonti",
+    "prezzo": "13",
+    "pma": "2.6%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Como",
+    "nome": "Diao",
+    "prezzo": "11",
+    "pma": "2.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Roma",
+    "nome": "Soulè",
+    "prezzo": "10",
+    "pma": "2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Venezia",
+    "nome": "Adams A.",
+    "prezzo": "10",
+    "pma": "2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Inter",
+    "nome": "Bonny",
+    "prezzo": "4",
+    "pma": "0.8%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Parma",
+    "nome": "Tourè E.",
+    "prezzo": "4",
+    "pma": "0.8%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Bologna",
+    "nome": "Piccoli",
+    "prezzo": "3",
+    "pma": "0.6%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Venezia",
+    "nome": "Yeboah J.",
+    "prezzo": "3",
+    "pma": "0.6%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Napoli",
+    "nome": "Neres",
+    "prezzo": "3",
+    "pma": "0.6%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Monza",
+    "nome": "Cutrone",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Cagliari",
+    "nome": "Maldini",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Sassuolo",
+    "nome": "Bowie",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Lecce",
+    "nome": "Geubbels",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Genoa",
+    "nome": "Vitinha O.",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Cagliari",
+    "nome": "Kevin Carlos",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Parma",
+    "nome": "Romero D.",
+    "prezzo": "2",
+    "pma": "0.4%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Juventus",
+    "nome": "Boga",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Juventus",
+    "nome": "David",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Cagliari",
+    "nome": "Esposito Se.",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Milan",
+    "nome": "Nkunku",
+    "prezzo": "2",
+    "pma": "0.3%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Torino",
+    "nome": "Adams C.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Monza",
+    "nome": "Varela G.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Lazio",
+    "nome": "Dia",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Parma",
+    "nome": "Lontani",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Napoli",
+    "nome": "Lucca",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Cagliari",
+    "nome": "Borrelli",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Frosinone",
+    "nome": "Kvernadze",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Napoli",
+    "nome": "Lang",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Parma",
+    "nome": "Elphege",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Udinese",
+    "nome": "Gueye",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Cagliari",
+    "nome": "Mendy P.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Lecce",
+    "nome": "N'Dri",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Frosinone",
+    "nome": "Raimondo",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Lecce",
+    "nome": "Stulic",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Udinese",
+    "nome": "Bayo V.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Venezia",
+    "nome": "Adorante",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Como",
+    "nome": "Azon",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Milan",
+    "nome": "Camarda",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Parma",
+    "nome": "De Martis",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Juventus",
+    "nome": "Ekhator",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Parma",
+    "nome": "Frigan",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Frosinone",
+    "nome": "Ghedjemis",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Milan",
+    "nome": "Gimenez",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Napoli",
+    "nome": "Giovane",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Genoa",
+    "nome": "Havel",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Como",
+    "nome": "Kuhn",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Torino",
+    "nome": "Kulenovic",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Venezia",
+    "nome": "Lauberbach",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Venezia",
+    "nome": "Lisman",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Juventus",
+    "nome": "Milik",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Como",
+    "nome": "Morata",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Monza",
+    "nome": "Mota",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Cagliari",
+    "nome": "Mutandwa",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Lazio",
+    "nome": "Noslin",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Lazio",
+    "nome": "Ratkov",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Venezia",
+    "nome": "Rrahmani Al.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Atalanta",
+    "nome": "Sulemana K.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Cagliari",
+    "nome": "Trepy",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Roma",
+    "nome": "Vaz",
+    "prezzo": "1",
+    "pma": "0.2%"
+  },
+  {
+    "ruolo": "A",
+    "squadra": "Torino",
+    "nome": "Zapata D.",
+    "prezzo": "1",
+    "pma": "0.2%"
+  }
+]

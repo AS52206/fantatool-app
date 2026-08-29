@@ -1,0 +1,6 @@
+node_modules/
+app/build/
+app/.svelte-kit/
+.DS_Store
+__pycache__/
+*.pyc

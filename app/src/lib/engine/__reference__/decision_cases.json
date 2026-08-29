@@ -1,0 +1,1676 @@
+{
+ "fascia": [
+  {
+   "input": {
+    "pma": 20,
+    "pfc": 25,
+    "fallback": 15,
+    "budget_iniziale": 500
+   },
+   "atteso": {
+    "fonte": "PMA",
+    "pma": 20.0,
+    "pfc": 25.0,
+    "base": 20.0,
+    "riferimento": 20,
+    "min": 18,
+    "max": 22,
+    "fattore_mercato": 1.0
+   }
+  },
+  {
+   "input": {
+    "pma": 0,
+    "pfc": 25,
+    "fallback": 15,
+    "budget_iniziale": 500
+   },
+   "atteso": {
+    "fonte": "PFC",
+    "pma": 0.0,
+    "pfc": 25.0,
+    "base": 25.0,
+    "riferimento": 25,
+    "min": 22,
+    "max": 28,
+    "fattore_mercato": 1.0
+   }
+  },
+  {
+   "input": {
+    "pma": 0,
+    "pfc": 0,
+    "fallback": 15,
+    "budget_iniziale": 500
+   },
+   "atteso": {
+    "fonte": "FALLBACK",
+    "pma": 0.0,
+    "pfc": 0.0,
+    "base": 15,
+    "riferimento": 15,
+    "min": 14,
+    "max": 16,
+    "fattore_mercato": 1.0
+   }
+  },
+  {
+   "input": {
+    "pma": null,
+    "pfc": null,
+    "fallback": 1,
+    "budget_iniziale": 500
+   },
+   "atteso": {
+    "fonte": "FALLBACK",
+    "pma": 0.0,
+    "pfc": 0.0,
+    "base": 1,
+    "riferimento": 1,
+    "min": 1,
+    "max": 1,
+    "fattore_mercato": 1.0
+   }
+  },
+  {
+   "input": {
+    "pma": 33,
+    "pfc": 0,
+    "fallback": 10,
+    "budget_iniziale": 300
+   },
+   "atteso": {
+    "fonte": "PMA",
+    "pma": 33.0,
+    "pfc": 0.0,
+    "base": 33.0,
+    "riferimento": 20,
+    "min": 18,
+    "max": 22,
+    "fattore_mercato": 1.0
+   }
+  },
+  {
+   "input": {
+    "pma": 33,
+    "pfc": 0,
+    "fallback": 10,
+    "budget_iniziale": 500,
+    "inflazione_percentuale": 25
+   },
+   "atteso": {
+    "fonte": "PMA",
+    "pma": 33.0,
+    "pfc": 0.0,
+    "base": 33.0,
+    "riferimento": 40,
+    "min": 36,
+    "max": 44,
+    "fattore_mercato": 1.2
+   }
+  },
+  {
+   "input": {
+    "pma": 33,
+    "pfc": 0,
+    "fallback": 10,
+    "budget_iniziale": 500,
+    "inflazione_percentuale": -30
+   },
+   "atteso": {
+    "fonte": "PMA",
+    "pma": 33.0,
+    "pfc": 0.0,
+    "base": 33.0,
+    "riferimento": 28,
+    "min": 25,
+    "max": 31,
+    "fattore_mercato": 0.85
+   }
+  },
+  {
+   "input": {
+    "pma": 33,
+    "pfc": 0,
+    "fallback": 10,
+    "budget_iniziale": 500,
+    "scarsita": "CRITICA"
+   },
+   "atteso": {
+    "fonte": "PMA",
+    "pma": 33.0,
+    "pfc": 0.0,
+    "base": 33.0,
+    "riferimento": 35,
+    "min": 32,
+    "max": 38,
+    "fattore_mercato": 1.06
+   }
+  },
+  {
+   "input": {
+    "pma": 33,
+    "pfc": 0,
+    "fallback": 10,
+    "budget_iniziale": 500,
+    "scarsita": "ALTA"
+   },
+   "atteso": {
+    "fonte": "PMA",
+    "pma": 33.0,
+    "pfc": 0.0,
+    "base": 33.0,
+    "riferimento": 34,
+    "min": 31,
+    "max": 37,
+    "fattore_mercato": 1.03
+   }
+  },
+  {
+   "input": {
+    "pma": 33,
+    "pfc": 0,
+    "fallback": 10,
+    "budget_iniziale": 500,
+    "moltiplicatore_fase": 1.12
+   },
+   "atteso": {
+    "fonte": "PMA",
+    "pma": 33.0,
+    "pfc": 0.0,
+    "base": 33.0,
+    "riferimento": 37,
+    "min": 33,
+    "max": 41,
+    "fattore_mercato": 1.12
+   }
+  },
+  {
+   "input": {
+    "pma": 33,
+    "pfc": 0,
+    "fallback": 10,
+    "budget_iniziale": 500,
+    "moltiplicatore_fase": 0.9
+   },
+   "atteso": {
+    "fonte": "PMA",
+    "pma": 33.0,
+    "pfc": 0.0,
+    "base": 33.0,
+    "riferimento": 31,
+    "min": 28,
+    "max": 34,
+    "fattore_mercato": 0.94
+   }
+  },
+  {
+   "input": {
+    "pma": 33,
+    "pfc": 0,
+    "fallback": 10,
+    "budget_iniziale": 500,
+    "limite_massimo": 20
+   },
+   "atteso": {
+    "fonte": "PMA",
+    "pma": 33.0,
+    "pfc": 0.0,
+    "base": 33.0,
+    "riferimento": 20,
+    "min": 18,
+    "max": 20,
+    "fattore_mercato": 1.0
+   }
+  },
+  {
+   "input": {
+    "pma": 7.5,
+    "pfc": 9.2,
+    "fallback": 5,
+    "budget_iniziale": 500
+   },
+   "atteso": {
+    "fonte": "PMA",
+    "pma": 7.5,
+    "pfc": 9.2,
+    "base": 7.5,
+    "riferimento": 8,
+    "min": 7,
+    "max": 9,
+    "fattore_mercato": 1.0
+   }
+  },
+  {
+   "input": {
+    "pma": 2.5,
+    "pfc": 0,
+    "fallback": 5,
+    "budget_iniziale": 500
+   },
+   "atteso": {
+    "fonte": "PMA",
+    "pma": 2.5,
+    "pfc": 0.0,
+    "base": 2.5,
+    "riferimento": 2,
+    "min": 2,
+    "max": 2,
+    "fattore_mercato": 1.0
+   }
+  },
+  {
+   "input": {
+    "pma": 100,
+    "pfc": 0,
+    "fallback": 10,
+    "budget_iniziale": 500,
+    "inflazione_percentuale": 15,
+    "scarsita": "ALTA",
+    "moltiplicatore_fase": 1.05
+   },
+   "atteso": {
+    "fonte": "PMA",
+    "pma": 100.0,
+    "pfc": 0.0,
+    "base": 100.0,
+    "riferimento": 124,
+    "min": 112,
+    "max": 136,
+    "fattore_mercato": 1.244
+   }
+  }
+ ],
+ "fase": [
+  {
+   "args": [
+    0,
+    25
+   ],
+   "atteso": {
+    "codice": "APERTURA",
+    "etichetta": "Apertura",
+    "progresso": 0.0,
+    "pressione": 0.0,
+    "moltiplicatore": 0.98,
+    "affidabilita": "ALTA"
+   }
+  },
+  {
+   "args": [
+    5,
+    25
+   ],
+   "atteso": {
+    "codice": "REGOLARE",
+    "etichetta": "Mercato regolare",
+    "progresso": 20.0,
+    "pressione": 0.0,
+    "moltiplicatore": 1.0,
+    "affidabilita": "ALTA"
+   }
+  },
+  {
+   "args": [
+    10,
+    25
+   ],
+   "atteso": {
+    "codice": "REGOLARE",
+    "etichetta": "Mercato regolare",
+    "progresso": 40.0,
+    "pressione": 0.0,
+    "moltiplicatore": 1.0,
+    "affidabilita": "ALTA"
+   }
+  },
+  {
+   "args": [
+    18,
+    25
+   ],
+   "atteso": {
+    "codice": "ACCELERAZIONE",
+    "etichetta": "Accelerazione",
+    "progresso": 72.0,
+    "pressione": 0.0,
+    "moltiplicatore": 1.05,
+    "affidabilita": "ALTA"
+   }
+  },
+  {
+   "args": [
+    24,
+    25
+   ],
+   "atteso": {
+    "codice": "FINE_REPARTO",
+    "etichetta": "Fine reparto",
+    "progresso": 96.0,
+    "pressione": 0.0,
+    "moltiplicatore": 1.08,
+    "affidabilita": "ALTA"
+   }
+  },
+  {
+   "args": [
+    23,
+    25,
+    2
+   ],
+   "atteso": {
+    "codice": "FINE_REPARTO",
+    "etichetta": "Fine reparto",
+    "progresso": 92.0,
+    "pressione": 0.0,
+    "moltiplicatore": 1.08,
+    "affidabilita": "ALTA"
+   }
+  },
+  {
+   "args": [
+    10,
+    25,
+    5,
+    9.0
+   ],
+   "atteso": {
+    "codice": "SCARSITA",
+    "etichetta": "Scarsità",
+    "progresso": 40.0,
+    "pressione": 1.8,
+    "moltiplicatore": 1.12,
+    "affidabilita": "ALTA"
+   }
+  },
+  {
+   "args": [
+    10,
+    25,
+    null,
+    null,
+    40,
+    500
+   ],
+   "atteso": {
+    "codice": "OCCASIONI_FINALI",
+    "etichetta": "Occasioni finali",
+    "progresso": 40.0,
+    "pressione": 0.0,
+    "moltiplicatore": 0.94,
+    "affidabilita": "ALTA"
+   }
+  },
+  {
+   "args": [
+    10,
+    25,
+    null,
+    null,
+    90,
+    500
+   ],
+   "atteso": {
+    "codice": "OCCASIONI_FINALI",
+    "etichetta": "Occasioni finali",
+    "progresso": 40.0,
+    "pressione": 0.0,
+    "moltiplicatore": 0.94,
+    "affidabilita": "ALTA"
+   }
+  },
+  {
+   "args": [
+    5,
+    8
+   ],
+   "atteso": {
+    "codice": "ACCELERAZIONE",
+    "etichetta": "Accelerazione",
+    "progresso": 62.5,
+    "pressione": 0.0,
+    "moltiplicatore": 1.05,
+    "affidabilita": "MEDIA"
+   }
+  }
+ ],
+ "decisione": [
+  {
+   "input": {
+    "prezzo_corrente": 10,
+    "fascia_min": 15,
+    "fascia_max": 22,
+    "limite_strategico": 40,
+    "budget_residuo": 300,
+    "slot_vuoti": 10,
+    "slot_ruolo_vuoti": 3
+   },
+   "atteso": {
+    "azione": "COMPRA",
+    "motivo": "prezzo nella zona conveniente",
+    "prezzo_corrente": 10,
+    "massimo_operativo": 22,
+    "budget_dopo": 290,
+    "slot_dopo": 9,
+    "minimo_slot": 9,
+    "libero_reale": 281,
+    "rosa_completabile": true
+   }
+  },
+  {
+   "input": {
+    "prezzo_corrente": 20,
+    "fascia_min": 15,
+    "fascia_max": 22,
+    "limite_strategico": 40,
+    "budget_residuo": 300,
+    "slot_vuoti": 10,
+    "slot_ruolo_vuoti": 3
+   },
+   "atteso": {
+    "azione": "VALUTA",
+    "motivo": "prezzo sostenibile ma non conveniente",
+    "prezzo_corrente": 20,
+    "massimo_operativo": 22,
+    "budget_dopo": 280,
+    "slot_dopo": 9,
+    "minimo_slot": 9,
+    "libero_reale": 271,
+    "rosa_completabile": true
+   }
+  },
+  {
+   "input": {
+    "prezzo_corrente": 45,
+    "fascia_min": 15,
+    "fascia_max": 22,
+    "limite_strategico": 40,
+    "budget_residuo": 300,
+    "slot_vuoti": 10,
+    "slot_ruolo_vuoti": 3
+   },
+   "atteso": {
+    "azione": "LASCIA",
+    "motivo": "supera il massimo operativo",
+    "prezzo_corrente": 45,
+    "massimo_operativo": 22,
+    "budget_dopo": 255,
+    "slot_dopo": 9,
+    "minimo_slot": 9,
+    "libero_reale": 246,
+    "rosa_completabile": true
+   }
+  },
+  {
+   "input": {
+    "prezzo_corrente": 10,
+    "fascia_min": 15,
+    "fascia_max": 22,
+    "limite_strategico": 40,
+    "budget_residuo": 300,
+    "slot_vuoti": 10,
+    "slot_ruolo_vuoti": 0
+   },
+   "atteso": {
+    "azione": "LASCIA",
+    "motivo": "slot del ruolo gia' completo",
+    "prezzo_corrente": 10,
+    "massimo_operativo": 22,
+    "budget_dopo": 290,
+    "slot_dopo": 9,
+    "minimo_slot": 9,
+    "libero_reale": 281,
+    "rosa_completabile": false
+   }
+  },
+  {
+   "input": {
+    "prezzo_corrente": 10,
+    "fascia_min": 15,
+    "fascia_max": 22,
+    "limite_strategico": 40,
+    "massimo_personale": 12,
+    "budget_residuo": 300,
+    "slot_vuoti": 10,
+    "slot_ruolo_vuoti": 3
+   },
+   "atteso": {
+    "azione": "COMPRA",
+    "motivo": "prezzo nella zona conveniente",
+    "prezzo_corrente": 10,
+    "massimo_operativo": 12,
+    "budget_dopo": 290,
+    "slot_dopo": 9,
+    "minimo_slot": 9,
+    "libero_reale": 281,
+    "rosa_completabile": true
+   }
+  },
+  {
+   "input": {
+    "prezzo_corrente": 299,
+    "fascia_min": 15,
+    "fascia_max": 400,
+    "limite_strategico": 400,
+    "budget_residuo": 300,
+    "slot_vuoti": 10,
+    "slot_ruolo_vuoti": 3
+   },
+   "atteso": {
+    "azione": "LASCIA",
+    "motivo": "non consente di completare la rosa",
+    "prezzo_corrente": 299,
+    "massimo_operativo": 400,
+    "budget_dopo": 1,
+    "slot_dopo": 9,
+    "minimo_slot": 9,
+    "libero_reale": -8,
+    "rosa_completabile": false
+   }
+  },
+  {
+   "input": {
+    "prezzo_corrente": 5,
+    "fascia_min": 5,
+    "fascia_max": 8,
+    "limite_strategico": 10,
+    "budget_residuo": 6,
+    "slot_vuoti": 3,
+    "slot_ruolo_vuoti": 1
+   },
+   "atteso": {
+    "azione": "LASCIA",
+    "motivo": "non consente di completare la rosa",
+    "prezzo_corrente": 5,
+    "massimo_operativo": 8,
+    "budget_dopo": 1,
+    "slot_dopo": 2,
+    "minimo_slot": 2,
+    "libero_reale": -1,
+    "rosa_completabile": false
+   }
+  }
+ ],
+ "allarmi": [
+  {
+   "input": {
+    "budget_residuo": 200,
+    "slot_vuoti": 10,
+    "conteggi_ruolo": {
+     "P": 1,
+     "D": 3,
+     "C": 3,
+     "A": 2
+    },
+    "limiti_ruolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    }
+   },
+   "atteso": {
+    "livello": "OK",
+    "minimo_completamento": 10,
+    "massimo_prossimo": 191,
+    "margine_libero": 190,
+    "ruoli_mancanti": {
+     "P": 2,
+     "D": 5,
+     "C": 5,
+     "A": 4
+    },
+    "avvisi": []
+   }
+  },
+  {
+   "input": {
+    "budget_residuo": 0,
+    "slot_vuoti": 0,
+    "conteggi_ruolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    },
+    "limiti_ruolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    }
+   },
+   "atteso": {
+    "livello": "OK",
+    "minimo_completamento": 0,
+    "massimo_prossimo": 0,
+    "margine_libero": 0,
+    "ruoli_mancanti": {},
+    "avvisi": [
+     {
+      "livello": "OK",
+      "codice": "ROSA_COMPLETA",
+      "testo": "Rosa completa: nessun credito da riservare."
+     }
+    ]
+   }
+  },
+  {
+   "input": {
+    "budget_residuo": 3,
+    "slot_vuoti": 5,
+    "conteggi_ruolo": {
+     "P": 3,
+     "D": 6,
+     "C": 6,
+     "A": 4
+    },
+    "limiti_ruolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    }
+   },
+   "atteso": {
+    "livello": "CRITICO",
+    "minimo_completamento": 5,
+    "massimo_prossimo": 0,
+    "margine_libero": -2,
+    "ruoli_mancanti": {
+     "D": 2,
+     "C": 2,
+     "A": 2
+    },
+    "avvisi": [
+     {
+      "livello": "CRITICO",
+      "codice": "BUDGET_INSUFFICIENTE",
+      "testo": "Mancano 2 crediti per comprare 5 giocatori a 1 credito."
+     },
+     {
+      "livello": "ATTENZIONE",
+      "codice": "RUOLI_MANCANTI",
+      "testo": "Slot ancora obbligatori: D +2, C +2, A +2."
+     }
+    ]
+   }
+  },
+  {
+   "input": {
+    "budget_residuo": 5,
+    "slot_vuoti": 5,
+    "conteggi_ruolo": {
+     "P": 3,
+     "D": 6,
+     "C": 6,
+     "A": 4
+    },
+    "limiti_ruolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    }
+   },
+   "atteso": {
+    "livello": "CRITICO",
+    "minimo_completamento": 5,
+    "massimo_prossimo": 1,
+    "margine_libero": 0,
+    "ruoli_mancanti": {
+     "D": 2,
+     "C": 2,
+     "A": 2
+    },
+    "avvisi": [
+     {
+      "livello": "CRITICO",
+      "codice": "SOLO_UN_CREDITO",
+      "testo": "Restano 5 acquisti possibili soltanto a 1 credito."
+     },
+     {
+      "livello": "ATTENZIONE",
+      "codice": "RUOLI_MANCANTI",
+      "testo": "Slot ancora obbligatori: D +2, C +2, A +2."
+     }
+    ]
+   }
+  },
+  {
+   "input": {
+    "budget_residuo": 6,
+    "slot_vuoti": 5,
+    "conteggi_ruolo": {
+     "P": 2,
+     "D": 6,
+     "C": 7,
+     "A": 4
+    },
+    "limiti_ruolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    }
+   },
+   "atteso": {
+    "livello": "CRITICO",
+    "minimo_completamento": 5,
+    "massimo_prossimo": 2,
+    "margine_libero": 1,
+    "ruoli_mancanti": {
+     "P": 1,
+     "D": 2,
+     "C": 1,
+     "A": 2
+    },
+    "avvisi": [
+     {
+      "livello": "ATTENZIONE",
+      "codice": "MARGINE_MINIMO",
+      "testo": "Il prossimo rilancio non puo' superare 2 crediti."
+     },
+     {
+      "livello": "CRITICO",
+      "codice": "PORTIERE_MANCANTE",
+      "testo": "Mancano 1 portieri obbligatori."
+     },
+     {
+      "livello": "ATTENZIONE",
+      "codice": "RUOLI_MANCANTI",
+      "testo": "Slot ancora obbligatori: D +2, C +1, A +2."
+     }
+    ]
+   }
+  },
+  {
+   "input": {
+    "budget_residuo": 50,
+    "slot_vuoti": 4,
+    "conteggi_ruolo": {
+     "P": 3,
+     "D": 7,
+     "C": 6,
+     "A": 4
+    },
+    "limiti_ruolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    }
+   },
+   "atteso": {
+    "livello": "ATTENZIONE",
+    "minimo_completamento": 4,
+    "massimo_prossimo": 47,
+    "margine_libero": 46,
+    "ruoli_mancanti": {
+     "D": 1,
+     "C": 2,
+     "A": 2
+    },
+    "avvisi": [
+     {
+      "livello": "ATTENZIONE",
+      "codice": "RUOLI_MANCANTI",
+      "testo": "Slot ancora obbligatori: D +1, C +2, A +2."
+     }
+    ]
+   }
+  },
+  {
+   "input": {
+    "budget_residuo": 40,
+    "slot_vuoti": 5,
+    "conteggi_ruolo": {
+     "P": 1,
+     "D": 5
+    },
+    "limiti_ruolo": {
+     "P": 3,
+     "D": 8,
+     "C": 8,
+     "A": 6
+    },
+    "modalita": "MANTRA",
+    "portieri_mantra": 1,
+    "moduli_completi_mantra": 0,
+    "migliore_copertura_mantra": 8,
+    "incompatibili_moduli": 4
+   },
+   "atteso": {
+    "livello": "CRITICO",
+    "minimo_completamento": 5,
+    "massimo_prossimo": 36,
+    "margine_libero": 35,
+    "ruoli_mancanti": {
+     "P": 2,
+     "D": 3,
+     "C": 8,
+     "A": 6
+    },
+    "avvisi": [
+     {
+      "livello": "CRITICO",
+      "codice": "PORTIERI_MANTRA",
+      "testo": "Mancano 1 portieri per il minimo Mantra."
+     },
+     {
+      "livello": "CRITICO",
+      "codice": "MODULO_NON_COMPLETO",
+      "testo": "Nessun modulo completo: il migliore copre 8/11."
+     },
+     {
+      "livello": "ATTENZIONE",
+      "codice": "INCOMPATIBILI",
+      "testo": "4 giocatori non entrano nei due moduli fissati."
+     }
+    ]
+   }
+  }
+ ],
+ "profilaRivali": {
+  "bilanci": {
+   "Io": {
+    "c_rimasti": 300,
+    "slot_vuoti": 15,
+    "potere_max": 200,
+    "P": 1,
+    "D": 3,
+    "C": 3,
+    "A": 2,
+    "diff_medio_pct": null
+   },
+   "Rivale1": {
+    "c_rimasti": 350,
+    "slot_vuoti": 15,
+    "potere_max": 280,
+    "P": 1,
+    "D": 3,
+    "C": 3,
+    "A": 1,
+    "diff_medio_pct": 20
+   },
+   "Rivale2": {
+    "c_rimasti": 120,
+    "slot_vuoti": 15,
+    "potere_max": 90,
+    "P": 1,
+    "D": 3,
+    "C": 3,
+    "A": 5,
+    "diff_medio_pct": -10
+   },
+   "Rivale3": {
+    "c_rimasti": 400,
+    "slot_vuoti": 15,
+    "potere_max": 380,
+    "P": 1,
+    "D": 3,
+    "C": 3,
+    "A": 6,
+    "diff_medio_pct": null
+   },
+   "Rivale4": {
+    "c_rimasti": 250,
+    "slot_vuoti": 15,
+    "potere_max": 210,
+    "P": 1,
+    "D": 3,
+    "C": 3,
+    "A": 3,
+    "diff_medio_pct": null
+   }
+  },
+  "acquisti": [
+   {
+    "proprietario": "Rivale1",
+    "ruolo": "A",
+    "slot": 2
+   },
+   {
+    "proprietario": "Rivale2",
+    "ruolo": "A",
+    "slot": 1
+   },
+   {
+    "proprietario": "Rivale2",
+    "ruolo": "A",
+    "slot": 3
+   },
+   {
+    "proprietario": "Rivale4",
+    "ruolo": "A",
+    "slot": 5
+   }
+  ],
+  "limiti": {
+   "P": 3,
+   "D": 8,
+   "C": 8,
+   "A": 6
+  },
+  "casi": [
+   {
+    "slot_target": null,
+    "atteso": [
+     {
+      "squadra": "Rivale1",
+      "punteggio": 77,
+      "interesse": "POTENZIALE",
+      "potere": 280,
+      "min": 24,
+      "max": 31,
+      "affidabilita": "BASSA",
+      "motivo": "5 slot A mancanti · comportamento non ancora osservabile · spende sopra le stime"
+     },
+     {
+      "squadra": "Rivale4",
+      "punteggio": 60,
+      "interesse": "POTENZIALE",
+      "potere": 210,
+      "min": 22,
+      "max": 29,
+      "affidabilita": "BASSA",
+      "motivo": "3 slot A mancanti · comportamento non ancora osservabile"
+     },
+     {
+      "squadra": "Rivale2",
+      "punteggio": 48,
+      "interesse": "MEDIO",
+      "potere": 90,
+      "min": 21,
+      "max": 27,
+      "affidabilita": "MEDIA",
+      "motivo": "1 slot A mancanti"
+     }
+    ]
+   },
+   {
+    "slot_target": 1,
+    "atteso": [
+     {
+      "squadra": "Rivale1",
+      "punteggio": 97,
+      "interesse": "POTENZIALE",
+      "potere": 280,
+      "min": 27,
+      "max": 35,
+      "affidabilita": "BASSA",
+      "motivo": "5 slot A mancanti · comportamento non ancora osservabile · fascia ancora scoperta · spende sopra le stime"
+     },
+     {
+      "squadra": "Rivale4",
+      "punteggio": 80,
+      "interesse": "POTENZIALE",
+      "potere": 210,
+      "min": 25,
+      "max": 32,
+      "affidabilita": "BASSA",
+      "motivo": "3 slot A mancanti · comportamento non ancora osservabile · fascia ancora scoperta"
+     },
+     {
+      "squadra": "Rivale2",
+      "punteggio": 33,
+      "interesse": "BASSO",
+      "potere": 90,
+      "min": 18,
+      "max": 24,
+      "affidabilita": "MEDIA",
+      "motivo": "1 slot A mancanti"
+     }
+    ]
+   },
+   {
+    "slot_target": 3,
+    "atteso": [
+     {
+      "squadra": "Rivale4",
+      "punteggio": 80,
+      "interesse": "POTENZIALE",
+      "potere": 210,
+      "min": 25,
+      "max": 32,
+      "affidabilita": "BASSA",
+      "motivo": "3 slot A mancanti · comportamento non ancora osservabile · fascia ancora scoperta"
+     },
+     {
+      "squadra": "Rivale1",
+      "punteggio": 62,
+      "interesse": "POTENZIALE",
+      "potere": 280,
+      "min": 22,
+      "max": 29,
+      "affidabilita": "BASSA",
+      "motivo": "5 slot A mancanti · comportamento non ancora osservabile · spende sopra le stime"
+     },
+     {
+      "squadra": "Rivale2",
+      "punteggio": 33,
+      "interesse": "BASSO",
+      "potere": 90,
+      "min": 18,
+      "max": 24,
+      "affidabilita": "MEDIA",
+      "motivo": "1 slot A mancanti"
+     }
+    ]
+   }
+  ]
+ },
+ "poteri": {
+  "limiti": {
+   "P": 3,
+   "D": 8,
+   "C": 8,
+   "A": 6
+  },
+  "quote": {
+   "P": 6,
+   "D": 16,
+   "C": 30,
+   "A": 48
+  },
+  "casi": [
+   {
+    "bilancio": {
+     "c_rimasti": 300,
+     "slot_vuoti": 15,
+     "potere_max": 200,
+     "P": 1,
+     "D": 3,
+     "C": 3,
+     "A": 2,
+     "diff_medio_pct": null
+    },
+    "ruolo": "A",
+    "atteso": {
+     "assoluto": 286,
+     "ruolo": 237,
+     "strategico": 237
+    }
+   },
+   {
+    "bilancio": {
+     "c_rimasti": 300,
+     "slot_vuoti": 15,
+     "potere_max": 200,
+     "P": 1,
+     "D": 3,
+     "C": 3,
+     "A": 6,
+     "diff_medio_pct": null
+    },
+    "ruolo": "A",
+    "atteso": {
+     "assoluto": 286,
+     "ruolo": 0,
+     "strategico": 0
+    }
+   },
+   {
+    "bilancio": {
+     "c_rimasti": 50,
+     "slot_vuoti": 15,
+     "potere_max": 200,
+     "P": 1,
+     "D": 3,
+     "C": 3,
+     "A": 1,
+     "diff_medio_pct": null,
+     "spesi_A": 180
+    },
+    "ruolo": "A",
+    "atteso": {
+     "assoluto": 36,
+     "ruolo": 36,
+     "strategico": 36
+    }
+   },
+   {
+    "bilancio": {
+     "c_rimasti": 400,
+     "slot_vuoti": 5,
+     "potere_max": 200,
+     "P": 1,
+     "D": 3,
+     "C": 3,
+     "A": 0,
+     "diff_medio_pct": null
+    },
+    "ruolo": "A",
+    "atteso": {
+     "assoluto": 396,
+     "ruolo": 235,
+     "strategico": 235
+    }
+   }
+  ]
+ },
+ "matriceDomanda": {
+  "bilanci": {
+   "Io": {
+    "c_rimasti": 300,
+    "slot_vuoti": 15,
+    "potere_max": 200,
+    "P": 1,
+    "D": 3,
+    "C": 3,
+    "A": 2,
+    "diff_medio_pct": null
+   },
+   "Rivale1": {
+    "c_rimasti": 350,
+    "slot_vuoti": 15,
+    "potere_max": 280,
+    "P": 1,
+    "D": 3,
+    "C": 3,
+    "A": 1,
+    "diff_medio_pct": 20
+   },
+   "Rivale2": {
+    "c_rimasti": 120,
+    "slot_vuoti": 15,
+    "potere_max": 90,
+    "P": 1,
+    "D": 3,
+    "C": 3,
+    "A": 5,
+    "diff_medio_pct": -10
+   },
+   "Rivale3": {
+    "c_rimasti": 400,
+    "slot_vuoti": 15,
+    "potere_max": 380,
+    "P": 1,
+    "D": 3,
+    "C": 3,
+    "A": 6,
+    "diff_medio_pct": null
+   },
+   "Rivale4": {
+    "c_rimasti": 250,
+    "slot_vuoti": 15,
+    "potere_max": 210,
+    "P": 1,
+    "D": 3,
+    "C": 3,
+    "A": 3,
+    "diff_medio_pct": null
+   }
+  },
+  "limiti": {
+   "P": 3,
+   "D": 8,
+   "C": 8,
+   "A": 6
+  },
+  "atteso": [
+   {
+    "ruolo": "P",
+    "squadre": {
+     "Io": {
+      "mancanti": 2,
+      "stato": "ALTA",
+      "potere": 200
+     },
+     "Rivale1": {
+      "mancanti": 2,
+      "stato": "ALTA",
+      "potere": 280
+     },
+     "Rivale2": {
+      "mancanti": 2,
+      "stato": "ALTA",
+      "potere": 90
+     },
+     "Rivale3": {
+      "mancanti": 2,
+      "stato": "ALTA",
+      "potere": 380
+     },
+     "Rivale4": {
+      "mancanti": 2,
+      "stato": "ALTA",
+      "potere": 210
+     }
+    },
+    "domanda_rivali": 8,
+    "squadre_interessate": 4
+   },
+   {
+    "ruolo": "D",
+    "squadre": {
+     "Io": {
+      "mancanti": 5,
+      "stato": "ALTA",
+      "potere": 200
+     },
+     "Rivale1": {
+      "mancanti": 5,
+      "stato": "ALTA",
+      "potere": 280
+     },
+     "Rivale2": {
+      "mancanti": 5,
+      "stato": "ALTA",
+      "potere": 90
+     },
+     "Rivale3": {
+      "mancanti": 5,
+      "stato": "ALTA",
+      "potere": 380
+     },
+     "Rivale4": {
+      "mancanti": 5,
+      "stato": "ALTA",
+      "potere": 210
+     }
+    },
+    "domanda_rivali": 20,
+    "squadre_interessate": 4
+   },
+   {
+    "ruolo": "C",
+    "squadre": {
+     "Io": {
+      "mancanti": 5,
+      "stato": "ALTA",
+      "potere": 200
+     },
+     "Rivale1": {
+      "mancanti": 5,
+      "stato": "ALTA",
+      "potere": 280
+     },
+     "Rivale2": {
+      "mancanti": 5,
+      "stato": "ALTA",
+      "potere": 90
+     },
+     "Rivale3": {
+      "mancanti": 5,
+      "stato": "ALTA",
+      "potere": 380
+     },
+     "Rivale4": {
+      "mancanti": 5,
+      "stato": "ALTA",
+      "potere": 210
+     }
+    },
+    "domanda_rivali": 20,
+    "squadre_interessate": 4
+   },
+   {
+    "ruolo": "A",
+    "squadre": {
+     "Io": {
+      "mancanti": 4,
+      "stato": "ALTA",
+      "potere": 200
+     },
+     "Rivale1": {
+      "mancanti": 5,
+      "stato": "ALTA",
+      "potere": 280
+     },
+     "Rivale2": {
+      "mancanti": 1,
+      "stato": "MEDIA",
+      "potere": 90
+     },
+     "Rivale3": {
+      "mancanti": 0,
+      "stato": "COPERTA",
+      "potere": 380
+     },
+     "Rivale4": {
+      "mancanti": 3,
+      "stato": "ALTA",
+      "potere": 210
+     }
+    },
+    "domanda_rivali": 9,
+    "squadre_interessate": 3
+   }
+  ]
+ },
+ "confrontaCandidati": {
+  "candidati": [
+   {
+    "nome": "Alfa",
+    "fm": 7.5,
+    "prezzo": 30,
+    "titolarita": 80
+   },
+   {
+    "nome": "Beta",
+    "fm": 6.8,
+    "prezzo": 12,
+    "titolarita": 60,
+    "rischio": true
+   },
+   {
+    "nome": "Gamma",
+    "fm": 7.1,
+    "prezzo": 20,
+    "titolarita": null
+   }
+  ],
+  "atteso": {
+   "righe": [
+    {
+     "nome": "Alfa",
+     "fm": 7.5,
+     "prezzo": 30,
+     "titolarita": 80,
+     "valore": 0.25,
+     "sicurezza": 95.0
+    },
+    {
+     "nome": "Beta",
+     "fm": 6.8,
+     "prezzo": 12,
+     "titolarita": 60,
+     "rischio": true,
+     "valore": 0.567,
+     "sicurezza": 43.6
+    },
+    {
+     "nome": "Gamma",
+     "fm": 7.1,
+     "prezzo": 20,
+     "titolarita": null,
+     "valore": 0.355,
+     "sicurezza": 64.2
+    }
+   ],
+   "vincitori": {
+    "qualita": "Alfa",
+    "valore": "Beta",
+    "sicurezza": "Alfa"
+   }
+  }
+ },
+ "confrontaScenari": {
+  "a": {
+   "Alfa": 40,
+   "Beta": 20,
+   "Delta": 10
+  },
+  "b": {
+   "Alfa": 45,
+   "Gamma": 25,
+   "Delta": 10
+  },
+  "ruoli": {
+   "Alfa": "A",
+   "Beta": "C",
+   "Gamma": "A",
+   "Delta": "D"
+  },
+  "atteso": {
+   "a": {
+    "totale": 70,
+    "residuo": 430,
+    "percentuale": 14.0,
+    "giocatori": 3,
+    "spesa_ruolo": {
+     "P": 0,
+     "D": 10,
+     "C": 20,
+     "A": 40
+    },
+    "conteggio_ruolo": {
+     "P": 0,
+     "D": 1,
+     "C": 1,
+     "A": 1
+    }
+   },
+   "b": {
+    "totale": 80,
+    "residuo": 420,
+    "percentuale": 16.0,
+    "giocatori": 3,
+    "spesa_ruolo": {
+     "P": 0,
+     "D": 10,
+     "C": 0,
+     "A": 70
+    },
+    "conteggio_ruolo": {
+     "P": 0,
+     "D": 1,
+     "C": 0,
+     "A": 2
+    }
+   },
+   "delta_crediti": 10,
+   "comuni": [
+    "Alfa",
+    "Delta"
+   ],
+   "solo_a": [
+    "Beta"
+   ],
+   "solo_b": [
+    "Gamma"
+   ],
+   "variazioni_comuni": {
+    "Alfa": 5
+   }
+  }
+ },
+ "analizzaPiano": {
+  "piano": {
+   "alfa": 40,
+   "beta": 20,
+   "gamma": 15
+  },
+  "acquisti": [
+   {
+    "nome_puro": "Alfa",
+    "proprietario": "Io",
+    "prezzo": 38
+   },
+   {
+    "nome_puro": "Beta",
+    "proprietario": "Rivale1",
+    "prezzo": 22
+   }
+  ],
+  "mia": "Io",
+  "budget": 500,
+  "atteso": {
+   "righe": [
+    {
+     "priorita": 1,
+     "nome": "alfa",
+     "massimo": 40,
+     "stato": "PRESO",
+     "prezzo_effettivo": 38,
+     "proprietario": "Io"
+    },
+    {
+     "priorita": 2,
+     "nome": "beta",
+     "massimo": 20,
+     "stato": "PERSO",
+     "prezzo_effettivo": 22,
+     "proprietario": "Rivale1"
+    },
+    {
+     "priorita": 3,
+     "nome": "gamma",
+     "massimo": 15,
+     "stato": "LIBERO",
+     "prezzo_effettivo": 15,
+     "proprietario": null
+    }
+   ],
+   "conteggi": {
+    "presi": 1,
+    "persi": 1,
+    "liberi": 1
+   },
+   "prossimo_target": "gamma",
+   "budget_pianificato_libero": 15,
+   "margine": 425,
+   "realizzabile": true
+  }
+ },
+ "affidabilita": [
+  {
+   "input": {
+    "id_ufficiale": 123,
+    "ruolo_presente": true,
+    "presenze_correnti": 10,
+    "storico_disponibile": true,
+    "pma": 20,
+    "pfc": 25,
+    "mercato_aperto": false
+   },
+   "atteso": {
+    "livello": "ALTA",
+    "tag": [
+     "UFFICIALE",
+     "STORICO",
+     "PROIEZIONE"
+    ],
+    "ufficiale": true,
+    "storico": true,
+    "proiezione": true,
+    "mercato_aperto": false,
+    "ruolo_da_confermare": false,
+    "dati_insufficienti": false
+   }
+  },
+  {
+   "input": {
+    "id_ufficiale": 0,
+    "ruolo_presente": true,
+    "presenze_correnti": 10,
+    "storico_disponibile": true,
+    "pma": 20,
+    "pfc": 25,
+    "mercato_aperto": false
+   },
+   "atteso": {
+    "livello": "BASSA",
+    "tag": [
+     "STORICO",
+     "PROIEZIONE"
+    ],
+    "ufficiale": false,
+    "storico": true,
+    "proiezione": true,
+    "mercato_aperto": false,
+    "ruolo_da_confermare": false,
+    "dati_insufficienti": false
+   }
+  },
+  {
+   "input": {
+    "id_ufficiale": 123,
+    "ruolo_presente": true,
+    "presenze_correnti": 1,
+    "storico_disponibile": false,
+    "pma": 0,
+    "pfc": 0,
+    "mercato_aperto": false
+   },
+   "atteso": {
+    "livello": "BASSA",
+    "tag": [
+     "UFFICIALE",
+     "DATI INSUFFICIENTI"
+    ],
+    "ufficiale": true,
+    "storico": false,
+    "proiezione": false,
+    "mercato_aperto": false,
+    "ruolo_da_confermare": false,
+    "dati_insufficienti": true
+   }
+  },
+  {
+   "input": {
+    "id_ufficiale": 123,
+    "ruolo_presente": true,
+    "presenze_correnti": 2,
+    "storico_disponibile": true,
+    "pma": 0,
+    "pfc": 0,
+    "mercato_aperto": true
+   },
+   "atteso": {
+    "livello": "MEDIA",
+    "tag": [
+     "UFFICIALE",
+     "STORICO",
+     "MERCATO APERTO"
+    ],
+    "ufficiale": true,
+    "storico": true,
+    "proiezione": false,
+    "mercato_aperto": true,
+    "ruolo_da_confermare": false,
+    "dati_insufficienti": false
+   }
+  },
+  {
+   "input": {
+    "id_ufficiale": 123,
+    "ruolo_presente": false,
+    "presenze_correnti": 10,
+    "storico_disponibile": true,
+    "pma": 20,
+    "pfc": 0,
+    "mercato_aperto": false
+   },
+   "atteso": {
+    "livello": "BASSA",
+    "tag": [
+     "STORICO",
+     "PROIEZIONE",
+     "RUOLO DA CONFERMARE"
+    ],
+    "ufficiale": false,
+    "storico": true,
+    "proiezione": true,
+    "mercato_aperto": false,
+    "ruolo_da_confermare": true,
+    "dati_insufficienti": false
+   }
+  },
+  {
+   "input": {
+    "id_ufficiale": 123,
+    "ruolo_presente": true,
+    "presenze_correnti": 6,
+    "storico_disponibile": false,
+    "pma": 20,
+    "pfc": 0,
+    "mercato_aperto": false
+   },
+   "atteso": {
+    "livello": "ALTA",
+    "tag": [
+     "UFFICIALE",
+     "PROIEZIONE"
+    ],
+    "ufficiale": true,
+    "storico": false,
+    "proiezione": true,
+    "mercato_aperto": false,
+    "ruolo_da_confermare": false,
+    "dati_insufficienti": false
+   }
+  }
+ ]
+}
