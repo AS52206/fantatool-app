@@ -33,6 +33,8 @@
 		try {
 			const b = await caricaBundle(stagione, modalita, partecipanti);
 			asta.setGiocatori(b.players);
+			bundleCon = b.meta.con_fantacrediti;
+			bundleTot = b.meta.totale_giocatori;
 			metaTxt = `${b.meta.totale_giocatori} giocatori · ${b.meta.con_fantacrediti} con Fantacrediti · ${b.meta.modalita} · listone ${b.meta.sorgenti.listone?.impronta ?? '?'}`;
 			bundleCaricato = chiave;
 			statoDati = 'ok';
@@ -171,12 +173,18 @@
 	}
 
 	function impostaNumeroSquadre(n: number) {
-		const attuali = asta.config.squadre;
-		const nuove = [...attuali];
+		n = Math.max(2, Math.min(20, n || 2));
+		const nuove = [...asta.config.squadre];
 		while (nuove.length < n) nuove.push({ nome: `Squadra ${nuove.length + 1}`, isMia: false });
 		nuove.length = n;
 		if (!nuove.some((s) => s.isMia) && nuove[0]) nuove[0].isMia = true;
 		asta.config.squadre = nuove;
+	}
+
+	// I dati Fantacrediti (PMA/PFC/slot/titolarità) esistono solo per i tagli 8 e 10.
+	let bundleCon = $state<number>(0);
+	let bundleTot = $state<number>(0);
+	function impostaTaglioDati(n: number) {
 		asta.config.partecipanti = n;
 	}
 
@@ -217,6 +225,18 @@
 			<pre style="background:var(--bg);padding:8px;border-radius:6px;overflow:auto;">python3 tools/export_json.py --stagione {asta.config.stagione} --modalita {asta.config.modalita} --partecipanti {asta.config.partecipanti}</pre>
 		</div>
 	{:else}
+		{#if bundleTot > 0 && bundleCon / bundleTot < 0.6}
+			<div class="panel" style="border-color:var(--warn);margin-bottom:16px;">
+				<strong style="color:var(--warn);">Dati Fantacrediti parziali</strong> —
+				solo {bundleCon}/{bundleTot} giocatori hanno PMA/PFC/slot per il taglio
+				<strong>{asta.config.partecipanti} partecipanti</strong>{asta.isMantra ? ' in modalità Mantra' : ''}.
+				<div class="muted" style="font-size:12px;margin-top:4px;">
+					Per gli altri il prezzo consigliato usa solo quotazione + Fantalab.
+					{#if asta.config.partecipanti === 10}Prova il taglio <strong>8</strong> (più completo){/if}
+					{#if asta.isMantra && bundleCon === 0}— manca <code>data/2026-2027/mantra/fantacrediti/{asta.config.partecipanti}-partecipanti.xlsx</code>{/if}
+				</div>
+			</div>
+		{/if}
 		{#if mostraSetup}
 			<div class="panel" style="margin-bottom:16px;">
 				<h2 style="margin-top:0;font-size:16px;">Setup asta</h2>
@@ -236,6 +256,14 @@
 						<input type="number" min="2" max="20" value={asta.config.squadre.length}
 							onchange={(e) => impostaNumeroSquadre(+(e.target as HTMLInputElement).value)}
 							style="width:90px;display:block;" />
+					</label>
+					<label>Taglio dati (PMA/slot)
+						<select value={asta.config.partecipanti}
+							onchange={(e) => impostaTaglioDati(+(e.target as HTMLSelectElement).value)}
+							style="display:block;">
+							<option value={8}>8 partecipanti</option>
+							<option value={10}>10 partecipanti</option>
+						</select>
 					</label>
 					{#each RUOLI as r}
 						<label>Slot {r}

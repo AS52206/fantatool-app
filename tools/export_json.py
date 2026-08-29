@@ -265,6 +265,15 @@ def main() -> None:
     m = bundle["meta"]
     print(f"OK  {out.relative_to(RADICE)}")
     print(f"    {m['totale_giocatori']} giocatori, {m['con_fantacrediti']} con metriche Fantacrediti")
+    tot = max(1, m["totale_giocatori"])
+    if m["con_fantacrediti"] / tot < 0.6:
+        p_fc = RADICE / "data" / args.stagione / args.modalita / "fantacrediti" / f"{args.partecipanti}-partecipanti.xlsx"
+        stato = "manca" if not p_fc.exists() else "incompleto rispetto al listone"
+        print(
+            f"    ⚠  copertura Fantacrediti bassa: il file {p_fc.name} {stato}.\n"
+            f"       PMA/PFC/slot mancheranno per molti giocatori; usa il taglio 8 se disponibile.",
+            file=sys.stderr,
+        )
 
 
 if __name__ == "__main__":
