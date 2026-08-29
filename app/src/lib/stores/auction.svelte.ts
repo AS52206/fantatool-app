@@ -43,7 +43,13 @@ import {
 /** Quote di budget per reparto (percentuali), come QUOTE_RUOLO dell'app. */
 export const QUOTE_RUOLO: Record<Ruolo, number> = { P: 6, D: 16, C: 30, A: 48 };
 
-const CHIAVE_SALVATAGGIO = 'fantatool.asta.v1';
+// Classic e Mantra sono due aste indipendenti: ognuna ha il suo salvataggio.
+const CHIAVE_LEGACY = 'fantatool.asta.v1';
+const CHIAVE_ATTIVA = 'fantatool.asta.attiva';
+const chiaveMod = (m: string) => `fantatool.asta.${String(m).toLowerCase()}.v1`;
+const MODI = ['classic', 'mantra'] as const;
+const normModalita = (m: string) =>
+	String(m).toLowerCase() === 'mantra' ? 'mantra' : 'classic';
 
 export interface ConfigAsta {
 	budgetMax: number;
@@ -76,15 +82,42 @@ const CONFIG_DEFAULT: ConfigAsta = {
 	moduliTarget: ['3-4-1-2']
 };
 
-function carica(): Snapshot | null {
+function leggiChiave(chiave: string): Snapshot | null {
 	if (typeof localStorage === 'undefined') return null;
 	try {
-		const raw = localStorage.getItem(CHIAVE_SALVATAGGIO);
-		if (!raw) return null;
-		return JSON.parse(raw) as Snapshot;
+		const raw = localStorage.getItem(chiave);
+		return raw ? (JSON.parse(raw) as Snapshot) : null;
 	} catch {
 		return null;
 	}
+}
+
+/** Snapshot per una modalità: chiave dedicata, con migrazione dal vecchio unico. */
+function caricaMod(modalita: string): Snapshot | null {
+	const m = normModalita(modalita);
+	const proprio = leggiChiave(chiaveMod(m));
+	if (proprio) return proprio;
+	// migrazione una tantum dal salvataggio unico legacy
+	const legacy = leggiChiave(CHIAVE_LEGACY);
+	if (legacy && normModalita(legacy.config?.modalita ?? 'classic') === m) {
+		try {
+			localStorage.setItem(chiaveMod(m), JSON.stringify(legacy));
+			localStorage.removeItem(CHIAVE_LEGACY);
+		} catch {
+			/* ignora */
+		}
+		return legacy;
+	}
+	return null;
+}
+
+function modalitaAttiva(): string {
+	if (typeof localStorage === 'undefined') return 'classic';
+	const salvata = localStorage.getItem(CHIAVE_ATTIVA);
+	if (salvata && MODI.includes(salvata as (typeof MODI)[number])) return salvata;
+	// se esiste solo il legacy, parti dalla sua modalità
+	const legacy = leggiChiave(CHIAVE_LEGACY);
+	return normModalita(legacy?.config?.modalita ?? 'classic');
 }
 
 export class Asta {
@@ -95,36 +128,78 @@ export class Asta {
 	scenari = $state<Scenari>({});
 	ultimoSalvataggio = $state<number | null>(null);
 
+	/** true durante il caricamento/switch: sospende l'autosave. */
+	private caricando = false;
+
 	constructor() {
-		const s = carica();
-		if (s) {
-			this.config = { ...structuredClone(CONFIG_DEFAULT), ...s.config };
-			this.acquisti = s.acquisti ?? [];
-			this.avviata = s.avviata ?? false;
-			this.scenari = s.scenari ?? {};
-		}
-		// Le metriche Fantacrediti esistono solo per i tagli 8 e 10: se un
-		// salvataggio vecchio ha un altro valore, riportalo a 8.
-		if (![8, 10].includes(this.config.partecipanti)) this.config.partecipanti = 8;
-		if (!Array.isArray(this.config.moduliTarget) || !this.config.moduliTarget.length)
-			this.config.moduliTarget = ['3-4-1-2'];
-		// autosave: qualunque cosa cambi in config/acquisti/avviata viene persistita.
+		const m = modalitaAttiva();
+		this.applicaSnapshot(caricaMod(m), m);
+		if (typeof localStorage !== 'undefined') localStorage.setItem(CHIAVE_ATTIVA, m);
+
+		// autosave: ogni cambiamento persiste nella chiave della modalità attiva.
 		$effect.root(() => {
 			$effect(() => {
+				const chiave = chiaveMod(this.config.modalita);
 				const snap: Snapshot = {
 					config: this.config,
 					acquisti: this.acquisti,
 					avviata: this.avviata,
 					scenari: this.scenari
 				};
+				if (this.caricando) return;
 				try {
-					localStorage.setItem(CHIAVE_SALVATAGGIO, JSON.stringify(snap));
+					localStorage.setItem(chiave, JSON.stringify(snap));
 					this.ultimoSalvataggio = Date.now();
 				} catch {
 					/* quota piena o storage non disponibile: la UI mostra l'avviso */
 				}
 			});
 		});
+	}
+
+	/** Carica uno snapshot (o i default) nello store, forzando la modalità. */
+	private applicaSnapshot(s: Snapshot | null, modalita: string) {
+		const m = normModalita(modalita);
+		this.config = {
+			...structuredClone(CONFIG_DEFAULT),
+			...(s?.config ?? {}),
+			modalita: m
+		};
+		if (![8, 10].includes(this.config.partecipanti)) this.config.partecipanti = 8;
+		if (!Array.isArray(this.config.moduliTarget) || !this.config.moduliTarget.length)
+			this.config.moduliTarget = ['3-4-1-2'];
+		this.acquisti = s?.acquisti ?? [];
+		this.avviata = s?.avviata ?? false;
+		this.scenari = s?.scenari ?? {};
+	}
+
+	private salvaCorrente() {
+		if (typeof localStorage === 'undefined') return;
+		try {
+			localStorage.setItem(
+				chiaveMod(this.config.modalita),
+				JSON.stringify({
+					config: this.config,
+					acquisti: this.acquisti,
+					avviata: this.avviata,
+					scenari: this.scenari
+				})
+			);
+		} catch {
+			/* ignora */
+		}
+	}
+
+	/** Passa a Classic/Mantra: salva l'asta corrente e carica quella dell'altra modalità. */
+	cambiaModalita(nuova: string) {
+		const m = normModalita(nuova);
+		if (m === normModalita(this.config.modalita)) return;
+		this.caricando = true;
+		this.salvaCorrente();
+		this.applicaSnapshot(caricaMod(m), m);
+		if (typeof localStorage !== 'undefined') localStorage.setItem(CHIAVE_ATTIVA, m);
+		this.caricando = false;
+		this.salvaCorrente();
 	}
 
 	setGiocatori(g: Giocatore[]) {
@@ -596,13 +671,15 @@ export class Asta {
 		this.acquisti = this.acquisti.filter((a) => a.giocatoreId !== giocatoreId);
 	}
 
+	/** Backup completo: entrambe le aste (Classic + Mantra) in un solo file. */
 	esporta(): string {
+		this.salvaCorrente();
 		return JSON.stringify(
 			{
-				config: this.config,
-				acquisti: this.acquisti,
-				avviata: this.avviata,
-				scenari: this.scenari,
+				fantatool: 'asta',
+				attiva: normModalita(this.config.modalita),
+				classic: leggiChiave(chiaveMod('classic')),
+				mantra: leggiChiave(chiaveMod('mantra')),
 				esportato: new Date().toISOString()
 			},
 			null,
@@ -611,19 +688,37 @@ export class Asta {
 	}
 
 	importa(json: string) {
-		const s = JSON.parse(json) as Snapshot;
+		const raw = JSON.parse(json);
+		if (raw && (raw.classic !== undefined || raw.mantra !== undefined)) {
+			// backup completo: ripristina entrambe le modalità
+			this.caricando = true;
+			for (const m of MODI) {
+				const snap = raw[m] as Snapshot | null;
+				if (snap && typeof localStorage !== 'undefined')
+					localStorage.setItem(chiaveMod(m), JSON.stringify(snap));
+			}
+			const attiva = normModalita(raw.attiva ?? this.config.modalita);
+			this.applicaSnapshot(caricaMod(attiva), attiva);
+			if (typeof localStorage !== 'undefined') localStorage.setItem(CHIAVE_ATTIVA, attiva);
+			this.caricando = false;
+			return;
+		}
+		// file a singola modalità (vecchio formato): entra solo in quella modalità
+		const s = raw as Snapshot;
 		if (!s.config || !Array.isArray(s.acquisti)) throw new Error('File non valido');
-		this.config = { ...structuredClone(CONFIG_DEFAULT), ...s.config };
-		this.acquisti = s.acquisti;
+		const m = normModalita(s.config.modalita ?? this.config.modalita);
+		this.caricando = true;
+		this.applicaSnapshot(s, m);
 		this.avviata = s.avviata ?? this.acquisti.length > 0;
-		this.scenari = s.scenari ?? {};
+		if (typeof localStorage !== 'undefined') localStorage.setItem(CHIAVE_ATTIVA, m);
+		this.caricando = false;
+		this.salvaCorrente();
 	}
 
+	/** Azzera SOLO l'asta della modalità corrente. */
 	reset() {
-		this.config = structuredClone(CONFIG_DEFAULT);
-		this.acquisti = [];
-		this.avviata = false;
-		this.scenari = {};
+		const m = normModalita(this.config.modalita);
+		this.applicaSnapshot(null, m);
 	}
 
 	// ---------------------------------------------------------------- SCENARI

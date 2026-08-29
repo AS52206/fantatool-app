@@ -67,7 +67,7 @@
 	});
 
 	function impostaModalita(m: string) {
-		asta.config.modalita = m;
+		asta.cambiaModalita(m);
 	}
 	function toggleModulo(mod: string) {
 		const s = new Set(asta.config.moduliTarget);
@@ -169,6 +169,7 @@
 							<option value="classic">Classic</option>
 							<option value="mantra">Mantra</option>
 						</select>
+						<span class="muted" style="font-size:10px;display:block;max-width:160px;">Classic e Mantra sono aste separate: squadre, rose e scenari indipendenti.</span>
 					</label>
 					<label>Budget per squadra
 						<input type="number" min="1" bind:value={asta.config.budgetMax} style="width:90px;display:block;" />
