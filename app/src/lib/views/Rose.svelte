@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { asta } from '$lib/stores/auction.svelte';
 	import Crest from '$lib/ui/Crest.svelte';
+	import BudgetBar from '$lib/ui/BudgetBar.svelte';
+	import SlotDots from '$lib/ui/SlotDots.svelte';
 	import type { Ruolo } from '$lib/domain/types';
+	const rc = { P: 'var(--role-p)', D: 'var(--role-d)', C: 'var(--role-c)', A: 'var(--role-a)' } as Record<string, string>;
 	const RUOLI: Ruolo[] = ['P', 'D', 'C', 'A'];
 
 	let vista = $state<'reparto' | 'giocatore'>('reparto');
@@ -32,13 +35,15 @@
 			<div class="mono" style="font-size:11px;color:var(--muted);margin-top:2px;">
 				speso {speso} · <span style="color:var(--cyan);">{pct(speso)}</span> del budget
 			</div>
+			<div style="margin:6px 0 2px;"><BudgetBar squadra={sq.nome} height={9} /></div>
 
 			{#each RUOLI as r}
 				{@const gr = rosa.filter((a) => a.ruolo === r).sort((x, y) => y.prezzo - x.prezzo)}
 				{@const spesoR = gr.reduce((s, a) => s + a.prezzo, 0)}
-				<div style="display:flex;justify-content:space-between;font-size:11px;margin-top:8px;font-family:var(--mono);letter-spacing:1px;color:var(--role-{r.toLowerCase()});">
-					<span>{r} · {gr.length}/{asta.config.limiti[r]}</span>
-					<span>{spesoR} · {pct(spesoR)}</span>
+				<div style="display:flex;align-items:center;gap:8px;font-size:11px;margin-top:9px;font-family:var(--mono);letter-spacing:1px;color:{rc[r]};">
+					<span>{r}</span>
+					<SlotDots presi={gr.length} limite={asta.config.limiti[r]} colore={rc[r]} />
+					<span style="margin-left:auto;">{spesoR} · {pct(spesoR)}</span>
 				</div>
 				{#if vista === 'giocatore'}
 					{#each gr as a}

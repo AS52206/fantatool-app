@@ -300,9 +300,9 @@
 			</div>
 		{/if}
 
-		<nav style="display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap;">
+		<nav class="tabbar" style="margin-bottom:16px;">
 			{#each TABS as t}
-				<button onclick={() => (tab = t.id)} class:primary={tab === t.id} style="font-size:13px;">{t.label}</button>
+				<button onclick={() => (tab = t.id)} class:on={tab === t.id}>{t.label}</button>
 			{/each}
 		</nav>
 
