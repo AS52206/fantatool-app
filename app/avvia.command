@@ -1,6 +1,7 @@
 #!/bin/zsh
-# Avvia Fantatool (nuova app Svelte, Mac). Doppio click da Finder.
-# Costruisce l'app se serve, poi la serve in locale e apre il browser.
+# Avvia Fantatool (app Svelte, Mac). Doppio click da Finder.
+# Modalità sviluppo: il server resta in ascolto sui file.
+# Quando il codice cambia, la pagina si aggiorna da sola — basta il refresh, mai riavviare.
 set -e
 cd "$(dirname "$0")"
 
@@ -22,36 +23,19 @@ if command -v python3 >/dev/null 2>&1; then
 	python3 ../tools/sync_assets.py >/dev/null 2>&1 || true
 fi
 
-# Build solo se manca o se il sorgente è più recente dell'ultima build.
-if [[ ! -d build ]] || [[ -n "$(find src static -newer build -type f -print -quit 2>/dev/null)" ]]; then
-	echo "Compilo l'app…"
+# Dipendenze solo alla prima esecuzione (o dopo un aggiornamento).
+if [[ ! -d node_modules ]] || [[ package.json -nt node_modules ]]; then
+	echo "Preparo le dipendenze…"
 	npm install --silent
-	npm run build
 fi
 
-# Libera la porta da un'eventuale istanza precedente (evita di servire una build vecchia).
+# Libera la porta da un'eventuale istanza precedente.
 lsof -tiTCP:"$PORT" -sTCP:LISTEN 2>/dev/null | xargs kill 2>/dev/null || true
 sleep 0.3
 
 echo "Servo su $URL  (Ctrl+C per fermare)"
-(sleep 1; open -a "Google Chrome" "$URL" 2>/dev/null || open "$URL") &
+echo "Le modifiche si vedono con un semplice refresh della pagina."
+(sleep 2; open -a "Google Chrome" "$URL" 2>/dev/null || open "$URL") &
 
-# Server statico con no-cache: il browser prende sempre l'ultima build,
-# niente websocket, niente dev server. Se cade, si riapre e basta.
-cd build
-exec python3 - "$PORT" <<'PYEOF'
-import sys, http.server, socketserver
-port = int(sys.argv[1])
-class H(http.server.SimpleHTTPRequestHandler):
-    def end_headers(self):
-        self.send_header("Cache-Control", "no-store, must-revalidate")
-        self.send_header("Pragma", "no-cache")
-        self.send_header("Expires", "0")
-        super().end_headers()
-    def log_message(self, *a):
-        pass
-socketserver.TCPServer.allow_reuse_address = True
-with socketserver.TCPServer(("127.0.0.1", port), H) as httpd:
-    print(f"pronto su http://localhost:{port}")
-    httpd.serve_forever()
-PYEOF
+# Vite dev server: watch dei file + hot reload. Tutto locale, nessun dato in rete.
+exec npm run dev -- --port "$PORT" --strictPort --host 127.0.0.1
