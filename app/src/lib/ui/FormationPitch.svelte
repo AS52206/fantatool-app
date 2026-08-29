@@ -47,7 +47,6 @@
 									{#if s.etichetta}<span class="muted">{s.etichetta}</span>{/if}
 									{#if s.prezzo != null}<span style="color:var(--cyan);">{s.prezzo}</span>{/if}
 									{#if s.titolarita != null && s.titolarita > 0}<span style="color:{titColor(s.titolarita)};">{Math.round(s.titolarita)}%</span>{/if}
-									{#if s.pmaFl != null && s.pmaFl > 0}<span class="muted">FL{s.pmaFl}</span>{/if}
 								</div>
 							{:else}
 								<Jersey ghost size={44} />
