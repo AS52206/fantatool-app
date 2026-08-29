@@ -186,6 +186,11 @@
 		asta.config.squadre = nuove;
 	}
 
+	/** Etichetta ruolo da mostrare: Mantra (Dc;E) in modalità Mantra, altrimenti P/D/C/A. */
+	function ruoloLabel(g: { ruolo: string; ruoloMantra: string }): string {
+		return asta.isMantra ? g.ruoloMantra || g.ruolo : g.ruolo;
+	}
+
 	// I dati Fantacrediti (PMA/PFC/slot/titolarità) esistono solo per i tagli 8 e 10.
 	let bundleCon = $state<number>(0);
 	let bundleTot = $state<number>(0);
@@ -326,7 +331,7 @@
 							<button
 								class="row-player {selezionato?.id === g.id ? 'sel' : ''}"
 								onclick={() => seleziona(g)}>
-								<span class="tag" data-ruolo={g.ruolo}>{g.ruolo}</span>
+								<span class="tag" data-ruolo={g.ruolo} style="white-space:nowrap;">{ruoloLabel(g)}</span>
 								<strong>{g.nome}</strong>
 								<span class="muted">{g.squadra}</span>
 								<span style="margin-left:auto;" class="muted mono">
@@ -343,7 +348,7 @@
 					<div class="panel" style="border-color:var(--accent);">
 						<div style="display:flex;align-items:baseline;gap:10px;">
 							<h2 style="margin:0;font-size:18px;">{selezionato.nome}</h2>
-							<span class="tag" data-ruolo={selezionato.ruolo}>{selezionato.ruolo}</span>
+							<span class="tag" data-ruolo={selezionato.ruolo} style="white-space:nowrap;">{ruoloLabel(selezionato)}</span>
 							<span class="muted">{selezionato.squadra}</span>
 						</div>
 						<div class="muted" style="font-size:13px;margin:6px 0;">
@@ -537,8 +542,11 @@
 						{#if gr.length}
 							<div style="font-size:11px;margin-top:8px;font-family:var(--mono);letter-spacing:1px;color:var(--role-{r.toLowerCase()});">{r}</div>
 							{#each gr as a}
-								<div style="display:flex;gap:8px;font-size:13px;padding:3px 0;border-bottom:1px solid var(--border);">
+								<div style="display:flex;gap:8px;font-size:13px;padding:3px 0;border-bottom:1px solid var(--border);align-items:baseline;">
 									<span>{a.nome}</span>
+									{#if asta.isMantra && a.player?.ruoloMantra}
+										<span class="muted mono" style="font-size:11px;">{a.player.ruoloMantra}</span>
+									{/if}
 									<span class="muted">{a.squadraSerieA}</span>
 									<span class="mono" style="margin-left:auto;color:var(--cyan);">{a.prezzo}</span>
 									<button style="padding:0 6px;font-size:11px;" onclick={() => asta.rimuovi(a.giocatoreId)}>✕</button>
