@@ -93,6 +93,11 @@ export class Asta {
 			this.acquisti = s.acquisti ?? [];
 			this.avviata = s.avviata ?? false;
 		}
+		// Le metriche Fantacrediti esistono solo per i tagli 8 e 10: se un
+		// salvataggio vecchio ha un altro valore, riportalo a 8.
+		if (![8, 10].includes(this.config.partecipanti)) this.config.partecipanti = 8;
+		if (!Array.isArray(this.config.moduliTarget) || !this.config.moduliTarget.length)
+			this.config.moduliTarget = ['3-4-1-2'];
 		// autosave: qualunque cosa cambi in config/acquisti/avviata viene persistita.
 		$effect.root(() => {
 			$effect(() => {

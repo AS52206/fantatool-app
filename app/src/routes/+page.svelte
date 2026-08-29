@@ -41,6 +41,11 @@
 			selezionato = null;
 			proprietarioScelto = asta.miaSquadra;
 		} catch (e) {
+			// Bundle assente (es. taglio non 8/10 da un salvataggio vecchio): ripiega su 8.
+			if (partecipanti !== 8) {
+				asta.config.partecipanti = 8;
+				return;
+			}
 			erroreDati = e instanceof Error ? e.message : String(e);
 			statoDati = 'errore';
 		}
