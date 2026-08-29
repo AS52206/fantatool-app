@@ -13,11 +13,15 @@ import {
 	MOLTIPLICATORE_DIFESA_DEFAULT
 } from '../engine/pricing';
 import {
+	analizzaPianoDinamico,
 	calcolaAllarmiChiusuraAsta,
 	calcolaFasciaOperativa,
+	calcolaIncidenzeBudget,
 	calcolaPoteriAcquisto,
 	calcolaScarsitaMercato,
 	classificaFaseAsta,
+	confrontaScenari,
+	costruisciMatriceDomandaClassic,
 	profilaRivali,
 	raffinaScarsita,
 	valutaDecisioneImmediata,
@@ -52,10 +56,14 @@ export interface ConfigAsta {
 	moduliTarget: string[];
 }
 
+/** Piano/scenario: nome → { chiave giocatore → prezzo massimo pianificato }. */
+export type Scenari = Record<string, Record<string, number>>;
+
 interface Snapshot {
 	config: ConfigAsta;
 	acquisti: Acquisto[];
 	avviata: boolean;
+	scenari?: Scenari;
 }
 
 const CONFIG_DEFAULT: ConfigAsta = {
@@ -84,6 +92,7 @@ export class Asta {
 	acquisti = $state<Acquisto[]>([]);
 	avviata = $state(false);
 	giocatori = $state<Giocatore[]>([]);
+	scenari = $state<Scenari>({});
 	ultimoSalvataggio = $state<number | null>(null);
 
 	constructor() {
@@ -92,6 +101,7 @@ export class Asta {
 			this.config = { ...structuredClone(CONFIG_DEFAULT), ...s.config };
 			this.acquisti = s.acquisti ?? [];
 			this.avviata = s.avviata ?? false;
+			this.scenari = s.scenari ?? {};
 		}
 		// Le metriche Fantacrediti esistono solo per i tagli 8 e 10: se un
 		// salvataggio vecchio ha un altro valore, riportalo a 8.
@@ -104,7 +114,8 @@ export class Asta {
 				const snap: Snapshot = {
 					config: this.config,
 					acquisti: this.acquisti,
-					avviata: this.avviata
+					avviata: this.avviata,
+					scenari: this.scenari
 				};
 				try {
 					localStorage.setItem(CHIAVE_SALVATAGGIO, JSON.stringify(snap));
@@ -574,7 +585,13 @@ export class Asta {
 
 	esporta(): string {
 		return JSON.stringify(
-			{ config: this.config, acquisti: this.acquisti, avviata: this.avviata, esportato: new Date().toISOString() },
+			{
+				config: this.config,
+				acquisti: this.acquisti,
+				avviata: this.avviata,
+				scenari: this.scenari,
+				esportato: new Date().toISOString()
+			},
 			null,
 			2
 		);
@@ -586,12 +603,139 @@ export class Asta {
 		this.config = { ...structuredClone(CONFIG_DEFAULT), ...s.config };
 		this.acquisti = s.acquisti;
 		this.avviata = s.avviata ?? this.acquisti.length > 0;
+		this.scenari = s.scenari ?? {};
 	}
 
 	reset() {
 		this.config = structuredClone(CONFIG_DEFAULT);
 		this.acquisti = [];
 		this.avviata = false;
+		this.scenari = {};
+	}
+
+	// ---------------------------------------------------------------- SCENARI
+	private giocatorePerChiave(chiave: string): Giocatore | undefined {
+		return this.giocatori.find((g) => g.chiave === chiave || String(g.id) === chiave);
+	}
+
+	nuovoScenario(nome?: string): string {
+		const base = nome?.trim() || `Piano ${Object.keys(this.scenari).length + 1}`;
+		let n = base;
+		let i = 2;
+		while (n in this.scenari) n = `${base} ${i++}`;
+		this.scenari = { ...this.scenari, [n]: {} };
+		return n;
+	}
+
+	eliminaScenario(nome: string) {
+		const { [nome]: _, ...resto } = this.scenari;
+		this.scenari = resto;
+	}
+
+	rinominaScenario(vecchio: string, nuovo: string) {
+		const nome = nuovo.trim();
+		if (!nome || nome === vecchio || nome in this.scenari) return;
+		const { [vecchio]: piano, ...resto } = this.scenari;
+		this.scenari = { ...resto, [nome]: piano ?? {} };
+	}
+
+	setTargetScenario(nome: string, chiave: string, prezzoMax: number) {
+		const piano = { ...(this.scenari[nome] ?? {}), [chiave]: Math.max(1, Math.round(prezzoMax)) };
+		this.scenari = { ...this.scenari, [nome]: piano };
+	}
+
+	rimuoviDaScenario(nome: string, chiave: string) {
+		const { [chiave]: _, ...piano } = this.scenari[nome] ?? {};
+		this.scenari = { ...this.scenari, [nome]: piano };
+	}
+
+	/** Righe di uno scenario con nome/ruolo/consigliato risolti dal bundle. */
+	righeScenario(nome: string) {
+		const piano = this.scenari[nome] ?? {};
+		return Object.entries(piano).map(([chiave, max]) => {
+			const g = this.giocatorePerChiave(chiave);
+			const acq = g ? this.acquisti.find((a) => a.giocatoreId === g.id) : undefined;
+			return {
+				chiave,
+				max,
+				giocatore: g,
+				nome: g?.nome ?? chiave,
+				ruolo: g?.ruolo ?? '',
+				ruoloMantra: g?.ruoloMantra ?? '',
+				consigliato: g ? this.valutazione(g).fascia.riferimento : null,
+				stato: !acq ? 'LIBERO' : acq.proprietario === this.miaSquadra ? 'PRESO' : 'PERSO',
+				prezzoEffettivo: acq?.prezzo ?? null,
+				proprietario: acq?.proprietario ?? null
+			};
+		});
+	}
+
+	/** Analisi dinamica di uno scenario (analizza_piano_dinamico) col nome-chiave. */
+	analisiScenario(nome: string) {
+		const piano = this.scenari[nome] ?? {};
+		const perChiave: Record<string, number> = {};
+		for (const [chiave, max] of Object.entries(piano)) {
+			const g = this.giocatorePerChiave(chiave);
+			perChiave[g?.chiave ?? chiave] = max;
+		}
+		const acquistiPiano = this.acquisti.map((a) => {
+			const g = this.giocatori.find((x) => x.id === a.giocatoreId);
+			return { nome_puro: g?.chiave ?? a.nomePuro, proprietario: a.proprietario, prezzo: a.prezzo };
+		});
+		return analizzaPianoDinamico(perChiave, acquistiPiano, this.miaSquadra, this.config.budgetMax);
+	}
+
+	// ----------------------------------------------------------------- BUDGET
+	/** Ripartizione budget per reparto (mia squadra): quota, speso, residuo, poteri. */
+	get budgetPerReparto() {
+		const bil = this.bilanciCompleti[this.miaSquadra];
+		return (['P', 'D', 'C', 'A'] as Ruolo[]).map((r) => {
+			const inc = calcolaIncidenzeBudget({
+				budgetIniziale: this.config.budgetMax,
+				pma: 0,
+				pfc: 0,
+				fasciaMin: 0,
+				fasciaMax: 0,
+				riferimento: 0,
+				quotaReparto: QUOTE_RUOLO[r],
+				spesoReparto: (bil[`spesi_${r}`] as number) ?? 0
+			});
+			const poteri = calcolaPoteriAcquisto(bil, r, this.config.limiti, this.config.budgetMax, QUOTE_RUOLO);
+			return {
+				ruolo: r,
+				presi: bil.perRuolo[r],
+				limite: this.config.limiti[r],
+				quota_pct: inc.quota_reparto_pct,
+				budget_reparto: inc.budget_reparto,
+				speso: inc.speso_reparto,
+				residuo: inc.residuo_reparto,
+				poteri
+			};
+		});
+	}
+
+	/** Matrice della domanda per ruolo tra i rivali (classic). */
+	get matriceDomanda() {
+		return costruisciMatriceDomandaClassic(this.bilanciCompleti, this.config.limiti, this.miaSquadra);
+	}
+
+	confrontaScenari(a: string, b: string) {
+		const ruoli: Record<string, string> = {};
+		for (const chiave of [
+			...Object.keys(this.scenari[a] ?? {}),
+			...Object.keys(this.scenari[b] ?? {})
+		]) {
+			const g = this.giocatorePerChiave(chiave);
+			if (g) ruoli[g.chiave] = g.ruolo;
+		}
+		const norm = (nome: string) => {
+			const p = this.scenari[nome] ?? {};
+			const out: Record<string, number> = {};
+			for (const [chiave, max] of Object.entries(p))
+				out[this.giocatorePerChiave(chiave)?.chiave ?? chiave] = max;
+			return out;
+		};
+		return confrontaScenari(norm(a), norm(b), ruoli, this.config.budgetMax);
 	}
 }
 
