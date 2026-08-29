@@ -176,7 +176,7 @@
 					<div style="margin-top:14px;">
 						<div class="muted" style="font-size:11px;margin-bottom:4px;">RIVALI PROBABILI SU QUESTO GIOCATORE</div>
 						{#each val.profili.slice(0, 5) as p}
-							<div style="display:flex;gap:8px;font-size:12px;padding:2px 0;align-items:center;">
+							<div style="display:flex;gap:8px;font-size:12px;padding:2px 0 2px 6px;align-items:center;border-left:2px solid {asta.coloreDi(p.squadra)};">
 								<span style="width:16px;text-align:right;" class="muted">{p.punteggio}</span>
 								<Crest nome={asta.stemmaDi(p.squadra)} tipo="stemmi" size={16} />
 								<strong>{p.squadra}</strong>
@@ -280,8 +280,9 @@
 			</div>
 			{#each asta.config.squadre as sq}
 				{@const b = asta.bilanci[sq.nome]}
-				<div style="padding:7px 0;border-top:1px solid var(--border);">
+				<div style="padding:7px 0 7px 8px;border-top:1px solid var(--border);border-left:3px solid {asta.coloreDi(sq.nome)};margin-left:-8px;">
 					<div style="display:flex;align-items:center;gap:7px;font-size:13px;">
+						<span style="width:8px;height:8px;border-radius:2px;background:{asta.coloreDi(sq.nome)};flex:0 0 auto;"></span>
 						<Crest nome={sq.stemma || sq.nome} tipo="stemmi" size={18} />
 						<span style={sq.isMia ? 'font-weight:700;color:var(--text-strong);' : ''}>{sq.nome}</span>
 						{#if sq.isMia}<span style="color:var(--accent);">★</span>{/if}

@@ -3,6 +3,7 @@
 	import { asta } from '$lib/stores/auction.svelte';
 	import { caricaBundle } from '$lib/data/load';
 	import { stemmiDisponibili } from '$lib/assets';
+	import { ui } from '$lib/ui.svelte';
 	import { importaRoseDaFile, type RisultatoImport } from '$lib/data/importRose';
 	import { MODULI_MANTRA } from '$lib/engine/mantra';
 	import Crest from '$lib/ui/Crest.svelte';
@@ -155,6 +156,8 @@
 		<span class="muted mono" style="font-size:11px;">{metaTxt}</span>
 		<div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
 			<span class="tag" title="Salvataggio automatico locale">💾 {ora(asta.ultimoSalvataggio)}</span>
+			<button onclick={() => ui.toggleTema()} title="Tema chiaro / scuro" style="padding:8px 10px;">{ui.tema === 'scuro' ? '☀︎' : '☾'}</button>
+			<button onclick={() => ui.toggleDensita()} title="Densità comoda / compatta" style="padding:8px 10px;">{ui.densita === 'comoda' ? '▤' : '▦'}</button>
 			<button onclick={() => (mostraSetup = !mostraSetup)}>⚙️ Setup</button>
 			<button onclick={() => scarica(asta.esporta(), `asta-${oggi()}.json`, 'application/json')}>⬇︎ Backup</button>
 			{#if asta.acquisti.length}
@@ -273,10 +276,13 @@
 					</div>
 				{/if}
 				<h3 style="font-size:14px;">Squadre partecipanti</h3>
-				<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;">
+				<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px;">
 					{#each asta.config.squadre as sq, i}
-						<div style="display:flex;gap:6px;align-items:center;">
-							<Crest nome={sq.stemma || sq.nome} tipo="stemmi" size={26} />
+						<div style="display:flex;gap:6px;align-items:center;border-left:3px solid {asta.coloreDi(sq.nome)};padding-left:6px;">
+							<input type="color" value={asta.coloreDi(sq.nome)}
+								oninput={(e) => (asta.config.squadre[i].colore = (e.target as HTMLInputElement).value)}
+								title="Colore squadra" style="width:26px;height:26px;padding:0;border:none;background:none;cursor:pointer;" />
+							<Crest nome={sq.stemma || sq.nome} tipo="stemmi" size={24} />
 							<input bind:value={asta.config.squadre[i].nome} style="flex:1;min-width:0;" />
 							<select value={sq.stemma ?? ''}
 								onchange={(e) => (asta.config.squadre[i].stemma = (e.target as HTMLSelectElement).value || undefined)}
@@ -291,6 +297,7 @@
 						</div>
 					{/each}
 				</div>
+				<button style="font-size:11px;margin-top:6px;" onclick={() => asta.config.squadre.forEach((s) => (s.colore = undefined))}>Colori automatici</button>
 				<div style="margin-top:12px;display:flex;gap:8px;">
 					<button class="primary" onclick={() => (mostraSetup = false)}>Inizia l'asta</button>
 					{#if asta.acquisti.length}

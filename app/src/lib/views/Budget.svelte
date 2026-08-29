@@ -12,9 +12,10 @@
 		{@const b = asta.bilanci[sq.nome]}
 		{@const rip = asta.budgetPerRepartoDi(sq.nome)}
 		{@const speso = asta.config.budgetMax - b.c_rimasti}
-		<div class="panel">
+		<div class="panel" style="border-top:3px solid {asta.coloreDi(sq.nome)};">
 			<div style="display:flex;justify-content:space-between;align-items:center;">
 				<h3 style="margin:0;font-size:14px;display:flex;align-items:center;gap:6px;">
+					<span style="width:9px;height:9px;border-radius:2px;background:{asta.coloreDi(sq.nome)};"></span>
 					<Crest nome={sq.stemma || sq.nome} tipo="stemmi" size={20} />{sq.nome}{sq.isMia ? ' ★' : ''}
 				</h3>
 				<span class="mono" style="font-size:12px;">

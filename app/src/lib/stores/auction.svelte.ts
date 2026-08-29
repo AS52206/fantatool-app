@@ -43,6 +43,13 @@ import {
 /** Quote di budget per reparto (percentuali), come QUOTE_RUOLO dell'app. */
 export const QUOTE_RUOLO: Record<Ruolo, number> = { P: 6, D: 16, C: 30, A: 48 };
 
+/** Palette di ripiego per l'identità colore delle squadre. */
+export const PALETTE_SQUADRE = [
+	'#5eff9c', '#5ce1ff', '#ffcd4d', '#ff6b6b', '#c084fc',
+	'#fb923c', '#4ade80', '#38bdf8', '#f472b6', '#a3e635',
+	'#facc15', '#f87171', '#2dd4bf', '#818cf8', '#e879f9', '#fdba74'
+];
+
 // Classic e Mantra sono due aste indipendenti: ognuna ha il suo salvataggio.
 const CHIAVE_LEGACY = 'fantatool.asta.v1';
 const CHIAVE_ATTIVA = 'fantatool.asta.attiva';
@@ -214,6 +221,13 @@ export class Asta {
 	stemmaDi(nome: string): string {
 		const sq = this.config.squadre.find((s) => s.nome === nome);
 		return sq?.stemma || nome;
+	}
+
+	/** Colore identità di una squadra: quello scelto, o dalla palette per indice. */
+	coloreDi(nome: string): string {
+		const i = this.config.squadre.findIndex((s) => s.nome === nome);
+		const sq = this.config.squadre[i];
+		return sq?.colore || PALETTE_SQUADRE[(i < 0 ? 0 : i) % PALETTE_SQUADRE.length];
 	}
 
 	get miaSquadra(): string {
@@ -726,14 +740,15 @@ export class Asta {
 	 * le squadre partecipanti dai proprietari e popola gli acquisti.
 	 */
 	applicaImportRose(squadre: string[], acquisti: Acquisto[]) {
-		const stemmiEsistenti = new Map(
-			this.config.squadre.map((s) => [s.nome, s.stemma] as const)
+		const esistenti = new Map(
+			this.config.squadre.map((s) => [s.nome, { stemma: s.stemma, colore: s.colore }] as const)
 		);
 		const miaAttuale = this.miaSquadra;
 		const nuove: Squadra[] = squadre.map((nome) => ({
 			nome,
 			isMia: nome === miaAttuale,
-			stemma: stemmiEsistenti.get(nome)
+			stemma: esistenti.get(nome)?.stemma,
+			colore: esistenti.get(nome)?.colore
 		}));
 		if (nuove.length && !nuove.some((s) => s.isMia)) nuove[0].isMia = true;
 		this.config.squadre = nuove.length ? nuove : this.config.squadre;

@@ -34,7 +34,70 @@
 	--r-sm: 8px;
 	--shadow: 0 8px 30px -12px rgba(0, 0, 0, 0.7), 0 2px 8px -4px rgba(0, 0, 0, 0.5);
 
+	/* trama di sfondo (cambia col tema) */
+	--bg-radials:
+		radial-gradient(1200px 600px at 15% -10%, rgba(63, 140, 255, 0.06), transparent 60%),
+		radial-gradient(1000px 500px at 100% 0%, rgba(94, 255, 156, 0.05), transparent 55%);
+	--bg-grid: rgba(129, 151, 177, 0.018);
+	--panel-hi: rgba(255, 255, 255, 0.07);
+	--primary-bg: linear-gradient(180deg, #17332a, #12241d);
+	--primary-border: #2f5a45;
+	--primary-text: #eafff3;
+	--tag-bg: rgba(255, 255, 255, 0.03);
+
+	/* densità (override in [data-density='compatta']) */
+	--pad: 16px;
+	--pad-row: 7px;
+	--fs: 14px;
+
 	color-scheme: dark;
+}
+
+/* ---------------- TEMA CHIARO ---------------- */
+:root[data-theme='chiaro'] {
+	--bg: #eef1f6;
+	--bg-2: #e6eaf1;
+	--panel: #ffffff;
+	--panel-2: #f4f6fa;
+	--panel-3: #eef1f6;
+	--border: #d6dce6;
+	--border-strong: #c2cad6;
+	--text: #232a35;
+	--text-strong: #0f1723;
+	--muted: #64748b;
+	--muted-dim: #94a3b8;
+
+	--accent: #10b76a;
+	--accent-soft: rgba(16, 183, 106, 0.16);
+	--cyan: #0e8fc7;
+	--warn: #c98a00;
+	--bad: #d64545;
+	--ok: #10b76a;
+
+	--role-p: #c98a00;
+	--role-d: #10995a;
+	--role-c: #2b6fd6;
+	--role-a: #d64545;
+
+	--shadow: 0 8px 24px -14px rgba(20, 40, 70, 0.35), 0 1px 4px -2px rgba(20, 40, 70, 0.18);
+	--bg-radials:
+		radial-gradient(1200px 600px at 15% -10%, rgba(63, 140, 255, 0.08), transparent 60%),
+		radial-gradient(1000px 500px at 100% 0%, rgba(16, 183, 106, 0.07), transparent 55%);
+	--bg-grid: rgba(40, 60, 90, 0.05);
+	--panel-hi: rgba(20, 40, 70, 0.06);
+	--primary-bg: linear-gradient(180deg, #16a765, #12935a);
+	--primary-border: #0e7a49;
+	--primary-text: #ffffff;
+	--tag-bg: rgba(20, 40, 70, 0.04);
+	color-scheme: light;
+}
+
+/* ---------------- DENSITÀ COMPATTA ---------------- */
+:root[data-density='compatta'] {
+	--pad: 10px;
+	--pad-row: 3px;
+	--fs: 13px;
+	--r: 9px;
 }
 
 * {
@@ -45,14 +108,13 @@ body {
 	margin: 0;
 	background-color: var(--bg);
 	background-image:
-		radial-gradient(1200px 600px at 15% -10%, rgba(63, 140, 255, 0.06), transparent 60%),
-		radial-gradient(1000px 500px at 100% 0%, rgba(94, 255, 156, 0.05), transparent 55%),
-		linear-gradient(rgba(129, 151, 177, 0.018) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(129, 151, 177, 0.018) 1px, transparent 1px);
+		var(--bg-radials),
+		linear-gradient(var(--bg-grid) 1px, transparent 1px),
+		linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
 	background-size: 100% 100%, 100% 100%, 44px 44px, 44px 44px;
 	background-attachment: fixed;
 	color: var(--text);
-	font: 400 14px/1.55 var(--sans);
+	font: 400 var(--fs) / 1.55 var(--sans);
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
 }
@@ -95,9 +157,9 @@ button:active {
 	transform: translateY(1px);
 }
 button.primary {
-	background: linear-gradient(180deg, #17332a, #12241d);
-	border-color: #2f5a45;
-	color: #eafff3;
+	background: var(--primary-bg);
+	border-color: var(--primary-border);
+	color: var(--primary-text);
 	font-weight: 700;
 	box-shadow:
 		inset 0 1px 0 rgba(94, 255, 156, 0.18),
@@ -135,7 +197,7 @@ select:focus {
 	background: linear-gradient(180deg, var(--panel), var(--panel-3));
 	border: 1px solid var(--border);
 	border-radius: var(--r);
-	padding: 16px;
+	padding: var(--pad);
 	box-shadow: var(--shadow);
 }
 .panel::before {
@@ -143,7 +205,7 @@ select:focus {
 	position: absolute;
 	inset: 0 0 auto 0;
 	height: 1px;
-	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.07), transparent);
+	background: linear-gradient(90deg, transparent, var(--panel-hi), transparent);
 	border-radius: var(--r) var(--r) 0 0;
 }
 
@@ -157,7 +219,7 @@ select:focus {
 	align-items: center;
 	padding: 2px 7px;
 	border-radius: 6px;
-	background: rgba(255, 255, 255, 0.03);
+	background: var(--tag-bg);
 	border: 1px solid var(--border-strong);
 	font: 700 11px/1.4 var(--mono);
 	letter-spacing: 0.5px;
@@ -239,7 +301,7 @@ select:focus {
 	border: 1px solid var(--border);
 	border-left: 3px solid transparent;
 	border-radius: var(--r-sm);
-	padding: 7px 10px;
+	padding: var(--pad-row) 10px;
 	transition: border-color 0.14s ease, background 0.14s ease, transform 0.08s ease;
 }
 .row-player:hover {
@@ -294,7 +356,7 @@ table th {
 	padding-bottom: 4px;
 }
 table td {
-	padding: 3px 0;
+	padding: var(--pad-row) 0;
 }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }

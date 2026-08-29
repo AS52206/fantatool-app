@@ -65,6 +65,8 @@ export interface Squadra {
 	isMia: boolean;
 	/** Chiave stemma scelta manualmente (override); altrimenti si abbina per nome. */
 	stemma?: string;
+	/** Colore identità squadra (es. "#ff0000"). Se assente si usa la palette per indice. */
+	colore?: string;
 }
 
 export interface LimitiRuoli {
