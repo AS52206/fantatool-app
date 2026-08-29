@@ -1,0 +1,39 @@
+{
+ "loghi": {
+  "frosinone": "frosinone.png",
+  "monza": "monza.png",
+  "venezia": "venezia.png",
+  "atalanta": "atalanta.png",
+  "bologna": "bologna.png",
+  "cagliari": "cagliari.png",
+  "como": "como.png",
+  "cremonese": "cremonese.png",
+  "fiorentina": "fiorentina.png",
+  "genoa": "genoa.png",
+  "inter": "inter.png",
+  "juventus": "juventus.png",
+  "lazio": "lazio.png",
+  "lecce": "lecce.png",
+  "milan": "milan.png",
+  "napoli": "napoli.png",
+  "parma": "parma.png",
+  "pisa": "pisa.png",
+  "roma": "roma.png",
+  "sassuolo": "sassuolo.png",
+  "torino": "torino.png",
+  "udinese": "udinese.png",
+  "verona": "verona.png"
+ },
+ "stemmi": {
+  "acpix": "ac-pix.png",
+  "acfbisettricks": "acf-bisettricks.png",
+  "bojondc": "bojon-dc.png",
+  "caciocavalloft": "cacio-cavallo-ft.png",
+  "deportivolacarogna": "deportivo-la-carogna.png",
+  "fcsantignazio": "fc-sant-ignazio.png",
+  "parissaintpeterle": "paris-saint-peterle.png",
+  "partizandegrado": "partizan-degrado.png",
+  "protagonista": "pro-tagonista.png",
+  "tpcopaya": "tp-copaya.png"
+ }
+}

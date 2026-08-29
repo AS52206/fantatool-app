@@ -2,6 +2,7 @@
 	import { asta } from '$lib/stores/auction.svelte';
 	import { normalizzaNome } from '$lib/engine/names';
 	import RoleTag from '$lib/ui/RoleTag.svelte';
+	import Crest from '$lib/ui/Crest.svelte';
 
 	let attivo = $state<string>('');
 	let query = $state('');
@@ -58,6 +59,7 @@
 							{@const cons = asta.valutazione(g).fascia.riferimento}
 							<button class="row-player" onclick={() => aggiungi(g.chiave, cons)}>
 								<RoleTag ruolo={g.ruolo} ruoloMantra={g.ruoloMantra} />
+								<Crest nome={g.squadra} size={15} />
 								<strong>{g.nome}</strong><span class="muted">{g.squadra}</span>
 								<span class="muted mono" style="margin-left:auto;">cons. {cons}</span>
 							</button>
@@ -72,7 +74,8 @@
 					{#each righe as r (r.chiave)}
 						<tr style="border-top:1px solid var(--border);">
 							<td><RoleTag ruolo={r.ruolo} ruoloMantra={r.ruoloMantra} /></td>
-							<td>{r.nome}{#if r.stato !== 'LIBERO'}<span class="muted" style="font-size:11px;"> · {r.proprietario} {r.prezzoEffettivo}</span>{/if}</td>
+							<td style="white-space:nowrap;">
+								<Crest nome={r.giocatore?.squadra} size={14} /> {r.nome}{#if r.stato !== 'LIBERO'}<span class="muted" style="font-size:11px;"> · {r.proprietario} {r.prezzoEffettivo}</span>{/if}</td>
 							<td>
 								<input type="number" min="1" value={r.max} style="width:70px;"
 									onchange={(e) => asta.setTargetScenario(attivo, r.chiave, +(e.target as HTMLInputElement).value)} />

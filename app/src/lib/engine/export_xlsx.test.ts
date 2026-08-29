@@ -21,9 +21,12 @@ function acq(p: Partial<AcquistoExport>): AcquistoExport {
 	};
 }
 
+// 1x1 PNG trasparente
+const PX = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+
 const INPUT = {
 	astaAttiva: 'Asta CLASSIC',
-	squadre: [{ name: 'Io' }, { name: 'Rivale 1' }, { name: 'Rivale 2' }, { name: 'Rivale 3' }],
+	squadre: [{ name: 'Io', crest: PX }, { name: 'Rivale 1' }, { name: 'Rivale 2' }, { name: 'Rivale 3' }],
 	limitiRuoli: { P: 3, D: 8, C: 8, A: 6 },
 	budgetIniziale: 500,
 	numSquadre: 4,
@@ -43,13 +46,14 @@ async function apri(blob: Blob) {
 }
 
 describe('generaExcelFormattato', () => {
-	it('produce i 3 fogli attesi', async () => {
+	it('produce i 3 fogli attesi + lo stemma incorporato', async () => {
 		const wb = await apri(await generaExcelFormattato(INPUT));
 		expect(wb.worksheets.map((w) => w.name)).toEqual([
 			'Riepilogo_Asta CLASSIC',
 			'Registro_Asta',
 			'Controlli'
 		]);
+		expect(wb.model.media?.length).toBeGreaterThan(0);
 	});
 
 	it('Riepilogo: titolo, giocatore con ruolo mantra, subtotale come formula SUM', async () => {

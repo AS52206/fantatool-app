@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { asta } from '$lib/stores/auction.svelte';
+	import Crest from '$lib/ui/Crest.svelte';
 	import type { Ruolo } from '$lib/domain/types';
 	const RUOLI: Ruolo[] = ['P', 'D', 'C', 'A'];
 </script>
@@ -9,8 +10,11 @@
 		{@const b = asta.bilanci[sq.nome]}
 		{@const rosa = asta.rosa(sq.nome)}
 		<div class="panel">
-			<div style="display:flex;justify-content:space-between;align-items:baseline;">
-				<h2 style="margin:0;font-size:15px;">{sq.nome}{sq.isMia ? ' ★' : ''}</h2>
+			<div style="display:flex;justify-content:space-between;align-items:center;">
+				<h2 style="margin:0;font-size:15px;display:flex;align-items:center;gap:6px;">
+					<Crest nome={sq.stemma || sq.nome} tipo="stemmi" size={22} />
+					{sq.nome}{sq.isMia ? ' ★' : ''}
+				</h2>
 				<span class="muted mono" style="font-size:12px;">
 					{b.g_presi}/{asta.config.limiti.TOT} · <span style:color={b.c_rimasti < 0 ? 'var(--bad)' : 'var(--cyan)'}>{b.c_rimasti} cr</span>
 				</span>
@@ -21,7 +25,8 @@
 					{r} · {gr.length}/{asta.config.limiti[r]}
 				</div>
 				{#each gr as a}
-					<div style="display:flex;gap:6px;font-size:12px;padding:2px 0;align-items:baseline;">
+					<div style="display:flex;gap:6px;font-size:12px;padding:2px 0;align-items:center;">
+						<Crest nome={a.squadraSerieA} size={14} />
 						<span>{a.nome}</span>
 						{#if asta.isMantra && a.player?.ruoloMantra}<span class="muted mono" style="font-size:10px;">{a.player.ruoloMantra}</span>{/if}
 						<span class="muted">{a.squadraSerieA}</span>

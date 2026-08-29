@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { asta } from '$lib/stores/auction.svelte';
 	import RoleTag from '$lib/ui/RoleTag.svelte';
+	import Crest from '$lib/ui/Crest.svelte';
 
 	const ORDINE = { P: 0, D: 1, C: 2, A: 3 } as Record<string, number>;
 
@@ -27,7 +28,9 @@
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;align-items:start;">
 	{#each perClub as { club, players, acqById }}
 		<div class="panel">
-			<h2 style="margin:0 0 6px;font-size:15px;">{club}</h2>
+			<h2 style="margin:0 0 6px;font-size:15px;display:flex;align-items:center;gap:8px;">
+				<Crest nome={club} size={22} />{club}
+			</h2>
 			{#each players as g}
 				{@const a = acqById.get(g.id)}
 				<div style="display:flex;gap:6px;font-size:12px;padding:2px 0;align-items:baseline;{a ? 'opacity:0.55;' : ''}">

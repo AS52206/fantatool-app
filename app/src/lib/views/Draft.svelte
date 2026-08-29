@@ -3,6 +3,7 @@
 	import { normalizzaNome } from '$lib/engine/names';
 	import { MOLTIPLICATORI_FLAG_MANUALE } from '$lib/engine/pricing';
 	import RoleTag from '$lib/ui/RoleTag.svelte';
+	import Crest from '$lib/ui/Crest.svelte';
 	import type { Giocatore, Ruolo } from '$lib/domain/types';
 
 	const RUOLI: Ruolo[] = ['P', 'D', 'C', 'A'];
@@ -79,6 +80,7 @@
 				{#each risultati as g (g.id)}
 					<button class="row-player {selezionato?.id === g.id ? 'sel' : ''}" onclick={() => seleziona(g)}>
 						<RoleTag ruolo={g.ruolo} ruoloMantra={g.ruoloMantra} />
+						<Crest nome={g.squadra} size={16} />
 						<strong>{g.nome}</strong>
 						<span class="muted">{g.squadra}</span>
 						<span style="margin-left:auto;" class="muted mono">
@@ -93,7 +95,8 @@
 
 		{#if selezionato && val}
 			<div class="panel" style="border-color:var(--accent);">
-				<div style="display:flex;align-items:baseline;gap:10px;">
+				<div style="display:flex;align-items:center;gap:10px;">
+					<Crest nome={selezionato.squadra} size={24} />
 					<h2 style="margin:0;font-size:18px;">{selezionato.nome}</h2>
 					<RoleTag ruolo={selezionato.ruolo} ruoloMantra={selezionato.ruoloMantra} />
 					<span class="muted">{selezionato.squadra}</span>
@@ -160,8 +163,9 @@
 					<div style="margin-top:14px;">
 						<div class="muted" style="font-size:11px;margin-bottom:4px;">RIVALI PROBABILI SU QUESTO GIOCATORE</div>
 						{#each val.profili.slice(0, 5) as p}
-							<div style="display:flex;gap:8px;font-size:12px;padding:2px 0;align-items:baseline;">
+							<div style="display:flex;gap:8px;font-size:12px;padding:2px 0;align-items:center;">
 								<span style="width:16px;text-align:right;" class="muted">{p.punteggio}</span>
+								<Crest nome={asta.stemmaDi(p.squadra)} tipo="stemmi" size={16} />
 								<strong>{p.squadra}</strong>
 								<span class="tag">{p.interesse}</span>
 								<span class="muted">{p.min}–{p.max} cr</span>
@@ -267,7 +271,10 @@
 					{#each asta.config.squadre as sq}
 						{@const b = asta.bilanci[sq.nome]}
 						<tr style="border-top:1px solid var(--border);{sq.isMia ? 'font-weight:600;' : ''}">
-							<td>{sq.nome}{sq.isMia ? ' ★' : ''}</td>
+							<td style="display:flex;align-items:center;gap:6px;">
+								<Crest nome={sq.stemma || sq.nome} tipo="stemmi" size={18} />
+								{sq.nome}{sq.isMia ? ' ★' : ''}
+							</td>
 							<td style:color={b.c_rimasti < 0 ? 'var(--bad)' : 'inherit'}>{b.c_rimasti}</td>
 							<td>{b.g_presi}/{asta.config.limiti.TOT}</td>
 							<td class="muted">{b.perRuolo.P}/{b.perRuolo.D}/{b.perRuolo.C}/{b.perRuolo.A}</td>
@@ -284,7 +291,8 @@
 				{#if gr.length}
 					<div style="font-size:11px;margin-top:8px;font-family:var(--mono);letter-spacing:1px;color:var(--role-{r.toLowerCase()});">{r}</div>
 					{#each gr as a}
-						<div style="display:flex;gap:8px;font-size:13px;padding:3px 0;border-bottom:1px solid var(--border);align-items:baseline;">
+						<div style="display:flex;gap:8px;font-size:13px;padding:3px 0;border-bottom:1px solid var(--border);align-items:center;">
+							<Crest nome={a.squadraSerieA} size={15} />
 							<span>{a.nome}</span>
 							{#if asta.isMantra && a.player?.ruoloMantra}<span class="muted mono" style="font-size:11px;">{a.player.ruoloMantra}</span>{/if}
 							<span class="muted">{a.squadraSerieA}</span>

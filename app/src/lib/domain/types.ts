@@ -63,6 +63,8 @@ export interface Acquisto {
 export interface Squadra {
 	nome: string;
 	isMia: boolean;
+	/** Chiave stemma scelta manualmente (override); altrimenti si abbina per nome. */
+	stemma?: string;
 }
 
 export interface LimitiRuoli {

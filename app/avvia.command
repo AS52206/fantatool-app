@@ -12,13 +12,14 @@ command -v node >/dev/null 2>&1 || {
 	exit 1
 }
 
-# Rigenera il bundle dati se il listone è cambiato (richiede Python + pandas).
+# Rigenera i bundle dati e i loghi se i file sorgente sono cambiati.
 if command -v python3 >/dev/null 2>&1; then
 	for mod in classic mantra; do
 		for n in 8 10; do
 			python3 ../tools/export_json.py --modalita $mod --partecipanti $n >/dev/null 2>&1 || true
 		done
 	done
+	python3 ../tools/sync_assets.py >/dev/null 2>&1 || true
 fi
 
 # Build solo se manca o se il sorgente è più recente dell'ultima build.

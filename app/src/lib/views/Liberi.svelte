@@ -3,6 +3,7 @@
 	import { normalizzaNome } from '$lib/engine/names';
 	import { calcolaScarsitaRuoliMantra } from '$lib/engine/mantra';
 	import RoleTag from '$lib/ui/RoleTag.svelte';
+	import Crest from '$lib/ui/Crest.svelte';
 	import type { Ruolo } from '$lib/domain/types';
 
 	const RUOLI: Ruolo[] = ['P', 'D', 'C', 'A'];
@@ -83,7 +84,7 @@
 					<tr style="border-top:1px solid var(--border);">
 						<td><RoleTag ruolo={g.ruolo} ruoloMantra={g.ruoloMantra} /></td>
 						<td>{g.nome}</td>
-						<td class="muted">{g.squadra}</td>
+						<td class="muted" style="white-space:nowrap;"><Crest nome={g.squadra} size={14} /> {g.squadra}</td>
 						<td class="mono">{g.quotazione}</td>
 						<td class="mono" style="color:var(--cyan);">{g.fc?.pma ?? '—'}</td>
 						<td class="mono">{g.fc?.pfc ?? '—'}</td>

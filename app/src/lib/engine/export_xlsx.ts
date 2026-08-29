@@ -46,6 +46,8 @@ export interface SquadraExport {
 	name: string;
 	color?: string;
 	text?: string;
+	/** data-URL PNG dello stemma (opzionale). */
+	crest?: string | null;
 }
 
 export interface ExportXlsxInput {
@@ -105,7 +107,17 @@ export async function generaExcelFormattato(inp: ExportXlsxInput): Promise<Blob>
 			const cText = sq.text || 'FFFFFF';
 			cName.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: A(cText) } };
 			cName.fill = solid(cColor);
-			cName.alignment = { horizontal: 'center', vertical: 'middle' };
+			cName.alignment = { horizontal: sq.crest ? 'right' : 'center', vertical: 'middle' };
+			if (sq.crest) {
+				const m = /^data:image\/(png|jpeg);base64,(.+)$/.exec(sq.crest);
+				if (m) {
+					const imgId = wb.addImage({ base64: m[2], extension: m[1] === 'jpeg' ? 'jpeg' : 'png' });
+					ws.addImage(imgId, {
+						tl: { col: cStart - 1 + 0.1, row: rStart - 1 + 0.1 },
+						ext: { width: 34, height: 34 }
+					});
+				}
+			}
 
 			const presi: Record<string, [string, number, string, string][]> = { P: [], D: [], C: [], A: [] };
 			for (const g of acquisti)

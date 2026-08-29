@@ -135,6 +135,12 @@ export class Asta {
 		return this.config.squadre.map((s) => s.nome);
 	}
 
+	/** Chiave da passare a <Crest tipo="stemmi"> per una squadra partecipante. */
+	stemmaDi(nome: string): string {
+		const sq = this.config.squadre.find((s) => s.nome === nome);
+		return sq?.stemma || nome;
+	}
+
 	get miaSquadra(): string {
 		return this.config.squadre.find((s) => s.isMia)?.nome ?? this.config.squadre[0]?.nome ?? '';
 	}
@@ -292,10 +298,17 @@ export class Asta {
 	/** Tabellone Excel formattato (3 fogli), come fantatool/export_excel.py. */
 	async esportaXlsx(): Promise<Blob> {
 		const { generaExcelFormattato } = await import('../engine/export_xlsx');
+		const { crestBase64 } = await import('../assets');
 		const byId = new Map(this.giocatori.map((g) => [g.id, g]));
+		const squadre = await Promise.all(
+			this.config.squadre.map(async (s) => ({
+				name: s.nome,
+				crest: await crestBase64(s.stemma || s.nome, 'stemmi')
+			}))
+		);
 		return generaExcelFormattato({
 			astaAttiva: `Asta ${this.config.modalita.toUpperCase()}`,
-			squadre: this.config.squadre.map((s) => ({ name: s.nome })),
+			squadre,
 			limitiRuoli: {
 				P: this.config.limiti.P,
 				D: this.config.limiti.D,

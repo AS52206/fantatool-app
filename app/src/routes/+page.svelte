@@ -2,7 +2,9 @@
 	import { onMount } from 'svelte';
 	import { asta } from '$lib/stores/auction.svelte';
 	import { caricaBundle } from '$lib/data/load';
+	import { caricaManifestAsset, stemmiDisponibili } from '$lib/assets';
 	import { MODULI_MANTRA } from '$lib/engine/mantra';
+	import Crest from '$lib/ui/Crest.svelte';
 	import type { Ruolo } from '$lib/domain/types';
 	import Draft from '$lib/views/Draft.svelte';
 	import Rose from '$lib/views/Rose.svelte';
@@ -56,9 +58,13 @@
 		}
 	}
 
-	onMount(() => {
+	let manifestPronto = $state(false);
+	onMount(async () => {
 		mostraSetup = !asta.avviata;
+		await caricaManifestAsset();
+		manifestPronto = true;
 	});
+	const stemmi = $derived(manifestPronto ? stemmiDisponibili() : []);
 	$effect(() => {
 		caricaDati(asta.config.stagione, asta.config.modalita, asta.config.partecipanti);
 	});
@@ -195,11 +201,18 @@
 						{/each}
 					</div>
 				{/if}
-				<h3 style="font-size:14px;">Squadre</h3>
-				<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;">
+				<h3 style="font-size:14px;">Squadre partecipanti</h3>
+				<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;">
 					{#each asta.config.squadre as sq, i}
 						<div style="display:flex;gap:6px;align-items:center;">
-							<input bind:value={asta.config.squadre[i].nome} style="flex:1;" />
+							<Crest nome={sq.stemma || sq.nome} tipo="stemmi" size={26} />
+							<input bind:value={asta.config.squadre[i].nome} style="flex:1;min-width:0;" />
+							<select value={sq.stemma ?? ''}
+								onchange={(e) => (asta.config.squadre[i].stemma = (e.target as HTMLSelectElement).value || undefined)}
+								title="Stemma" style="width:38px;padding:4px 2px;">
+								<option value="">auto</option>
+								{#each stemmi as s}<option value={s.chiave}>{s.chiave}</option>{/each}
+							</select>
 							<label class="muted" style="font-size:12px;white-space:nowrap;">
 								<input type="radio" name="mia" checked={sq.isMia}
 									onchange={() => asta.config.squadre.forEach((s, j) => (s.isMia = j === i))} /> mia
