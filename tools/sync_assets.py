@@ -36,17 +36,27 @@ def slug(nome: str) -> str:
 
 
 def main() -> None:
+    # Se non c'è nessuna cartella sorgente, non toccare nulla: probabilmente
+    # è una copia del progetto senza assets/ e i file sono già in static/.
+    if not any(s.exists() for s in SORGENTI.values()):
+        esistente = DEST / "loghi"
+        if esistente.exists() and MANIFEST.exists():
+            print("assets/ non presente: mantengo static/assets/ e il manifest esistenti.")
+            return
+        print("assets/ non presente e nessun manifest: niente da fare.", file=sys.stderr)
+        return
+
     manifest: dict[str, dict[str, str]] = {}
     for tipo, sorgente in SORGENTI.items():
         out_dir = DEST / tipo
+        mappa: dict[str, str] = {}
+        if not sorgente.exists():
+            print(f"  ! cartella mancante, la salto: {sorgente}", file=sys.stderr)
+            manifest[tipo] = {}
+            continue
         if out_dir.exists():
             shutil.rmtree(out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
-        mappa: dict[str, str] = {}
-        if not sorgente.exists():
-            print(f"  ! cartella mancante: {sorgente}", file=sys.stderr)
-            manifest[tipo] = {}
-            continue
         for f in sorted(sorgente.iterdir()):
             if f.suffix.lower() not in (".png", ".jpg", ".jpeg", ".webp", ".svg"):
                 continue
