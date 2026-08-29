@@ -12,7 +12,7 @@
 	import Rose from '$lib/views/Rose.svelte';
 	import Liberi from '$lib/views/Liberi.svelte';
 	import SerieA from '$lib/views/SerieA.svelte';
-	import Budget from '$lib/views/Budget.svelte';
+	import Confronto from '$lib/views/Confronto.svelte';
 	import Scenari from '$lib/views/Scenari.svelte';
 
 	const MODULI = Object.keys(MODULI_MANTRA);
@@ -21,7 +21,7 @@
 	const TABS = [
 		{ id: 'draft', label: '📢 Draft', view: Draft },
 		{ id: 'scenari', label: '🧪 Scenari', view: Scenari },
-		{ id: 'budget', label: '🧮 Budget', view: Budget },
+		{ id: 'confronto', label: '🕸️ Confronto', view: Confronto },
 		{ id: 'rose', label: '📊 Rose', view: Rose },
 		{ id: 'liberi', label: '🔍 Liberi', view: Liberi },
 		{ id: 'seriea', label: '👕 Serie A', view: SerieA }
