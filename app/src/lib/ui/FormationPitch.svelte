@@ -107,7 +107,11 @@
 		text-align: center;
 		font: 700 12px/1 var(--mono);
 		letter-spacing: 4px;
-		color: var(--muted);
+		color: rgba(255, 255, 255, 0.55);
+	}
+	/* il campo è sempre verde scuro: testo chiaro a prescindere dal tema */
+	.pitch-frame :global(*) {
+		--muted: rgba(255, 255, 255, 0.62);
 	}
 	.lines {
 		position: relative;
@@ -152,7 +156,7 @@
 	.name {
 		font-size: 11px;
 		font-weight: 600;
-		color: var(--text-strong);
+		color: #f6f8fb;
 		line-height: 1.1;
 		max-width: 100%;
 		white-space: nowrap;
@@ -166,7 +170,7 @@
 	}
 	.empty {
 		font: 700 11px/1 var(--mono);
-		color: var(--muted-dim);
+		color: rgba(255, 255, 255, 0.5);
 		letter-spacing: 1px;
 	}
 </style>

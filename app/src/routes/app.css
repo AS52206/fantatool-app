@@ -30,15 +30,17 @@
 	--mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 	--sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-	--r: 12px;
-	--r-sm: 8px;
-	--shadow: 0 8px 30px -12px rgba(0, 0, 0, 0.7), 0 2px 8px -4px rgba(0, 0, 0, 0.5);
+	--r: 14px;
+	--r-sm: 9px;
+	--ring: rgba(94, 255, 156, 0.34);
+	--shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 14px 44px -18px rgba(0, 0, 0, 0.72);
 
 	/* trama di sfondo (cambia col tema) */
 	--bg-radials:
-		radial-gradient(1200px 600px at 15% -10%, rgba(63, 140, 255, 0.06), transparent 60%),
-		radial-gradient(1000px 500px at 100% 0%, rgba(94, 255, 156, 0.05), transparent 55%);
-	--bg-grid: rgba(129, 151, 177, 0.018);
+		radial-gradient(1100px 560px at 12% -8%, rgba(63, 140, 255, 0.08), transparent 60%),
+		radial-gradient(900px 480px at 100% -4%, rgba(94, 255, 156, 0.06), transparent 55%),
+		radial-gradient(1200px 900px at 50% 120%, rgba(92, 225, 255, 0.045), transparent 60%);
+	--bg-grid: rgba(129, 151, 177, 0.02);
 	--panel-hi: rgba(255, 255, 255, 0.07);
 	--primary-bg: linear-gradient(180deg, #17332a, #12241d);
 	--primary-border: #2f5a45;
@@ -79,11 +81,13 @@
 	--role-c: #2b6fd6;
 	--role-a: #d64545;
 
-	--shadow: 0 8px 24px -14px rgba(20, 40, 70, 0.35), 0 1px 4px -2px rgba(20, 40, 70, 0.18);
+	--ring: rgba(16, 183, 106, 0.32);
+	--shadow: 0 1px 3px rgba(20, 40, 70, 0.1), 0 16px 40px -20px rgba(20, 40, 70, 0.34);
 	--bg-radials:
-		radial-gradient(1200px 600px at 15% -10%, rgba(63, 140, 255, 0.08), transparent 60%),
-		radial-gradient(1000px 500px at 100% 0%, rgba(16, 183, 106, 0.07), transparent 55%);
-	--bg-grid: rgba(40, 60, 90, 0.05);
+		radial-gradient(1100px 560px at 12% -8%, rgba(63, 140, 255, 0.1), transparent 60%),
+		radial-gradient(900px 480px at 100% -4%, rgba(16, 183, 106, 0.09), transparent 55%),
+		radial-gradient(1200px 900px at 50% 120%, rgba(14, 143, 199, 0.06), transparent 60%);
+	--bg-grid: rgba(40, 60, 90, 0.045);
 	--panel-hi: rgba(20, 40, 70, 0.06);
 	--primary-bg: linear-gradient(180deg, #16a765, #12935a);
 	--primary-border: #0e7a49;
@@ -103,6 +107,9 @@
 * {
 	box-sizing: border-box;
 }
+html {
+	scroll-behavior: smooth;
+}
 
 body {
 	margin: 0;
@@ -111,12 +118,17 @@ body {
 		var(--bg-radials),
 		linear-gradient(var(--bg-grid) 1px, transparent 1px),
 		linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
-	background-size: 100% 100%, 100% 100%, 44px 44px, 44px 44px;
+	background-size: 100% 100%, 100% 100%, 100% 100%, 46px 46px, 46px 46px;
 	background-attachment: fixed;
 	color: var(--text);
 	font: 400 var(--fs) / 1.55 var(--sans);
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
+}
+
+::selection {
+	background: var(--accent-soft);
+	color: var(--text-strong);
 }
 
 h1,
@@ -126,6 +138,55 @@ h3 {
 	color: var(--text-strong);
 	letter-spacing: 0.2px;
 	font-weight: 700;
+	text-wrap: balance;
+}
+
+/* ---------------- APP BAR ---------------- */
+.appbar {
+	position: sticky;
+	top: 0;
+	z-index: 50;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	flex-wrap: wrap;
+	margin: calc(var(--pad) * -1) calc(var(--pad) * -1) 18px;
+	padding: 11px var(--pad);
+	background: color-mix(in srgb, var(--bg) 92%, transparent);
+	backdrop-filter: blur(16px) saturate(1.3);
+	-webkit-backdrop-filter: blur(16px) saturate(1.3);
+	border-bottom: 1px solid var(--border);
+	box-shadow: 0 10px 30px -20px rgba(0, 0, 0, 0.6);
+}
+.brand {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	margin: 0;
+	font-family: 'Oxanium', var(--sans);
+	font-size: 18px;
+	font-weight: 800;
+	letter-spacing: 2.5px;
+	text-transform: uppercase;
+}
+.brand .mark {
+	color: var(--accent);
+	filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 55%, transparent));
+}
+.brand .sub {
+	color: var(--muted);
+	font-weight: 600;
+	letter-spacing: 1.5px;
+}
+.icon-btn {
+	width: 34px;
+	height: 34px;
+	padding: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 15px;
+	line-height: 1;
 }
 
 .mono,
@@ -150,11 +211,17 @@ button {
 		transform 0.08s ease;
 }
 button:hover {
-	border-color: var(--accent);
+	border-color: color-mix(in srgb, var(--accent) 55%, var(--border-strong));
 	color: var(--text-strong);
+	background: linear-gradient(180deg, var(--panel-2), var(--panel-2));
 }
 button:active {
 	transform: translateY(1px);
+}
+button:focus-visible {
+	outline: none;
+	border-color: var(--accent);
+	box-shadow: 0 0 0 3px var(--accent-soft);
 }
 button.primary {
 	background: var(--primary-bg);
@@ -194,7 +261,9 @@ select:focus {
 
 .panel {
 	position: relative;
-	background: linear-gradient(180deg, var(--panel), var(--panel-3));
+	background:
+		radial-gradient(120% 120% at 0% 0%, var(--panel-hi), transparent 42%),
+		linear-gradient(180deg, var(--panel), var(--panel-3));
 	border: 1px solid var(--border);
 	border-radius: var(--r);
 	padding: var(--pad);
@@ -249,7 +318,11 @@ select:focus {
 .prezzo-hero {
 	font: 800 44px/1 var(--mono);
 	color: var(--cyan);
-	text-shadow: 0 0 26px rgba(92, 225, 255, 0.5);
+	background: linear-gradient(180deg, color-mix(in srgb, var(--cyan) 55%, #ffffff), var(--cyan));
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	filter: drop-shadow(0 0 24px color-mix(in srgb, var(--cyan) 45%, transparent));
 	letter-spacing: -1px;
 }
 
@@ -318,28 +391,32 @@ select:focus {
 /* --- barra tab (segmented) --- */
 .tabbar {
 	display: inline-flex;
-	gap: 2px;
-	padding: 4px;
-	border-radius: 10px;
-	background: var(--panel-3);
+	gap: 3px;
+	padding: 5px;
+	border-radius: 13px;
+	background: linear-gradient(180deg, var(--panel-3), var(--panel));
 	border: 1px solid var(--border);
+	box-shadow: var(--shadow);
 	flex-wrap: wrap;
 }
 .tabbar button {
 	background: transparent;
 	border: 1px solid transparent;
-	padding: 6px 12px;
+	padding: 7px 13px;
 	font-size: 13px;
 	color: var(--muted);
 }
 .tabbar button:hover {
 	color: var(--text-strong);
+	background: var(--panel-hi);
 }
 .tabbar button.on {
-	background: linear-gradient(180deg, var(--panel-2), var(--panel-3));
-	border-color: var(--border-strong);
+	background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 15%, var(--panel-2)), var(--panel-3));
+	border-color: color-mix(in srgb, var(--accent) 34%, var(--border-strong));
 	color: var(--text-strong);
-	box-shadow: inset 0 0 0 1px rgba(94, 255, 156, 0.1);
+	box-shadow:
+		inset 0 1px 0 color-mix(in srgb, var(--accent) 20%, transparent),
+		0 8px 22px -14px var(--ring);
 }
 
 table {
@@ -359,7 +436,17 @@ table td {
 	padding: var(--pad-row) 0;
 }
 
-::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar { width: 11px; height: 11px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #26333f; border-radius: 6px; border: 2px solid var(--bg); }
-::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+::-webkit-scrollbar-thumb {
+	background: var(--border-strong);
+	border-radius: 8px;
+	border: 3px solid transparent;
+	background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--muted); background-clip: padding-box; }
+
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+	html { scroll-behavior: auto; }
+}

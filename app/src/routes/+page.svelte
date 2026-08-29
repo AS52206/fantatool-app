@@ -148,16 +148,16 @@
 	}
 </script>
 
-<div style="max-width:1280px;margin:0 auto;padding:16px;">
-	<header style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:12px;">
-		<h1 style="margin:0;font-size:19px;text-transform:uppercase;letter-spacing:1.5px;">
-			<span style="color:var(--accent);">▮</span> Fantatool <span class="muted" style="font-weight:400;">/ asta</span>
+<div style="max-width:1280px;margin:0 auto;padding:var(--pad);">
+	<header class="appbar">
+		<h1 class="brand">
+			<span class="mark">▮</span> Fantatool <span class="sub">/ asta</span>
 		</h1>
 		<span class="muted mono" style="font-size:11px;">{metaTxt}</span>
 		<div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
 			<span class="tag" title="Salvataggio automatico locale">💾 {ora(asta.ultimoSalvataggio)}</span>
-			<button onclick={() => ui.toggleTema()} title="Tema chiaro / scuro" style="padding:8px 10px;">{ui.tema === 'scuro' ? '☀︎' : '☾'}</button>
-			<button onclick={() => ui.toggleDensita()} title="Densità comoda / compatta" style="padding:8px 10px;">{ui.densita === 'comoda' ? '▤' : '▦'}</button>
+			<button class="icon-btn" onclick={() => ui.toggleTema()} title="Tema chiaro / scuro">{ui.tema === 'scuro' ? '☀︎' : '☾'}</button>
+			<button class="icon-btn" onclick={() => ui.toggleDensita()} title="Densità comoda / compatta">{ui.densita === 'comoda' ? '▤' : '▦'}</button>
 			<button onclick={() => (mostraSetup = !mostraSetup)}>⚙️ Setup</button>
 			<button onclick={() => scarica(asta.esporta(), `asta-${oggi()}.json`, 'application/json')}>⬇︎ Backup</button>
 			{#if asta.acquisti.length}
