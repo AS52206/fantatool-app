@@ -1,0 +1,46 @@
+<script lang="ts">
+	let { size = 30 }: { size?: number } = $props();
+	const uid = 'lg' + Math.random().toString(36).slice(2, 7);
+</script>
+
+<svg
+	width={size}
+	height={size}
+	viewBox="0 0 48 48"
+	fill="none"
+	xmlns="http://www.w3.org/2000/svg"
+	role="img"
+	aria-label="Fantatool"
+	style="display:block;flex:none;"
+>
+	<defs>
+		<linearGradient id="{uid}-badge" x1="6" y1="4" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+			<stop offset="0" stop-color="#6bffab" />
+			<stop offset="0.5" stop-color="#33e6c9" />
+			<stop offset="1" stop-color="#4bd6ff" />
+		</linearGradient>
+		<linearGradient id="{uid}-bolt" x1="16" y1="42" x2="33" y2="6" gradientUnits="userSpaceOnUse">
+			<stop offset="0" stop-color="#06231c" />
+			<stop offset="1" stop-color="#0b2f3c" />
+		</linearGradient>
+		<filter id="{uid}-sh" x="-30%" y="-30%" width="160%" height="160%">
+			<feDropShadow dx="0" dy="1" stdDeviation="0.8" flood-color="#00110d" flood-opacity="0.35" />
+		</filter>
+	</defs>
+
+	<!-- badge -->
+	<rect x="4" y="4" width="40" height="40" rx="13" fill="url(#{uid}-badge)" />
+	<!-- lucido in alto -->
+	<path d="M17 4h27a0 0 0 0 1 0 0v6c-14 0-21 8-40 8V17C4 9.8 9.8 4 17 4Z" fill="#ffffff" fill-opacity="0.16" />
+	<!-- cerchio di centrocampo -->
+	<circle cx="24" cy="24" r="13.2" stroke="#06231c" stroke-opacity="0.28" stroke-width="1.6" />
+
+	<!-- fulmine = scatto d'asta + "F" -->
+	<path
+		d="M27.9 6.4 15.4 26.1c-.5.8.06 1.8 1 1.8h6l-2.1 12.5c-.2 1.2 1.4 1.9 2.1.8L34.7 21c.5-.8-.06-1.9-1-1.9h-6.2l3-11c.3-1.2-1.2-2-2-1Z"
+		fill="url(#{uid}-bolt)"
+		filter="url(#{uid}-sh)"
+	/>
+	<!-- riflesso sul fulmine -->
+	<path d="M27.9 6.4 20 18.9l2.4 1L27.9 6.4Z" fill="#ffffff" fill-opacity="0.14" />
+</svg>

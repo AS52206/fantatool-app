@@ -170,8 +170,9 @@ h3 {
 	text-transform: uppercase;
 }
 .brand .mark {
-	color: var(--accent);
-	filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 55%, transparent));
+	display: inline-flex;
+	line-height: 0;
+	filter: drop-shadow(0 2px 10px rgba(56, 232, 198, 0.35));
 }
 .brand .sub {
 	color: var(--muted);

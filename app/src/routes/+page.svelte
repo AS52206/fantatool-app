@@ -7,6 +7,7 @@
 	import { importaRoseDaFile, type RisultatoImport } from '$lib/data/importRose';
 	import { MODULI_MANTRA } from '$lib/engine/mantra';
 	import Crest from '$lib/ui/Crest.svelte';
+	import Logo from '$lib/ui/Logo.svelte';
 	import type { Ruolo } from '$lib/domain/types';
 	import Draft from '$lib/views/Draft.svelte';
 	import Rose from '$lib/views/Rose.svelte';
@@ -151,7 +152,7 @@
 <div style="max-width:1280px;margin:0 auto;padding:var(--pad);">
 	<header class="appbar">
 		<h1 class="brand">
-			<span class="mark">▮</span> Fantatool <span class="sub">/ asta</span>
+			<span class="mark"><Logo size={30} /></span> Fantatool <span class="sub">/ asta</span>
 		</h1>
 		<span class="muted mono" style="font-size:11px;">{metaTxt}</span>
 		<div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
