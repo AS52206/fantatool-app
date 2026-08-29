@@ -9,15 +9,21 @@
 	}: { nome?: string | null; tipo?: 'loghi' | 'stemmi'; size?: number; title?: string } = $props();
 
 	let url = $derived(urlCrest(nome, tipo));
+	let errore = $state(false);
+	$effect(() => {
+		void url;
+		errore = false;
+	});
 </script>
 
-{#if url}
+{#if url && !errore}
 	<img
 		src={url}
 		alt={nome ?? ''}
 		title={title ?? nome ?? ''}
 		width={size}
 		height={size}
+		onerror={() => (errore = true)}
 		style="border-radius:3px;object-fit:contain;vertical-align:middle;flex:0 0 auto;"
 	/>
 {:else if tipo === 'stemmi' && nome}

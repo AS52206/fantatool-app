@@ -1,33 +1,23 @@
 import { base } from '$app/paths';
+import manifest from './assetsManifest.json';
 
+// manifest generato da tools/sync_assets.py — importato in modo sincrono,
+// così i <Crest> hanno l'URL già al primo render (niente fetch, niente race).
 type Manifest = { loghi: Record<string, string>; stemmi: Record<string, string> };
-let manifest: Manifest = { loghi: {}, stemmi: {} };
-let caricato = false;
-
-/** Carica app/static/assets/manifest.json una volta sola. */
-export async function caricaManifestAsset(): Promise<void> {
-	if (caricato) return;
-	try {
-		const r = await fetch(`${base}/assets/manifest.json`);
-		if (r.ok) manifest = (await r.json()) as Manifest;
-	} catch {
-		/* nessun manifest: i crest non vengono mostrati */
-	}
-	caricato = true;
-}
+const m = manifest as Manifest;
 
 const norm = (s: string) => s.trim().toLowerCase().replace(/[\s'’.]/g, '');
 
 /** URL del logo/stemma per un nome, o null se non c'è. */
 export function urlCrest(nome: string | undefined | null, tipo: 'loghi' | 'stemmi'): string | null {
 	if (!nome) return null;
-	const file = manifest[tipo][norm(nome)];
+	const file = m[tipo]?.[norm(nome)];
 	return file ? `${base}/assets/${tipo}/${file}` : null;
 }
 
 /** Elenco {chiave, url} degli stemmi disponibili, per i selettori. */
 export function stemmiDisponibili(): { chiave: string; file: string; url: string }[] {
-	return Object.entries(manifest.stemmi).map(([chiave, file]) => ({
+	return Object.entries(m.stemmi ?? {}).map(([chiave, file]) => ({
 		chiave,
 		file,
 		url: `${base}/assets/stemmi/${file}`

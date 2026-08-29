@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { asta } from '$lib/stores/auction.svelte';
 	import { caricaBundle } from '$lib/data/load';
-	import { caricaManifestAsset, stemmiDisponibili } from '$lib/assets';
+	import { stemmiDisponibili } from '$lib/assets';
 	import { MODULI_MANTRA } from '$lib/engine/mantra';
 	import Crest from '$lib/ui/Crest.svelte';
 	import type { Ruolo } from '$lib/domain/types';
@@ -58,13 +58,10 @@
 		}
 	}
 
-	let manifestPronto = $state(false);
-	onMount(async () => {
+	onMount(() => {
 		mostraSetup = !asta.avviata;
-		await caricaManifestAsset();
-		manifestPronto = true;
 	});
-	const stemmi = $derived(manifestPronto ? stemmiDisponibili() : []);
+	const stemmi = stemmiDisponibili();
 	$effect(() => {
 		caricaDati(asta.config.stagione, asta.config.modalita, asta.config.partecipanti);
 	});

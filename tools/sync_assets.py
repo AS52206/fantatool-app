@@ -22,6 +22,8 @@ from pathlib import Path
 RADICE = Path(__file__).resolve().parents[1]
 SORGENTI = {"loghi": RADICE / "assets" / "Loghi", "stemmi": RADICE / "assets" / "Stemmi"}
 DEST = RADICE / "app" / "static" / "assets"
+# Il manifest va importato in modo sincrono dal codice: sta in src/lib, non in static.
+MANIFEST = RADICE / "app" / "src" / "lib" / "assetsManifest.json"
 
 
 def norm(nome: str) -> str:
@@ -54,11 +56,9 @@ def main() -> None:
         manifest[tipo] = mappa
         print(f"  {tipo}: {len(mappa)} file")
 
-    DEST.mkdir(parents=True, exist_ok=True)
-    (DEST / "manifest.json").write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=1), encoding="utf-8"
-    )
-    print(f"OK  {(DEST / 'manifest.json').relative_to(RADICE)}")
+    MANIFEST.parent.mkdir(parents=True, exist_ok=True)
+    MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"OK  {MANIFEST.relative_to(RADICE)}")
 
 
 if __name__ == "__main__":
