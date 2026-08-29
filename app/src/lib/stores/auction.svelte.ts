@@ -814,32 +814,39 @@ export class Asta {
 	}
 
 	// ----------------------------------------------------------------- BUDGET
-	/** Ripartizione budget per reparto (mia squadra): quota, speso, residuo, poteri. */
-	get budgetPerReparto() {
-		const bil = this.bilanciCompleti[this.miaSquadra];
+	/** Ripartizione budget per reparto di una squadra: quota, speso, %, residuo, poteri. */
+	budgetPerRepartoDi(squadra: string) {
+		const bil = this.bilanciCompleti[squadra] ?? this.bilanciCompleti[this.miaSquadra];
+		const budget = this.config.budgetMax;
 		return (['P', 'D', 'C', 'A'] as Ruolo[]).map((r) => {
+			const speso = (bil[`spesi_${r}`] as number) ?? 0;
 			const inc = calcolaIncidenzeBudget({
-				budgetIniziale: this.config.budgetMax,
+				budgetIniziale: budget,
 				pma: 0,
 				pfc: 0,
 				fasciaMin: 0,
 				fasciaMax: 0,
 				riferimento: 0,
 				quotaReparto: QUOTE_RUOLO[r],
-				spesoReparto: (bil[`spesi_${r}`] as number) ?? 0
+				spesoReparto: speso
 			});
-			const poteri = calcolaPoteriAcquisto(bil, r, this.config.limiti, this.config.budgetMax, QUOTE_RUOLO);
+			const poteri = calcolaPoteriAcquisto(bil, r, this.config.limiti, budget, QUOTE_RUOLO);
 			return {
 				ruolo: r,
 				presi: bil.perRuolo[r],
 				limite: this.config.limiti[r],
 				quota_pct: inc.quota_reparto_pct,
 				budget_reparto: inc.budget_reparto,
-				speso: inc.speso_reparto,
+				speso,
+				speso_pct: inc.speso_reparto_pct,
 				residuo: inc.residuo_reparto,
 				poteri
 			};
 		});
+	}
+
+	get budgetPerReparto() {
+		return this.budgetPerRepartoDi(this.miaSquadra);
 	}
 
 	/** Matrice della domanda per ruolo tra i rivali (classic). */
