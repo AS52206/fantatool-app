@@ -1,12 +1,21 @@
 <script lang="ts">
 	import { asta } from '$lib/stores/auction.svelte';
 	import { normalizzaNome } from '$lib/engine/names';
+	import { MODULI_MANTRA } from '$lib/engine/mantra';
+	import { buildCampoClassic, buildCampoMantra, MODULI_CLASSIC, type GiocatoreCampo } from '$lib/campo';
 	import RoleTag from '$lib/ui/RoleTag.svelte';
 	import Crest from '$lib/ui/Crest.svelte';
+	import FormationPitch from '$lib/ui/FormationPitch.svelte';
 
 	let attivo = $state<string>('');
 	let query = $state('');
 	let confrontaCon = $state<string>('');
+	let modulo = $state('');
+	const moduliDisponibili = $derived(asta.isMantra ? Object.keys(MODULI_MANTRA) : MODULI_CLASSIC);
+	$effect(() => {
+		if (!moduliDisponibili.includes(modulo))
+			modulo = asta.isMantra ? (asta.moduliTargetValidi[0] ?? '3-4-1-2') : '4-3-3';
+	});
 
 	const nomi = $derived(Object.keys(asta.scenari));
 	$effect(() => {
@@ -41,6 +50,41 @@
 {#if attivo}
 	{@const righe = asta.righeScenario(attivo)}
 	{@const an = asta.analisiScenario(attivo)}
+	{@const campoInput = righe.filter((r) => r.stato !== 'PERSO').map((r): GiocatoreCampo => ({
+		chiave: r.chiave,
+		nome: r.nome,
+		club: r.giocatore?.squadra,
+		ruolo: r.ruolo || 'C',
+		ruoloMantra: r.ruoloMantra,
+		prezzo: r.stato === 'PRESO' ? r.prezzoEffettivo : r.max,
+		stato: r.stato === 'PRESO' ? 'PRESO' : 'LIBERO'
+	}))}
+	{@const campo = asta.isMantra ? buildCampoMantra(campoInput, modulo) : buildCampoClassic(campoInput, modulo)}
+
+	<div class="panel" style="margin-bottom:16px;">
+		<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+			<h2 style="margin:0;font-size:15px;">Disposizione in campo</h2>
+			<select bind:value={modulo} style="font-family:var(--mono);">
+				{#each moduliDisponibili as m}<option value={m}>{m}</option>{/each}
+			</select>
+			<span class="muted" style="font-size:11px;">
+				{#if asta.isMantra}incastro reale sui ruoli Mantra{:else}reparti P/D/C/A, titolari per prezzo{/if}
+				· <span style="color:var(--ok);">■</span> preso · <span style="color:var(--cyan);">■</span> obiettivo
+			</span>
+		</div>
+		<FormationPitch linee={campo.linee} titolo={campo.modulo} />
+		{#if campo.panchina.length}
+			<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;font-size:12px;">
+				<span class="muted mono" style="align-self:center;">PANCHINA</span>
+				{#each campo.panchina as p}
+					<span class="tag" data-ruolo={p.ruolo}>
+						{p.nome}{#if asta.isMantra && p.ruoloMantra}<span class="muted"> {p.ruoloMantra}</span>{/if}
+					</span>
+				{/each}
+			</div>
+		{/if}
+	</div>
+
 	<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start;">
 		<div class="panel">
 			<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
