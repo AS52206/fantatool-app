@@ -1,12 +1,7 @@
 <script lang="ts">
 	import { asta } from '$lib/stores/auction.svelte';
 	import { normalizzaNome } from '$lib/engine/names';
-	import {
-		MODULI_MANTRA,
-		PROFILI_ROSA_MANTRA,
-		PIANO_ROSA_MANTRA_30,
-		analizzaPianoRosaMantra
-	} from '$lib/engine/mantra';
+	import { MODULI_MANTRA, PROFILI_ROSA_MANTRA, PIANO_ROSA_MANTRA_30 } from '$lib/engine/mantra';
 	import { buildCampoClassic, buildCampoMantra, MODULI_CLASSIC, type GiocatoreCampo } from '$lib/campo';
 	import type { Ruolo } from '$lib/domain/types';
 	import RoleTag from '$lib/ui/RoleTag.svelte';
@@ -100,7 +95,14 @@
 		asta.isMantra ? buildCampoMantra(campoInput, modulo) : buildCampoClassic(campoInput, modulo)
 	);
 
-	/** Ricambi consigliati per la rosa Mantra completa (modulo + n° giocatori di lega). */
+	const tokensRuolo = (rm: unknown) =>
+		String(rm ?? '')
+			.split(/[;,/]/)
+			.map((s) => s.trim())
+			.filter(Boolean);
+
+	/** Ricambi consigliati per la rosa Mantra completa (modulo + n° giocatori di lega).
+	 *  Un giocatore polivalente (es. Dd;E) conta in OGNI ruolo che può coprire. */
 	const ricambiMantra = $derived.by(() => {
 		if (!asta.isMantra) return [];
 		const tot = asta.config.limiti.TOT || 25;
@@ -115,13 +117,13 @@
 				acc += piano[k];
 			}
 		});
-		const ruoli = righe
+		const ruoliPlan = righe
 			.filter((r) => r.stato !== 'PERSO')
-			.map((r) => r.ruoloMantra || r.ruolo);
-		const a = analizzaPianoRosaMantra(ruoli, piano, tot, modulo);
+			.map((r) => tokensRuolo(r.ruoloMantra || r.ruolo));
 		return PROFILI_ROSA_MANTRA.map(([chiave, etichetta, roli]) => {
-			const d = a.profili[chiave] as { presenti: number; obiettivo: number; mancanti: number };
-			return { chiave, etichetta, roli, ...d };
+			const obiettivo = piano[chiave] ?? 0;
+			const presenti = ruoliPlan.filter((toks) => toks.some((t) => roli.includes(t))).length;
+			return { chiave, etichetta, roli, presenti, obiettivo, mancanti: Math.max(0, obiettivo - presenti) };
 		});
 	});
 
@@ -135,6 +137,7 @@
 		});
 	});
 	const ricambi = $derived(asta.isMantra ? ricambiMantra : ricambiClassic);
+	const totalePiano = $derived(righe.filter((r) => r.stato !== 'PERSO').length);
 
 	/** Slot ancora scoperti nel modulo scelto, raggruppati per ruolo. */
 	const ruoliDaCoprire = $derived.by(() => {
@@ -214,10 +217,12 @@
 				<div>
 					<h3 style="margin:0 0 2px;font-size:13px;">
 						Ricambi consigliati
-						<span class="muted mono" style="font-size:11px;">· {asta.isMantra ? modulo + ', ' : ''}{asta.config.limiti.TOT} in rosa</span>
+						<span class="mono" style="font-size:11px;color:{totalePiano >= asta.config.limiti.TOT ? 'var(--ok)' : 'var(--muted)'};">
+							· {totalePiano}/{asta.config.limiti.TOT} in rosa
+						</span>
 					</h3>
 					<p class="muted" style="font-size:10px;margin:0 0 6px;">
-						quanti giocatori per ruolo per una rosa completa e con ricambi
+						{#if asta.isMantra}un giocatore polivalente (es. Dd;E) conta in ogni ruolo che può coprire{:else}giocatori per reparto per la rosa completa{/if}
 					</p>
 					<div style="display:flex;flex-direction:column;gap:4px;">
 						{#each ricambi as p}
