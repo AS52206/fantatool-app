@@ -2,16 +2,27 @@
 	import { asta } from '$lib/stores/auction.svelte';
 	import Crest from '$lib/ui/Crest.svelte';
 	import { analizzaRosaMantra, MODULI_MANTRA } from '$lib/engine/mantra';
+	import { MODULI_CLASSIC } from '$lib/campo';
 	import type { Ruolo } from '$lib/domain/types';
 
-	// XI di riferimento uguale per tutti: 3-4-3 (P non conta nel modulo, 1 fisso)
-	const FORMAZIONE: Record<Ruolo, number> = { P: 1, D: 3, C: 4, A: 3 };
 	const RUOLI: Ruolo[] = ['P', 'D', 'C', 'A'];
 	const N_MODULI = Object.keys(MODULI_MANTRA).length;
+	const MIN_ACQ_EFFICIENZA = 5;
+
+	let moduloRif = $state('3-4-3');
+	// modulo "3-4-3" -> { P:1, D:3, C:4, A:3 }
+	const formazione = $derived.by<Record<Ruolo, number>>(() => {
+		const cifre = moduloRif.split('-').map(Number).filter((x) => x > 0);
+		const [d = 3, ...resto] = cifre;
+		const a = resto.length ? resto[resto.length - 1] : 3;
+		const c = cifre.slice(1, -1).reduce((s, x) => s + x, 0) || (cifre.length <= 2 ? 3 : 0);
+		return { P: 1, D: d, C: c, A: a };
+	});
 
 	type Xi = { fanta: number; tit: number; n: number };
 	function xiDi(sq: string): Xi {
 		const rosa = asta.rosa(sq);
+		const form = formazione;
 		const val = (a: (typeof rosa)[number]) =>
 			a.player?.fc?.expectedFantamedia || a.player?.fc?.pma || a.player?.quotazione || 0;
 		let fanta = 0;
@@ -22,7 +33,7 @@
 			const pool = rosa
 				.filter((a) => a.ruolo === r)
 				.sort((x, y) => val(y) - val(x))
-				.slice(0, FORMAZIONE[r]);
+				.slice(0, form[r]);
 			for (const a of pool) {
 				fanta += a.player?.fc?.expectedFantamedia ?? 0;
 				const t = a.player?.fc?.expectedTitolarita;
@@ -69,7 +80,7 @@
 		const base: Metrica[] = [
 			{ id: 'proiezione', label: 'Proiezione XI', nota: 'Somma fantamedia attesa dei migliori 11', fmt: 'dec', v: (s) => xiDi(s).fanta },
 			{ id: 'titxi', label: 'Titolarità XI', nota: '% titolarità media dei soli 11 titolari', fmt: 'pct', v: (s) => xiDi(s).tit / 100 },
-			{ id: 'efficienza', label: 'Efficienza', nota: 'PMA acquistato per credito speso', fmt: 'dec', v: (s) => pmaTotale(s) / Math.max(1, spesaDi(s)) },
+			{ id: 'efficienza', label: 'Efficienza', nota: `PMA acquistato per credito speso (da ${MIN_ACQ_EFFICIENZA} giocatori)`, fmt: 'dec', v: (s) => (asta.bilanci[s].g_presi < MIN_ACQ_EFFICIENZA ? 0 : pmaTotale(s) / Math.max(1, spesaDi(s))) },
 			{ id: 'equilibrio', label: 'Equilibrio reparti', nota: '100 − scarto max dalla quota P/D/C/A', fmt: 'n', v: (s) => equilibrio(s) },
 			{ id: 'fmrosa', label: 'Fantamedia rosa', nota: 'Fantamedia attesa media dell\'intera rosa', fmt: 'dec', v: (s) => fantamediaRosa(s) },
 			{ id: 'big', label: 'Big in rosa', nota: 'Top = 2, Semi-Top = 1', fmt: 'n', v: (s) => bigIndex(s) }
@@ -141,6 +152,12 @@
 			<Crest nome={sq.stemma || sq.nome} tipo="stemmi" size={16} />{sq.nome}{sq.isMia ? ' ★' : ''}
 		</button>
 	{/each}
+	<label class="muted" style="font-size:12px;margin-left:auto;">
+		XI di riferimento
+		<select bind:value={moduloRif} style="font-family:var(--mono);margin-left:4px;">
+			{#each MODULI_CLASSIC as m}<option value={m}>{m}</option>{/each}
+		</select>
+	</label>
 </div>
 
 {#if squadreSel.length < 2}
@@ -183,7 +200,7 @@
 				{/each}
 			</div>
 			<p class="muted" style="font-size:10px;margin-top:6px;max-width:360px;">
-				Ogni asse è normalizzato sul valore più alto fra le squadre a confronto. XI di riferimento: 3-4-3.
+				Ogni asse è normalizzato sul valore più alto fra le squadre a confronto. XI di riferimento: {moduloRif}.
 			</p>
 		</div>
 

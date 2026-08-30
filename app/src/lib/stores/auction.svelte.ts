@@ -77,7 +77,18 @@ interface Snapshot {
 	acquisti: Acquisto[];
 	avviata: boolean;
 	scenari?: Scenari;
+	/** Coda chiamate: id dei giocatori che stai per chiamare / aspettando. */
+	codaChiamate?: number[];
 }
+
+interface RingItem {
+	t: number;
+	n: number;
+	snap: Snapshot;
+}
+const chiaveRing = (m: string) => `${chiaveMod(m)}.ring`;
+const MAX_RING = 15;
+const MAX_STORIA = 60;
 
 const CONFIG_DEFAULT: ConfigAsta = {
 	budgetMax: 500,
@@ -133,10 +144,17 @@ export class Asta {
 	avviata = $state(false);
 	giocatori = $state<Giocatore[]>([]);
 	scenari = $state<Scenari>({});
+	codaChiamate = $state<number[]>([]);
 	ultimoSalvataggio = $state<number | null>(null);
 
 	/** true durante il caricamento/switch: sospende l'autosave. */
 	private caricando = false;
+
+	/** Cronologia acquisti per annulla/ripeti (solo sessione, non persistita). */
+	private storiaUndo = $state<Acquisto[][]>([]);
+	private storiaRedo = $state<Acquisto[][]>([]);
+	/** Ultimo numero di acquisti salvato nel ring di backup. */
+	private ultimoRingN = -1;
 
 	constructor() {
 		const m = modalitaAttiva();
@@ -151,12 +169,14 @@ export class Asta {
 					config: this.config,
 					acquisti: this.acquisti,
 					avviata: this.avviata,
-					scenari: this.scenari
+					scenari: this.scenari,
+					codaChiamate: this.codaChiamate
 				};
 				if (this.caricando) return;
 				try {
 					localStorage.setItem(chiave, JSON.stringify(snap));
 					this.ultimoSalvataggio = Date.now();
+					this.aggiornaRing(snap);
 				} catch {
 					/* quota piena o storage non disponibile: la UI mostra l'avviso */
 				}
@@ -178,6 +198,91 @@ export class Asta {
 		this.acquisti = s?.acquisti ?? [];
 		this.avviata = s?.avviata ?? false;
 		this.scenari = s?.scenari ?? {};
+		this.codaChiamate = s?.codaChiamate ?? [];
+		this.storiaUndo = [];
+		this.storiaRedo = [];
+		this.ultimoRingN = -1;
+	}
+
+	// ------------------------------------------------- annulla / ripeti
+	private registra() {
+		this.storiaUndo = [
+			...this.storiaUndo.slice(-(MAX_STORIA - 1)),
+			this.acquisti.map((a) => ({ ...a }))
+		];
+		this.storiaRedo = [];
+	}
+	get puoiAnnullare(): boolean {
+		return this.storiaUndo.length > 0;
+	}
+	get puoiRipetere(): boolean {
+		return this.storiaRedo.length > 0;
+	}
+	annulla() {
+		const prev = this.storiaUndo.at(-1);
+		if (!prev) return;
+		this.storiaRedo = [...this.storiaRedo, this.acquisti.map((a) => ({ ...a }))];
+		this.storiaUndo = this.storiaUndo.slice(0, -1);
+		this.acquisti = prev;
+	}
+	ripeti() {
+		const next = this.storiaRedo.at(-1);
+		if (!next) return;
+		this.storiaUndo = [...this.storiaUndo, this.acquisti.map((a) => ({ ...a }))];
+		this.storiaRedo = this.storiaRedo.slice(0, -1);
+		this.acquisti = next;
+	}
+
+	// ------------------------------------------------- ring di backup automatico
+	private aggiornaRing(snap: Snapshot) {
+		if (typeof localStorage === 'undefined' || !snap.avviata) return;
+		const n = snap.acquisti.length;
+		if (n === this.ultimoRingN) return;
+		this.ultimoRingN = n;
+		const k = chiaveRing(this.config.modalita);
+		let ring: RingItem[] = [];
+		try {
+			ring = JSON.parse(localStorage.getItem(k) ?? '[]');
+		} catch {
+			ring = [];
+		}
+		ring.push({ t: Date.now(), n, snap: JSON.parse(JSON.stringify(snap)) });
+		try {
+			localStorage.setItem(k, JSON.stringify(ring.slice(-MAX_RING)));
+		} catch {
+			/* quota piena: salta */
+		}
+	}
+	/** Metadati dei backup automatici disponibili (più recente in fondo). */
+	get elencoBackup(): { t: number; n: number }[] {
+		void this.acquisti.length; // dipendenza reattiva
+		if (typeof localStorage === 'undefined') return [];
+		try {
+			const ring: RingItem[] = JSON.parse(
+				localStorage.getItem(chiaveRing(this.config.modalita)) ?? '[]'
+			);
+			return ring.map((r) => ({ t: r.t, n: r.n }));
+		} catch {
+			return [];
+		}
+	}
+	ripristinaDaBackup(t: number) {
+		if (typeof localStorage === 'undefined') return;
+		let ring: RingItem[] = [];
+		try {
+			ring = JSON.parse(localStorage.getItem(chiaveRing(this.config.modalita)) ?? '[]');
+		} catch {
+			return;
+		}
+		const item = ring.find((r) => r.t === t);
+		if (!item) return;
+		const prima = this.acquisti.map((a) => ({ ...a }));
+		this.caricando = true;
+		this.applicaSnapshot(item.snap, this.config.modalita);
+		this.caricando = false;
+		this.storiaUndo = [prima];
+		this.storiaRedo = [];
+		this.salvaCorrente();
 	}
 
 	private salvaCorrente() {
@@ -189,7 +294,8 @@ export class Asta {
 					config: this.config,
 					acquisti: this.acquisti,
 					avviata: this.avviata,
-					scenari: this.scenari
+					scenari: this.scenari,
+					codaChiamate: this.codaChiamate
 				})
 			);
 		} catch {
@@ -657,6 +763,7 @@ export class Asta {
 
 	assegna(g: Giocatore, prezzo: number, proprietario: string) {
 		if (this.giocatoreIdPresi.has(g.id)) throw new Error(`${g.nome} è già stato assegnato`);
+		this.registra();
 		const ordine = this.acquisti.reduce((m, a) => Math.max(m, a.ordine), 0) + 1;
 		this.acquisti = [
 			...this.acquisti,
@@ -673,16 +780,42 @@ export class Asta {
 			}
 		];
 		this.avviata = true;
+		if (this.codaChiamate.includes(g.id))
+			this.codaChiamate = this.codaChiamate.filter((id) => id !== g.id);
 	}
 
+	/** Retrocompat: annulla l'ultima mossa (alias di annulla()). */
 	annullaUltimo() {
-		if (!this.acquisti.length) return;
-		const maxOrdine = this.acquisti.reduce((m, a) => Math.max(m, a.ordine), 0);
-		this.acquisti = this.acquisti.filter((a) => a.ordine !== maxOrdine);
+		this.annulla();
 	}
 
 	rimuovi(giocatoreId: number) {
+		if (!this.acquisti.some((a) => a.giocatoreId === giocatoreId)) return;
+		this.registra();
 		this.acquisti = this.acquisti.filter((a) => a.giocatoreId !== giocatoreId);
+	}
+
+	// ------------------------------------------------- coda chiamate
+	aggiungiCoda(id: number) {
+		if (!this.codaChiamate.includes(id)) this.codaChiamate = [...this.codaChiamate, id];
+	}
+	rimuoviCoda(id: number) {
+		this.codaChiamate = this.codaChiamate.filter((x) => x !== id);
+	}
+	svuotaCoda() {
+		this.codaChiamate = [];
+	}
+	inCoda(id: number): boolean {
+		return this.codaChiamate.includes(id);
+	}
+	/** Giocatori in coda ancora liberi, nell'ordine di inserimento. */
+	get coda(): Giocatore[] {
+		const presi = this.giocatoreIdPresi;
+		const byId = new Map(this.giocatori.map((g) => [g.id, g]));
+		return this.codaChiamate
+			.filter((id) => !presi.has(id))
+			.map((id) => byId.get(id))
+			.filter((g): g is Giocatore => !!g);
 	}
 
 	/** Backup completo: entrambe le aste (Classic + Mantra) in un solo file. */
@@ -754,6 +887,10 @@ export class Asta {
 		this.config.squadre = nuove.length ? nuove : this.config.squadre;
 		this.acquisti = acquisti;
 		this.avviata = true;
+		this.codaChiamate = [];
+		this.storiaUndo = [];
+		this.storiaRedo = [];
+		this.ultimoRingN = -1;
 	}
 
 	// ---------------------------------------------------------------- SCENARI

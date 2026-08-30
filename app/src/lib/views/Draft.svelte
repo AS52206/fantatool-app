@@ -20,7 +20,11 @@
 	let flagScelto = $state('');
 	let prezzoInput = $state(1);
 	let proprietarioScelto = $state(asta.miaSquadra);
+	let ricercaEl: HTMLInputElement;
+	let listaEl: HTMLElement;
+	let evidenziato = $state(0);
 
+	const gById = $derived(new Map(asta.giocatori.map((g) => [g.id, g])));
 	const presi = $derived(asta.giocatoreIdPresi);
 	const risultati = $derived.by(() => {
 		const q = normalizzaNome(query);
@@ -29,6 +33,69 @@
 		if (q) list = list.filter((g) => g.chiave.includes(q) || normalizzaNome(g.squadra).includes(q));
 		return [...list].sort((a, b) => b.quotazione - a.quotazione).slice(0, 40);
 	});
+	$effect(() => {
+		void risultati;
+		evidenziato = 0;
+	});
+	$effect(() => {
+		const el = listaEl?.querySelector(`[data-i="${evidenziato}"]`) as HTMLElement | null;
+		el?.scrollIntoView({ block: 'nearest' });
+	});
+
+	const ultimiAcquisti = $derived(
+		[...asta.acquisti].sort((a, b) => b.ordine - a.ordine).slice(0, 8)
+	);
+	const consigliatoRapido = (g: Giocatore) =>
+		g.fantalab?.prezzo_atteso || g.fc?.pma || g.quotazione || 1;
+
+	function daTastiera(e: KeyboardEvent) {
+		const t = e.target as HTMLElement | null;
+		const tag = t?.tagName;
+		const inCampo = tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA';
+		const inRicerca = t === ricercaEl;
+
+		if (e.key === '/' && !inCampo) {
+			e.preventDefault();
+			ricercaEl?.focus();
+			return;
+		}
+		if ((inRicerca || !inCampo) && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+			if (!risultati.length) return;
+			e.preventDefault();
+			evidenziato =
+				(evidenziato + (e.key === 'ArrowDown' ? 1 : -1) + risultati.length) % risultati.length;
+			return;
+		}
+		if (e.key === 'Enter') {
+			if (inRicerca) {
+				e.preventDefault();
+				const g = risultati[evidenziato];
+				if (g) seleziona(g);
+				ricercaEl?.blur();
+				return;
+			}
+			if (!inCampo && selezionato) {
+				e.preventDefault();
+				assegna();
+				return;
+			}
+		}
+		if (e.key === 'Escape') {
+			if (inRicerca) ricercaEl.blur();
+			else if (selezionato) selezionato = null;
+			return;
+		}
+		if (!inCampo && selezionato && (e.key === '+' || e.key === '=')) {
+			e.preventDefault();
+			prezzoInput = Math.max(1, prezzoInput + 1);
+		}
+		if (!inCampo && selezionato && (e.key === '-' || e.key === '_')) {
+			e.preventDefault();
+			prezzoInput = Math.max(1, prezzoInput - 1);
+		}
+		if (!inCampo && selezionato && (e.key === 'm' || e.key === 'M'))
+			proprietarioScelto = asta.miaSquadra;
+	}
 
 	const val = $derived.by(() =>
 		selezionato
@@ -68,20 +135,32 @@
 		a === 'COMPRA' ? 'var(--ok)' : a === 'VALUTA' ? 'var(--warn)' : 'var(--bad)';
 </script>
 
+<svelte:window onkeydown={daTastiera} />
+
 <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:start;">
 	<!-- SINISTRA: ricerca + consiglio -->
 	<div style="display:flex;flex-direction:column;gap:16px;">
 		<div class="panel">
-			<div style="display:flex;gap:8px;margin-bottom:10px;">
-				<input placeholder="Cerca giocatore o squadra…" bind:value={query} style="flex:1;" />
+			<div style="display:flex;gap:8px;margin-bottom:8px;">
+				<input bind:this={ricercaEl} placeholder="Cerca giocatore o squadra…  ( / )" bind:value={query} style="flex:1;" />
 				<select bind:value={ruoloFiltro}>
 					<option value="TUTTI">Tutti</option>
 					{#each RUOLI as r}<option value={r}>{r}</option>{/each}
 				</select>
 			</div>
-			<div style="max-height:280px;overflow:auto;">
-				{#each risultati as g (g.id)}
-					<button class="row-player {selezionato?.id === g.id ? 'sel' : ''}" onclick={() => seleziona(g)}>
+			<div class="muted" style="font-size:10px;margin-bottom:8px;letter-spacing:0.3px;">
+				<kbd>/</kbd> cerca · <kbd>↑↓</kbd> scorri · <kbd>invio</kbd> seleziona / assegna · <kbd>+</kbd><kbd>−</kbd> prezzo · <kbd>m</kbd> a me · <kbd>esc</kbd> annulla scelta
+			</div>
+			<div bind:this={listaEl} style="max-height:280px;overflow:auto;">
+				{#each risultati as g, i (g.id)}
+					<div
+						class="row-player {selezionato?.id === g.id || evidenziato === i ? 'sel' : ''}"
+						data-i={i}
+						role="button"
+						tabindex="-1"
+						onclick={() => seleziona(g)}
+						onkeydown={(e) => e.key === 'Enter' && seleziona(g)}
+					>
 						<RoleTag ruolo={g.ruolo} ruoloMantra={g.ruoloMantra} />
 						<Crest nome={g.squadra} size={16} />
 						<strong>{g.nome}</strong>
@@ -89,7 +168,15 @@
 						<span style="margin-left:auto;" class="muted mono">
 							Qt {g.quotazione}{#if g.fc?.pma}· PMA {g.fc.pma}{/if}{#if g.fantalab?.prezzo_atteso}· FL {g.fantalab.prezzo_atteso}{/if}{#if g.fc?.expectedTitolarita}· {Math.round(g.fc.expectedTitolarita)}%{/if}
 						</span>
-					</button>
+						<button
+							class="coda-add"
+							title={asta.inCoda(g.id) ? 'Togli dalla coda' : 'Aggiungi alla coda chiamate'}
+							onclick={(e) => {
+								e.stopPropagation();
+								asta.inCoda(g.id) ? asta.rimuoviCoda(g.id) : asta.aggiungiCoda(g.id);
+							}}
+						>{asta.inCoda(g.id) ? '★' : '☆'}</button>
+					</div>
 				{:else}
 					<p class="muted">Nessun risultato.</p>
 				{/each}
@@ -170,6 +257,10 @@
 						</select>
 					</label>
 					<button class="primary" onclick={assegna}>Assegna →</button>
+					<button
+						title={asta.inCoda(selezionato.id) ? 'Togli dalla coda' : 'Aggiungi alla coda chiamate'}
+						onclick={() => (asta.inCoda(selezionato!.id) ? asta.rimuoviCoda(selezionato!.id) : asta.aggiungiCoda(selezionato!.id))}
+					>{asta.inCoda(selezionato.id) ? '★ in coda' : '☆ coda'}</button>
 				</div>
 
 				{#if val.profili.length}
@@ -193,6 +284,26 @@
 
 	<!-- DESTRA: allarmi + squadre + rosa -->
 	<div style="display:flex;flex-direction:column;gap:16px;">
+		{#if asta.coda.length}
+			<div class="panel" style="border-color:color-mix(in srgb, var(--accent) 35%, var(--border));">
+				<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+					<h2 style="margin:0;font-size:15px;">★ Coda chiamate <span class="muted mono" style="font-size:12px;">({asta.coda.length})</span></h2>
+					<button style="font-size:11px;" onclick={() => asta.svuotaCoda()}>Svuota</button>
+				</div>
+				{#each asta.coda as g (g.id)}
+					<div class="row-player" style="cursor:pointer;" role="button" tabindex="-1"
+						onclick={() => seleziona(g)} onkeydown={(e) => e.key === 'Enter' && seleziona(g)}>
+						<RoleTag ruolo={g.ruolo} ruoloMantra={g.ruoloMantra} />
+						<Crest nome={g.squadra} size={15} />
+						<strong>{g.nome}</strong>
+						<span class="muted" style="font-size:11px;">{g.squadra}</span>
+						<span class="muted mono" style="margin-left:auto;font-size:11px;">~{Math.round(consigliatoRapido(g))}</span>
+						<button class="coda-add" title="Togli dalla coda" onclick={(e) => { e.stopPropagation(); asta.rimuoviCoda(g.id); }}>✕</button>
+					</div>
+				{/each}
+			</div>
+		{/if}
+
 		{#if asta.acquisti.length}
 			{@const al = asta.allarmiChiusura}
 			<div class="panel" style="border-color:{coloreLivello[al.livello]};">
@@ -274,9 +385,10 @@
 		<div class="panel">
 			<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
 				<h2 style="margin:0;font-size:16px;">Squadre</h2>
-				{#if asta.acquisti.length}
-					<button onclick={() => asta.annullaUltimo()}>↩︎ Annulla ultimo</button>
-				{/if}
+				<div style="display:flex;gap:6px;">
+					<button disabled={!asta.puoiAnnullare} title="Annulla (Cmd+Z)" onclick={() => asta.annulla()}>↩︎ Annulla</button>
+					<button disabled={!asta.puoiRipetere} title="Ripeti (Cmd+Shift+Z)" onclick={() => asta.ripeti()}>↪︎ Ripeti</button>
+				</div>
 			</div>
 			{#each asta.config.squadre as sq}
 				{@const b = asta.bilanci[sq.nome]}
@@ -294,6 +406,31 @@
 				</div>
 			{/each}
 		</div>
+
+		{#if ultimiAcquisti.length}
+			<div class="panel">
+				<h2 style="margin:0 0 6px;font-size:15px;">Ultimi acquisti</h2>
+				{#each ultimiAcquisti as a (a.ordine)}
+					{@const pma = gById.get(a.giocatoreId)?.fc?.pma ?? null}
+					{@const delta = pma != null ? a.prezzo - pma : null}
+					<div style="display:flex;gap:7px;align-items:center;font-size:12px;padding:2px 0;border-top:1px solid var(--border);">
+						<RoleTag ruolo={a.ruolo || 'C'} />
+						<Crest nome={a.squadraSerieA} size={14} />
+						<span>{a.nome}</span>
+						<span style="color:{asta.coloreDi(a.proprietario)};">→ {a.proprietario}</span>
+						<span class="mono" style="margin-left:auto;color:var(--cyan);">{a.prezzo}</span>
+						{#if delta != null}
+							<span class="mono" style="width:44px;text-align:right;color:{delta > 1 ? 'var(--bad)' : delta < -1 ? 'var(--ok)' : 'var(--muted)'};">
+								{delta > 0 ? '+' : ''}{Math.round(delta)}
+							</span>
+						{:else}
+							<span class="mono muted" style="width:44px;text-align:right;">—</span>
+						{/if}
+					</div>
+				{/each}
+				<div class="muted" style="font-size:10px;margin-top:4px;">scarto vs PMA</div>
+			</div>
+		{/if}
 
 		<div class="panel">
 			<h2 style="margin:0 0 8px;font-size:16px;">Rosa · {asta.miaSquadra}</h2>
@@ -317,3 +454,30 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	kbd {
+		font: 600 10px/1 var(--mono);
+		background: var(--tag-bg);
+		border: 1px solid var(--border-strong);
+		border-radius: 4px;
+		padding: 1px 4px;
+		color: var(--muted);
+	}
+	.coda-add {
+		padding: 0 6px;
+		font-size: 13px;
+		line-height: 1;
+		background: transparent;
+		border-color: transparent;
+		color: var(--muted);
+	}
+	.coda-add:hover {
+		color: var(--accent);
+		border-color: transparent;
+		background: transparent;
+	}
+	.row-player {
+		cursor: pointer;
+	}
+</style>

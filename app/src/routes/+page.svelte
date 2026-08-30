@@ -147,7 +147,19 @@
 			? new Date(ts).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
 			: '—';
 	}
+
+	let mostraSnapshot = $state(false);
+	function scorciatoieGlobali(e: KeyboardEvent) {
+		const tag = (e.target as HTMLElement | null)?.tagName;
+		if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+		if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+			e.preventDefault();
+			e.shiftKey ? asta.ripeti() : asta.annulla();
+		}
+	}
 </script>
+
+<svelte:window onkeydown={scorciatoieGlobali} />
 
 <div style="max-width:1280px;margin:0 auto;padding:var(--pad);">
 	<header class="appbar">
@@ -162,6 +174,7 @@
 			<button onclick={() => (mostraSetup = !mostraSetup)}>⚙️ Setup</button>
 			<button onclick={() => scarica(asta.esporta(), `asta-${oggi()}.json`, 'application/json')}>⬇︎ Backup</button>
 			{#if asta.acquisti.length}
+				<button onclick={() => (mostraSnapshot = !mostraSnapshot)} title="Ripristina da uno snapshot automatico">🕑 Snapshot</button>
 				<button onclick={() => scarica(asta.esportaCsv(), `rose-${oggi()}.csv`, 'text/csv')}>⬇︎ CSV</button>
 				<button onclick={esportaXlsx} disabled={esportandoXlsx}>{esportandoXlsx ? '…' : '⬇︎ Excel'}</button>
 			{/if}
@@ -173,6 +186,30 @@
 			<input bind:this={roseInput} type="file" accept=".json,.csv,.tsv,.txt,.xlsx,.xls" style="display:none" onchange={scegliRoseFile} />
 		</div>
 	</header>
+
+	{#if mostraSnapshot}
+		{@const backup = asta.elencoBackup}
+		<div class="panel" style="margin-bottom:12px;">
+			<div style="display:flex;justify-content:space-between;align-items:center;">
+				<h2 style="margin:0;font-size:15px;">Snapshot automatici — {asta.config.modalita.toUpperCase()}</h2>
+				<button style="font-size:11px;" onclick={() => (mostraSnapshot = false)}>Chiudi</button>
+			</div>
+			<p class="muted" style="font-size:11px;margin:4px 0 8px;">
+				Copie salvate in automatico a ogni acquisto/rimozione (ultime {backup.length}). Ripristinare è annullabile con Annulla.
+			</p>
+			{#if !backup.length}
+				<p class="muted" style="font-size:12px;">Ancora nessuno snapshot.</p>
+			{:else}
+				<div style="display:flex;flex-wrap:wrap;gap:6px;">
+					{#each [...backup].reverse() as b}
+						<button style="font-size:11px;" onclick={() => { asta.ripristinaDaBackup(b.t); mostraSnapshot = false; }}>
+							{new Date(b.t).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} · {b.n} giocatori
+						</button>
+					{/each}
+				</div>
+			{/if}
+		</div>
+	{/if}
 
 	{#if anteprima}
 		{@const p = anteprima}
