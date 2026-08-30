@@ -13,14 +13,18 @@ command -v node >/dev/null 2>&1 || {
 	exit 1
 }
 
-# Rigenera i bundle dati e i loghi se i file sorgente sono cambiati.
+# Rigenera i bundle dati dai file Excel (listone / fantacrediti) a ogni avvio.
+# NB: sostituire un file in data/ NON basta: il tool legge i bundle JSON,
+# che vengono ricreati QUI. Dopo aver cambiato un file, rilancia questo comando.
 if command -v python3 >/dev/null 2>&1; then
+	echo "Aggiorno i dati…"
 	for mod in classic mantra; do
 		for n in 8 10; do
-			python3 ../tools/export_json.py --modalita $mod --partecipanti $n >/dev/null 2>&1 || true
+			python3 ../tools/export_json.py --modalita $mod --partecipanti $n 2>&1 | grep -E "giocatori|⚠|mancante" || true
 		done
 	done
 	python3 ../tools/sync_assets.py >/dev/null 2>&1 || true
+	echo ""
 fi
 
 # Dipendenze solo alla prima esecuzione (o dopo un aggiornamento).
