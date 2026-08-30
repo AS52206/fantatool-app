@@ -100,6 +100,9 @@ const CONFIG_DEFAULT: ConfigAsta = {
 	moduliTarget: ['3-4-1-2']
 };
 
+/** Rosa Mantra standard: 3 portieri + 27 di movimento = 30. */
+const LIMITI_MANTRA_DEFAULT: LimitiRuoli = { P: 3, D: 11, C: 8, A: 8, TOT: 30 };
+
 function leggiChiave(chiave: string): Snapshot | null {
 	if (typeof localStorage === 'undefined') return null;
 	try {
@@ -189,12 +192,15 @@ export class Asta {
 		const m = normModalita(modalita);
 		this.config = {
 			...structuredClone(CONFIG_DEFAULT),
+			// asta Mantra nuova: parte da 3 portieri + 27 di movimento
+			...(!s && m === 'mantra' ? { limiti: { ...LIMITI_MANTRA_DEFAULT } } : {}),
 			...(s?.config ?? {}),
 			modalita: m
 		};
 		if (![8, 10].includes(this.config.partecipanti)) this.config.partecipanti = 8;
 		if (!Array.isArray(this.config.moduliTarget) || !this.config.moduliTarget.length)
 			this.config.moduliTarget = ['3-4-1-2'];
+		this.ricalcolaTot();
 		this.acquisti = s?.acquisti ?? [];
 		this.avviata = s?.avviata ?? false;
 		this.scenari = s?.scenari ?? {};
@@ -317,6 +323,30 @@ export class Asta {
 
 	setGiocatori(g: Giocatore[]) {
 		this.giocatori = g;
+	}
+
+	/** TOT dei limiti = somma di P+D+C+A (mai a mano). */
+	private ricalcolaTot() {
+		const L = this.config.limiti;
+		const t =
+			(Number(L.P) || 0) + (Number(L.D) || 0) + (Number(L.C) || 0) + (Number(L.A) || 0);
+		L.TOT = t > 0 ? t : 25;
+	}
+
+	/** Imposta gli slot di un reparto (Classic) e ricalcola il totale rosa. */
+	setSlotRuolo(ruolo: Ruolo, valore: number) {
+		this.config.limiti[ruolo] = Math.max(0, Math.round(valore) || 0);
+		this.ricalcolaTot();
+	}
+
+	/** Rosa Mantra: portieri + giocatori di movimento (il movimento è ripartito
+	 *  in D/C/A solo per le viste per reparto; l'incastro usa i ruoli Mantra). */
+	setSlotMantra(portieri: number, movimento: number) {
+		const p = Math.max(1, Math.round(portieri) || 3);
+		const m = Math.max(3, Math.round(movimento) || 27);
+		const d = Math.round(m * 0.42);
+		const c = Math.round(m * 0.31);
+		this.config.limiti = { P: p, D: d, C: c, A: m - d - c, TOT: p + m };
 	}
 
 	get squadreNomi(): string[] {

@@ -298,11 +298,29 @@
 							<option value={10}>10 partecipanti</option>
 						</select>
 					</label>
-					{#each RUOLI as r}
-						<label>Slot {r}
-							<input type="number" min="0" bind:value={asta.config.limiti[r]} style="width:70px;display:block;" />
+					{#if asta.isMantra}
+						<label>Portieri
+							<input type="number" min="1" value={asta.config.limiti.P}
+								onchange={(e) => asta.setSlotMantra(+(e.target as HTMLInputElement).value, asta.config.limiti.TOT - asta.config.limiti.P)}
+								style="width:70px;display:block;" />
 						</label>
-					{/each}
+						<label>Giocatori di movimento
+							<input type="number" min="3" value={asta.config.limiti.TOT - asta.config.limiti.P}
+								onchange={(e) => asta.setSlotMantra(asta.config.limiti.P, +(e.target as HTMLInputElement).value)}
+								style="width:90px;display:block;" />
+							<span class="muted" style="font-size:10px;display:block;">standard: 3 + 27 = 30</span>
+						</label>
+					{:else}
+						{#each RUOLI as r}
+							<label>Slot {r}
+								<input type="number" min="0" value={asta.config.limiti[r]}
+									onchange={(e) => asta.setSlotRuolo(r, +(e.target as HTMLInputElement).value)} style="width:70px;display:block;" />
+							</label>
+						{/each}
+					{/if}
+					<label>Rosa totale
+						<input type="number" value={asta.config.limiti.TOT} disabled style="width:70px;display:block;opacity:0.7;" />
+					</label>
 				</div>
 				{#if asta.isMantra}
 					<h3 style="font-size:14px;margin-bottom:4px;">Moduli target Mantra</h3>
