@@ -71,6 +71,47 @@
 		aggiungi(g.chiave, prezzoDefault(g, cons));
 		picker = null;
 	}
+
+	const righe = $derived(attivo ? asta.righeScenario(attivo) : []);
+	const campoInput = $derived(
+		righe
+			.filter((r) => r.stato !== 'PERSO')
+			.map(
+				(r): GiocatoreCampo => ({
+					chiave: r.chiave,
+					nome: r.nome,
+					club: r.giocatore?.squadra,
+					ruolo: r.ruolo || 'C',
+					ruoloMantra: r.ruoloMantra,
+					prezzo: r.stato === 'PRESO' ? r.prezzoEffettivo : r.max,
+					titolarita: r.giocatore?.fc?.expectedTitolarita ?? null,
+					pmaFl: r.giocatore?.fantalab?.prezzo_atteso ?? null,
+					stato: r.stato === 'PRESO' ? 'PRESO' : 'LIBERO'
+				})
+			)
+	);
+	const campo = $derived(
+		asta.isMantra ? buildCampoMantra(campoInput, modulo) : buildCampoClassic(campoInput, modulo)
+	);
+
+	/** Slot ancora scoperti nel modulo scelto, raggruppati per ruolo. */
+	const ruoliDaCoprire = $derived.by(() => {
+		const m = new Map<string, { etichetta: string; ruolo?: string; linea: string; n: number }>();
+		for (const linea of campo.linee)
+			for (const s of linea.slot)
+				if ((s.stato ?? 'VUOTO') === 'VUOTO') {
+					const key = s.etichetta ?? s.ruolo ?? '?';
+					const cur = m.get(key) ?? {
+						etichetta: s.etichetta ?? key,
+						ruolo: s.ruolo,
+						linea: linea.nome,
+						n: 0
+					};
+					cur.n += 1;
+					m.set(key, cur);
+				}
+		return [...m.values()];
+	});
 </script>
 
 <svelte:window onkeydown={(e) => e.key === 'Escape' && (picker = null)} />
@@ -83,20 +124,7 @@
 </div>
 
 {#if attivo}
-	{@const righe = asta.righeScenario(attivo)}
 	{@const an = asta.analisiScenario(attivo)}
-	{@const campoInput = righe.filter((r) => r.stato !== 'PERSO').map((r): GiocatoreCampo => ({
-		chiave: r.chiave,
-		nome: r.nome,
-		club: r.giocatore?.squadra,
-		ruolo: r.ruolo || 'C',
-		ruoloMantra: r.ruoloMantra,
-		prezzo: r.stato === 'PRESO' ? r.prezzoEffettivo : r.max,
-		titolarita: r.giocatore?.fc?.expectedTitolarita ?? null,
-		pmaFl: r.giocatore?.fantalab?.prezzo_atteso ?? null,
-		stato: r.stato === 'PRESO' ? 'PRESO' : 'LIBERO'
-	}))}
-	{@const campo = asta.isMantra ? buildCampoMantra(campoInput, modulo) : buildCampoClassic(campoInput, modulo)}
 
 	<div class="panel" style="margin-bottom:16px;">
 		<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
@@ -109,20 +137,59 @@
 				· <span style="color:var(--ok);">■</span> preso · <span style="color:var(--cyan);">■</span> obiettivo
 			</span>
 		</div>
-		<FormationPitch linee={campo.linee} titolo={campo.modulo} onSlotVuoto={(i) => (picker = i)} />
-		<div class="muted" style="font-size:11px;text-align:center;margin-top:2px;">
-			Clicca una maglia vuota per scegliere un giocatore di quel ruolo.
-		</div>
-		{#if campo.panchina.length}
-			<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;font-size:12px;">
-				<span class="muted mono" style="align-self:center;">PANCHINA</span>
-				{#each campo.panchina as p}
-					<span class="tag" data-ruolo={p.ruolo}>
-						{p.nome}{#if asta.isMantra && p.ruoloMantra}<span class="muted"> {p.ruoloMantra}</span>{/if}
-					</span>
-				{/each}
+		<div class="campo-wrap">
+			<div style="flex:1 1 420px;min-width:0;">
+				<FormationPitch linee={campo.linee} titolo={campo.modulo} onSlotVuoto={(i) => (picker = i)} />
+				<div class="muted" style="font-size:11px;text-align:center;margin-top:2px;">
+					Clicca una maglia vuota (o un ruolo qui a destra) per scegliere un giocatore.
+				</div>
 			</div>
-		{/if}
+			<div class="campo-side">
+				<div>
+					<h3 style="margin:0 0 6px;font-size:13px;">
+						Ruoli da coprire <span class="muted mono" style="font-size:11px;">· {modulo}</span>
+					</h3>
+					{#if ruoliDaCoprire.length}
+						<div style="display:flex;flex-direction:column;gap:5px;">
+							{#each ruoliDaCoprire as r}
+								<button
+									class="row-player"
+									style="justify-content:flex-start;"
+									onclick={() => (picker = { ruolo: r.ruolo, etichetta: r.etichetta, linea: r.linea })}
+								>
+									<span class="tag" data-ruolo={asta.isMantra ? undefined : r.etichetta}>{r.etichetta}</span>
+									{#if r.n > 1}<span class="mono" style="color:var(--cyan);">×{r.n}</span>{/if}
+									<span class="muted" style="font-size:11px;">{r.linea}</span>
+									<span class="muted" style="margin-left:auto;font-size:11px;">＋ scegli</span>
+								</button>
+							{/each}
+						</div>
+					{:else}
+						<p class="muted" style="font-size:12px;margin:0;">XI completo per questo modulo. ✓</p>
+					{/if}
+				</div>
+
+				<div>
+					<h3 style="margin:0 0 6px;font-size:13px;">
+						Panchina <span class="muted mono" style="font-size:11px;">({campo.panchina.length})</span>
+					</h3>
+					{#if campo.panchina.length}
+						<div style="display:flex;flex-direction:column;gap:4px;">
+							{#each campo.panchina as p}
+								<div style="display:flex;align-items:center;gap:6px;font-size:12px;">
+									<span class="tag" data-ruolo={asta.isMantra ? undefined : p.ruolo}>{asta.isMantra ? p.ruoloMantra || p.ruolo : p.ruolo}</span>
+									<Crest nome={p.club} size={14} />
+									<span>{p.nome}</span>
+									{#if p.prezzo != null}<span class="mono muted" style="margin-left:auto;">{p.prezzo}</span>{/if}
+								</div>
+							{/each}
+						</div>
+					{:else}
+						<p class="muted" style="font-size:12px;margin:0;">Nessuna riserva nel piano.</p>
+					{/if}
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start;">
@@ -267,6 +334,19 @@
 {/if}
 
 <style>
+	.campo-wrap {
+		display: flex;
+		gap: 16px;
+		align-items: flex-start;
+		flex-wrap: wrap;
+	}
+	.campo-side {
+		flex: 1 1 220px;
+		min-width: 200px;
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+	}
 	.picker-overlay {
 		position: fixed;
 		inset: 0;
