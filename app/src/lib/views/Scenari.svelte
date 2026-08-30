@@ -229,6 +229,32 @@
 			<div class="campo-side">
 				<div>
 					<h3 style="margin:0 0 6px;font-size:13px;">
+						In panchina nel piano
+						<span class="muted mono" style="font-size:11px;">({campo.panchina.length})</span>
+					</h3>
+					{#if campo.panchina.length}
+						<div style="display:flex;flex-wrap:wrap;gap:4px;">
+							{#each campo.panchina as p}
+								<span
+									class="tag"
+									data-ruolo={asta.isMantra ? undefined : p.ruolo}
+									style="gap:4px;font-size:11px;{p.nome === p.chiave ? 'opacity:0.5;' : ''}"
+									title={p.club ?? ''}
+								>
+									<Crest nome={p.club} size={12} />
+									{p.nome}
+									{#if asta.isMantra && p.ruoloMantra}<span class="muted">{p.ruoloMantra}</span>{/if}
+									{#if p.prezzo != null}<span style="color:var(--cyan);">{p.prezzo}</span>{/if}
+								</span>
+							{/each}
+						</div>
+					{:else}
+						<p class="muted" style="font-size:12px;margin:0;">Nel piano non ci sono riserve oltre l'XI.</p>
+					{/if}
+				</div>
+
+				<div>
+					<h3 style="margin:0 0 6px;font-size:13px;">
 						Ruoli da coprire <span class="muted mono" style="font-size:11px;">· {modulo}</span>
 					</h3>
 					{#if ruoliDaCoprire.length}
@@ -283,24 +309,6 @@
 						{/each}
 					</div>
 				</div>
-
-				{#if campo.panchina.length}
-					<div>
-						<h3 style="margin:0 0 6px;font-size:13px;">
-							In panchina nel piano <span class="muted mono" style="font-size:11px;">({campo.panchina.length})</span>
-						</h3>
-						<div style="display:flex;flex-direction:column;gap:4px;">
-							{#each campo.panchina as p}
-								<div style="display:flex;align-items:center;gap:6px;font-size:12px;">
-									<span class="tag" data-ruolo={asta.isMantra ? undefined : p.ruolo}>{asta.isMantra ? p.ruoloMantra || p.ruolo : p.ruolo}</span>
-									<Crest nome={p.club} size={14} />
-									<span>{p.nome}</span>
-									{#if p.prezzo != null}<span class="mono muted" style="margin-left:auto;">{p.prezzo}</span>{/if}
-								</div>
-							{/each}
-						</div>
-					</div>
-				{/if}
 			</div>
 		</div>
 	</div>
