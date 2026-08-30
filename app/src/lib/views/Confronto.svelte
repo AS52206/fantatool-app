@@ -1,61 +1,81 @@
 <script lang="ts">
 	import { asta } from '$lib/stores/auction.svelte';
 	import Crest from '$lib/ui/Crest.svelte';
+	import { analizzaRosaMantra, MODULI_MANTRA } from '$lib/engine/mantra';
+	import type { Ruolo } from '$lib/domain/types';
 
-	type Metrica = { id: string; label: string; nota: string; valore: (sq: string) => number };
+	// XI di riferimento uguale per tutti: 3-4-3 (P non conta nel modulo, 1 fisso)
+	const FORMAZIONE: Record<Ruolo, number> = { P: 1, D: 3, C: 4, A: 3 };
+	const RUOLI: Ruolo[] = ['P', 'D', 'C', 'A'];
+	const N_MODULI = Object.keys(MODULI_MANTRA).length;
 
-	const rosaDi = (sq: string) => asta.rosa(sq);
-
-	const METRICHE: Metrica[] = [
-		{
-			id: 'rosa',
-			label: 'Rosa',
-			nota: 'Slot riempiti sul totale',
-			valore: (sq) => asta.bilanci[sq].g_presi / Math.max(1, asta.config.limiti.TOT)
-		},
-		{
-			id: 'spesa',
-			label: 'Spesa',
-			nota: 'Crediti spesi sul budget',
-			valore: (sq) =>
-				(asta.config.budgetMax - asta.bilanci[sq].c_rimasti) / Math.max(1, asta.config.budgetMax)
-		},
-		{
-			id: 'residuo',
-			label: 'Potere residuo',
-			nota: 'Crediti ancora disponibili',
-			valore: (sq) => Math.max(0, asta.bilanci[sq].c_rimasti) / Math.max(1, asta.config.budgetMax)
-		},
-		{
-			id: 'pma',
-			label: 'PMA totale',
-			nota: 'Somma PMA della rosa',
-			valore: (sq) => rosaDi(sq).reduce((s, a) => s + (a.player?.fc?.pma ?? 0), 0)
-		},
-		{
-			id: 'tit',
-			label: 'Titolarità media',
-			nota: '% titolarità media dei giocatori',
-			valore: (sq) => {
-				const r = rosaDi(sq).filter((a) => a.player?.fc?.expectedTitolarita != null);
-				if (!r.length) return 0;
-				return (
-					r.reduce((s, a) => s + (a.player!.fc!.expectedTitolarita ?? 0), 0) / r.length / 100
-				);
+	type Xi = { fanta: number; tit: number; n: number };
+	function xiDi(sq: string): Xi {
+		const rosa = asta.rosa(sq);
+		const val = (a: (typeof rosa)[number]) =>
+			a.player?.fc?.expectedFantamedia || a.player?.fc?.pma || a.player?.quotazione || 0;
+		let fanta = 0;
+		let titSum = 0;
+		let titN = 0;
+		let n = 0;
+		for (const r of RUOLI) {
+			const pool = rosa
+				.filter((a) => a.ruolo === r)
+				.sort((x, y) => val(y) - val(x))
+				.slice(0, FORMAZIONE[r]);
+			for (const a of pool) {
+				fanta += a.player?.fc?.expectedFantamedia ?? 0;
+				const t = a.player?.fc?.expectedTitolarita;
+				if (t != null) {
+					titSum += t;
+					titN++;
+				}
+				n++;
 			}
-		},
-		{
-			id: 'top11',
-			label: 'Undici titolare',
-			nota: 'Somma FL dei migliori 11',
-			valore: (sq) =>
-				rosaDi(sq)
-					.map((a) => a.player?.fantalab?.prezzo_atteso ?? a.prezzo)
-					.sort((x, y) => y - x)
-					.slice(0, 11)
-					.reduce((s, v) => s + v, 0)
 		}
-	];
+		return { fanta, tit: titN ? titSum / titN : 0, n };
+	}
+
+	function pmaTotale(sq: string) {
+		return asta.rosa(sq).reduce((s, a) => s + (a.player?.fc?.pma ?? 0), 0);
+	}
+	function spesaDi(sq: string) {
+		return asta.config.budgetMax - asta.bilanci[sq].c_rimasti;
+	}
+	function equilibrio(sq: string) {
+		const rip = asta.budgetPerRepartoDi(sq);
+		const scartoMax = Math.max(0, ...rip.map((x) => Math.abs(x.speso_pct - x.quota_pct)));
+		return Math.max(0, 100 - scartoMax);
+	}
+	function potereResiduo(sq: string) {
+		const b = asta.bilanci[sq];
+		const vuoti = asta.config.limiti.TOT - b.g_presi;
+		return vuoti > 0 ? Math.max(0, b.c_rimasti) / vuoti : 0;
+	}
+	function bigIndex(sq: string) {
+		return asta.rosa(sq).reduce((s, a) => {
+			const f = a.player?.fc?.fasciaFc;
+			return s + (f === 'Top' ? 2 : f === 'Semi-Top' ? 1 : 0);
+		}, 0);
+	}
+	function modularita(sq: string) {
+		return analizzaRosaMantra(asta.rosaMantraInput(sq)).moduli_completi.length;
+	}
+
+	type Metrica = { id: string; label: string; nota: string; fmt: 'n' | 'pct' | 'dec'; v: (sq: string) => number };
+	const METRICHE = $derived.by<Metrica[]>(() => {
+		const base: Metrica[] = [
+			{ id: 'proiezione', label: 'Proiezione XI', nota: 'Somma fantamedia attesa dei migliori 11', fmt: 'dec', v: (s) => xiDi(s).fanta },
+			{ id: 'titxi', label: 'Titolarità XI', nota: '% titolarità media dei soli 11 titolari', fmt: 'pct', v: (s) => xiDi(s).tit / 100 },
+			{ id: 'efficienza', label: 'Efficienza', nota: 'PMA acquistato per credito speso', fmt: 'dec', v: (s) => pmaTotale(s) / Math.max(1, spesaDi(s)) },
+			{ id: 'equilibrio', label: 'Equilibrio reparti', nota: '100 − scarto max dalla quota P/D/C/A', fmt: 'n', v: (s) => equilibrio(s) },
+			{ id: 'potere', label: 'Potere residuo', nota: 'Crediti liberi per slot ancora da riempire', fmt: 'dec', v: (s) => potereResiduo(s) },
+			{ id: 'big', label: 'Big in rosa', nota: 'Top = 2, Semi-Top = 1', fmt: 'n', v: (s) => bigIndex(s) }
+		];
+		if (asta.isMantra)
+			base.push({ id: 'moduli', label: 'Modularità', nota: `Moduli target coperti su ${N_MODULI}`, fmt: 'n', v: (s) => modularita(s) });
+		return base;
+	});
 
 	let selezione = $state<Set<string>>(new Set());
 	$effect(() => {
@@ -71,35 +91,41 @@
 		s.has(nome) ? s.delete(nome) : s.add(nome);
 		selezione = s;
 	}
-
 	const squadreSel = $derived(asta.config.squadre.filter((s) => selezione.has(s.nome)));
 
-	// valori grezzi + normalizzazione per asse (max fra le squadre selezionate)
 	const dati = $derived.by(() => {
 		const teams = squadreSel.map((s) => s.nome);
-		const maxPerAsse = METRICHE.map((m) => Math.max(1e-9, ...teams.map((t) => m.valore(t))));
+		const maxPerAsse = METRICHE.map((m) => Math.max(1e-9, ...teams.map((t) => m.v(t))));
 		return teams.map((t) => ({
 			nome: t,
 			colore: asta.coloreDi(t),
-			grezzi: METRICHE.map((m) => m.valore(t)),
-			norm: METRICHE.map((m, i) => m.valore(t) / maxPerAsse[i])
+			grezzi: METRICHE.map((m) => m.v(t)),
+			norm: METRICHE.map((m, i) => m.v(t) / maxPerAsse[i])
 		}));
 	});
 
+	const RIGHE_ASSOLUTE: { label: string; val: (sq: string) => string }[] = [
+		{ label: 'Crediti spesi', val: (s) => `${spesaDi(s)}` },
+		{ label: 'Crediti residui', val: (s) => `${asta.bilanci[s].c_rimasti}` },
+		{ label: 'Giocatori presi', val: (s) => `${asta.bilanci[s].g_presi}/${asta.config.limiti.TOT}` },
+		{ label: 'PMA totale', val: (s) => `${Math.round(pmaTotale(s))}` },
+		{ label: 'Fantamedia XI', val: (s) => xiDi(s).fanta.toFixed(1) }
+	];
+
 	// geometria radar
-	const N = METRICHE.length;
-	const R = 130;
+	const R = 128;
 	const cx = 170;
 	const cy = 160;
-	const ang = (i: number) => -Math.PI / 2 + (i * 2 * Math.PI) / N;
-	const pt = (i: number, r: number) => [cx + Math.cos(ang(i)) * R * r, cy + Math.sin(ang(i)) * R * r];
-	const poly = (rs: number[]) => rs.map((r, i) => pt(i, r).join(',')).join(' ');
+	const ang = (i: number, n: number) => -Math.PI / 2 + (i * 2 * Math.PI) / n;
+	const pt = (i: number, r: number, n: number) => [cx + Math.cos(ang(i, n)) * R * r, cy + Math.sin(ang(i, n)) * R * r];
+	const poly = (rs: number[]) => rs.map((r, i) => pt(i, r, rs.length).join(',')).join(' ');
 	const anelli = [0.25, 0.5, 0.75, 1];
 
-	const fmt = (m: Metrica, v: number) => {
-		if (['rosa', 'spesa', 'residuo', 'tit'].includes(m.id)) return `${Math.round(v * 100)}%`;
+	function fmt(m: Metrica, v: number) {
+		if (m.fmt === 'pct') return `${Math.round(v * 100)}%`;
+		if (m.fmt === 'dec') return v >= 100 ? Math.round(v).toString() : v.toFixed(1);
 		return Math.round(v).toString();
-	};
+	}
 </script>
 
 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
@@ -122,17 +148,12 @@
 		<div class="panel" style="flex:0 0 auto;">
 			<svg viewBox="-55 0 450 340" style="width:390px;max-width:100%;height:auto;">
 				{#each anelli as a}
-					<polygon
-						points={poly(METRICHE.map(() => a))}
-						fill="none"
-						stroke="var(--border)"
-						stroke-width="1"
-					/>
+					<polygon points={poly(METRICHE.map(() => a))} fill="none" stroke="var(--border)" stroke-width="1" />
 				{/each}
 				{#each METRICHE as m, i}
-					{@const p = pt(i, 1)}
+					{@const p = pt(i, 1, METRICHE.length)}
 					<line x1={cx} y1={cy} x2={p[0]} y2={p[1]} stroke="var(--border)" stroke-width="1" />
-					{@const lp = pt(i, 1.16)}
+					{@const lp = pt(i, 1.16, METRICHE.length)}
 					<text
 						x={lp[0]}
 						y={lp[1]}
@@ -145,16 +166,9 @@
 					</text>
 				{/each}
 				{#each dati as d}
-					<polygon
-						points={poly(d.norm)}
-						fill={d.colore}
-						fill-opacity="0.12"
-						stroke={d.colore}
-						stroke-width="2"
-						stroke-linejoin="round"
-					/>
+					<polygon points={poly(d.norm)} fill={d.colore} fill-opacity="0.12" stroke={d.colore} stroke-width="2" stroke-linejoin="round" />
 					{#each d.norm as r, i}
-						{@const p = pt(i, r)}
+						{@const p = pt(i, r, d.norm.length)}
 						<circle cx={p[0]} cy={p[1]} r="2.5" fill={d.colore} />
 					{/each}
 				{/each}
@@ -166,43 +180,58 @@
 					</span>
 				{/each}
 			</div>
-			<p class="muted" style="font-size:10px;margin-top:6px;max-width:340px;">
-				Ogni asse è normalizzato sul valore più alto fra le squadre a confronto.
+			<p class="muted" style="font-size:10px;margin-top:6px;max-width:360px;">
+				Ogni asse è normalizzato sul valore più alto fra le squadre a confronto. XI di riferimento: 3-4-3.
 			</p>
 		</div>
 
-		<div class="panel" style="flex:1;min-width:280px;overflow:auto;">
-			<table style="width:100%;border-collapse:collapse;font-size:12px;">
-				<thead>
-					<tr style="text-align:left;">
-						<th>Metrica</th>
-						{#each dati as d}
-							<th style="text-align:right;color:{d.colore};">{d.nome}</th>
-						{/each}
-					</tr>
-				</thead>
-				<tbody>
-					{#each METRICHE as m, i}
-						{@const migliore = Math.max(...dati.map((d) => d.grezzi[i]))}
-						<tr style="border-top:1px solid var(--border);">
-							<td>
-								{m.label}
-								<div class="muted" style="font-size:10px;">{m.nota}</div>
-							</td>
-							{#each dati as d}
-								<td
-									class="mono"
-									style="text-align:right;{d.grezzi[i] === migliore && migliore > 0
-										? 'color:var(--ok);font-weight:700;'
-										: ''}"
-								>
-									{fmt(m, d.grezzi[i])}
-								</td>
-							{/each}
+		<div style="flex:1;min-width:280px;display:flex;flex-direction:column;gap:16px;">
+			<div class="panel" style="overflow:auto;">
+				<h3 style="margin:0 0 6px;font-size:13px;">Indici</h3>
+				<table style="width:100%;border-collapse:collapse;font-size:12px;">
+					<thead>
+						<tr style="text-align:left;">
+							<th>Metrica</th>
+							{#each dati as d}<th style="text-align:right;color:{d.colore};">{d.nome}</th>{/each}
 						</tr>
-					{/each}
-				</tbody>
-			</table>
+					</thead>
+					<tbody>
+						{#each METRICHE as m, i}
+							{@const best = Math.max(...dati.map((d) => d.grezzi[i]))}
+							<tr style="border-top:1px solid var(--border);">
+								<td>{m.label}<div class="muted" style="font-size:10px;">{m.nota}</div></td>
+								{#each dati as d}
+									<td class="mono" style="text-align:right;{d.grezzi[i] === best && best > 0 ? 'color:var(--ok);font-weight:700;' : ''}">
+										{fmt(m, d.grezzi[i])}
+									</td>
+								{/each}
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+
+			<div class="panel" style="overflow:auto;">
+				<h3 style="margin:0 0 6px;font-size:13px;">Valori assoluti</h3>
+				<table style="width:100%;border-collapse:collapse;font-size:12px;">
+					<thead>
+						<tr style="text-align:left;">
+							<th>Voce</th>
+							{#each squadreSel as s}<th style="text-align:right;color:{asta.coloreDi(s.nome)};">{s.nome}</th>{/each}
+						</tr>
+					</thead>
+					<tbody>
+						{#each RIGHE_ASSOLUTE as r}
+							<tr style="border-top:1px solid var(--border);">
+								<td>{r.label}</td>
+								{#each squadreSel as s}
+									<td class="mono" style="text-align:right;">{r.val(s.nome)}</td>
+								{/each}
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 {/if}
