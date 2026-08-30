@@ -145,6 +145,7 @@
 	});
 	const ricambi = $derived(asta.isMantra ? ricambiMantra : ricambiClassic);
 	const totalePiano = $derived(righe.filter((r) => r.stato !== 'PERSO').length);
+	const righePerse = $derived(righe.filter((r) => r.stato === 'PERSO'));
 
 	/** Slot ancora scoperti nel modulo scelto, raggruppati per ruolo. */
 	const ruoliDaCoprire = $derived.by(() => {
@@ -230,7 +231,9 @@
 				<div>
 					<h3 style="margin:0 0 6px;font-size:13px;">
 						In panchina nel piano
-						<span class="muted mono" style="font-size:11px;">({campo.panchina.length})</span>
+						<span class="muted mono" style="font-size:11px;">
+							({campo.panchina.length}) · {totalePiano} in piano su {asta.config.limiti.TOT}
+						</span>
 					</h3>
 					{#if campo.panchina.length}
 						<div style="display:flex;flex-wrap:wrap;gap:4px;">
@@ -250,6 +253,19 @@
 						</div>
 					{:else}
 						<p class="muted" style="font-size:12px;margin:0;">Nel piano non ci sono riserve oltre l'XI.</p>
+					{/if}
+					{#if righePerse.length}
+						<div style="margin-top:6px;">
+							<span class="muted" style="font-size:10px;">Presi dai rivali ({righePerse.length}) — fuori dal piano:</span>
+							<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;">
+								{#each righePerse as r}
+									<span class="tag" style="font-size:10px;opacity:0.55;">
+										<s>{r.nome}</s>
+										<span class="muted">{r.proprietario} {r.prezzoEffettivo}</span>
+									</span>
+								{/each}
+							</div>
+						</div>
 					{/if}
 				</div>
 
