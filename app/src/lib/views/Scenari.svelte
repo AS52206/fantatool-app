@@ -42,7 +42,38 @@
 		asta.setTargetScenario(attivo, chiave, prezzo);
 		query = '';
 	}
+
+	// --- click su maglia vuota: elenco giocatori del ruolo ---
+	let picker = $state<{ ruolo?: string; etichetta?: string; linea: string } | null>(null);
+	const valFL = (g: { fantalab?: { prezzo_atteso: number } | null; quotazione: number }) =>
+		g.fantalab?.prezzo_atteso || g.quotazione || 0;
+	const candidatiPicker = $derived.by(() => {
+		if (!picker || !attivo) return [];
+		const inPiano = new Set(Object.keys(asta.scenari[attivo] ?? {}));
+		const opzioni = (picker.etichetta ?? '').split('/').map((s) => s.trim()).filter(Boolean);
+		return asta.giocatori
+			.filter((g) => !inPiano.has(g.chiave))
+			.filter((g) => {
+				if (asta.isMantra && opzioni.length) {
+					const suoi = String(g.ruoloMantra ?? '')
+						.split(/[;,/]/)
+						.map((x) => x.trim())
+						.filter(Boolean);
+					return suoi.some((x) => opzioni.includes(x));
+				}
+				return !picker!.ruolo || g.ruolo === picker!.ruolo;
+			})
+			.sort((a, b) => valFL(b) - valFL(a))
+			.slice(0, 60);
+	});
+	function aggiungiDaPicker(g: { chiave: string; fantalab?: { prezzo_atteso: number } | null }) {
+		const cons = asta.valutazione(g as never).fascia.riferimento;
+		aggiungi(g.chiave, prezzoDefault(g, cons));
+		picker = null;
+	}
 </script>
+
+<svelte:window onkeydown={(e) => e.key === 'Escape' && (picker = null)} />
 
 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
 	{#each nomi as n}
@@ -78,7 +109,10 @@
 				· <span style="color:var(--ok);">■</span> preso · <span style="color:var(--cyan);">■</span> obiettivo
 			</span>
 		</div>
-		<FormationPitch linee={campo.linee} titolo={campo.modulo} />
+		<FormationPitch linee={campo.linee} titolo={campo.modulo} onSlotVuoto={(i) => (picker = i)} />
+		<div class="muted" style="font-size:11px;text-align:center;margin-top:2px;">
+			Clicca una maglia vuota per scegliere un giocatore di quel ruolo.
+		</div>
 		{#if campo.panchina.length}
 			<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;font-size:12px;">
 				<span class="muted mono" style="align-self:center;">PANCHINA</span>
@@ -185,6 +219,70 @@
 			</div>
 		</div>
 	</div>
+
+	{#if picker}
+		<div
+			class="picker-overlay"
+			role="button"
+			tabindex="-1"
+			onclick={() => (picker = null)}
+			onkeydown={(e) => e.key === 'Enter' && (picker = null)}
+		>
+			<div
+				class="panel picker-box"
+				role="dialog"
+				tabindex="-1"
+				onclick={(e) => e.stopPropagation()}
+				onkeydown={(e) => e.stopPropagation()}
+			>
+				<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+					<h2 style="margin:0;font-size:15px;">
+						Scegli un <span style="color:var(--cyan);">{picker.etichetta ?? picker.ruolo}</span>
+						<span class="muted" style="font-weight:400;font-size:12px;">· {picker.linea}</span>
+					</h2>
+					<button style="margin-left:auto;font-size:11px;" onclick={() => (picker = null)}>Chiudi ✕</button>
+				</div>
+				<div style="overflow:auto;max-height:60vh;">
+					{#each candidatiPicker as g (g.chiave)}
+						{@const cons = asta.valutazione(g).fascia.riferimento}
+						{@const def = prezzoDefault(g, cons)}
+						<button class="row-player" onclick={() => aggiungiDaPicker(g)}>
+							<RoleTag ruolo={g.ruolo} ruoloMantra={g.ruoloMantra} />
+							<Crest nome={g.squadra} size={15} />
+							<strong>{g.nome}</strong><span class="muted">{g.squadra}</span>
+							{#if g.fc?.expectedTitolarita}<span class="mono" style="font-size:10px;color:{g.fc.expectedTitolarita >= 70 ? 'var(--ok)' : g.fc.expectedTitolarita >= 45 ? 'var(--warn)' : 'var(--bad)'};">{Math.round(g.fc.expectedTitolarita)}%</span>{/if}
+							<span class="muted mono" style="margin-left:auto;">
+								{#if g.fantalab?.prezzo_atteso}FL {g.fantalab.prezzo_atteso} · {/if}cons. {cons} → <span style="color:var(--cyan);">{def}</span>
+							</span>
+						</button>
+					{:else}
+						<p class="muted" style="font-size:12px;">Nessun giocatore disponibile per questo ruolo.</p>
+					{/each}
+				</div>
+			</div>
+		</div>
+	{/if}
 {:else}
 	<div class="panel"><button class="primary" onclick={() => (attivo = asta.nuovoScenario())}>Crea il primo piano</button></div>
 {/if}
+
+<style>
+	.picker-overlay {
+		position: fixed;
+		inset: 0;
+		z-index: 100;
+		background: rgba(0, 0, 0, 0.55);
+		backdrop-filter: blur(3px);
+		display: flex;
+		align-items: flex-start;
+		justify-content: center;
+		padding: 8vh 16px 16px;
+	}
+	.picker-box {
+		width: 100%;
+		max-width: 560px;
+		max-height: 80vh;
+		display: flex;
+		flex-direction: column;
+	}
+</style>

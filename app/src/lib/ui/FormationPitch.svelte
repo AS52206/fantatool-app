@@ -16,7 +16,15 @@
 		slot: SlotCampo[];
 	}
 
-	let { linee, titolo = '' }: { linee: LineaCampo[]; titolo?: string } = $props();
+	let {
+		linee,
+		titolo = '',
+		onSlotVuoto
+	}: {
+		linee: LineaCampo[];
+		titolo?: string;
+		onSlotVuoto?: (info: { ruolo?: string; etichetta?: string; linea: string }) => void;
+	} = $props();
 
 	const colStato: Record<string, string> = {
 		PRESO: 'var(--ok)',
@@ -48,6 +56,15 @@
 									{#if s.prezzo != null}<span style="color:var(--cyan);">{s.prezzo}</span>{/if}
 									{#if s.titolarita != null && s.titolarita > 0}<span style="color:{titColor(s.titolarita)};">{Math.round(s.titolarita)}%</span>{/if}
 								</div>
+							{:else if onSlotVuoto}
+								<button
+									class="slot-add"
+									title="Aggiungi un giocatore per questo ruolo"
+									onclick={() => onSlotVuoto?.({ ruolo: s.ruolo, etichetta: s.etichetta, linea: linea.nome })}
+								>
+									<Jersey ghost size={44} />
+									<div class="empty">＋ {s.etichetta ?? s.ruolo ?? '—'}</div>
+								</button>
 							{:else}
 								<Jersey ghost size={44} />
 								<div class="empty">{s.etichetta ?? s.ruolo ?? '—'}</div>
@@ -139,6 +156,25 @@
 	}
 	.slot.libero {
 		opacity: 0.72;
+	}
+	.slot-add {
+		background: transparent;
+		border: 1px dashed transparent;
+		border-radius: 10px;
+		padding: 2px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 3px;
+		cursor: pointer;
+		transition: border-color 0.14s ease, background 0.14s ease;
+	}
+	.slot-add:hover {
+		border-color: var(--accent);
+		background: color-mix(in srgb, var(--accent) 12%, transparent);
+	}
+	.slot-add:hover :global(svg) {
+		filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 60%, transparent));
 	}
 	.kit {
 		position: relative;
