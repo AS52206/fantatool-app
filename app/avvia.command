@@ -39,7 +39,7 @@ sleep 0.3
 
 echo "Servo su $URL  (Ctrl+C per fermare)"
 echo "Le modifiche si vedono con un semplice refresh della pagina."
-(sleep 2; open -a "Google Chrome" "$URL" 2>/dev/null || open "$URL") &
+(sleep 2; open -a "Brave Browser" "$URL" 2>/dev/null || open -a "Google Chrome" "$URL" 2>/dev/null || open "$URL") &
 
 # Vite dev server: watch dei file + hot reload. Tutto locale, nessun dato in rete.
 exec npm run dev -- --port "$PORT" --strictPort --host 127.0.0.1

@@ -36,7 +36,7 @@ lsof -tiTCP:"$PORT" -sTCP:LISTEN 2>/dev/null | xargs kill 2>/dev/null || true
 sleep 0.3
 
 echo "Servo la build stabile su $URL  (Ctrl+C per fermare)"
-(sleep 1; open -a "Google Chrome" "$URL" 2>/dev/null || open "$URL") &
+(sleep 1; open -a "Brave Browser" "$URL" 2>/dev/null || open -a "Google Chrome" "$URL" 2>/dev/null || open "$URL") &
 
 cd build
 exec python3 - "$PORT" <<'PYEOF'
