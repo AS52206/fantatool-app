@@ -46,26 +46,33 @@
 
 	// --- click su maglia vuota: elenco giocatori del ruolo ---
 	let picker = $state<{ ruolo?: string; etichetta?: string; linea: string } | null>(null);
+	let pickerQuery = $state('');
+	$effect(() => {
+		void picker;
+		pickerQuery = '';
+	});
 	const valFL = (g: { fantalab?: { prezzo_atteso: number } | null; quotazione: number }) =>
 		g.fantalab?.prezzo_atteso || g.quotazione || 0;
+	const tokens = (v: unknown) =>
+		String(v ?? '')
+			.split(/[;,/\s]+/)
+			.map((x) => x.trim())
+			.filter(Boolean);
 	const candidatiPicker = $derived.by(() => {
 		if (!picker || !attivo) return [];
 		const inPiano = new Set(Object.keys(asta.scenari[attivo] ?? {}));
-		const opzioni = (picker.etichetta ?? '').split('/').map((s) => s.trim()).filter(Boolean);
+		const opzioni = tokens(picker.etichetta);
+		const q = normalizzaNome(pickerQuery);
 		return asta.giocatori
 			.filter((g) => !inPiano.has(g.chiave))
 			.filter((g) => {
-				if (asta.isMantra && opzioni.length) {
-					const suoi = String(g.ruoloMantra ?? '')
-						.split(/[;,/]/)
-						.map((x) => x.trim())
-						.filter(Boolean);
-					return suoi.some((x) => opzioni.includes(x));
-				}
+				if (asta.isMantra && opzioni.length)
+					return tokens(g.ruoloMantra).some((x) => opzioni.includes(x));
 				return !picker!.ruolo || g.ruolo === picker!.ruolo;
 			})
+			.filter((g) => !q || g.chiave.includes(q) || normalizzaNome(g.squadra).includes(q))
 			.sort((a, b) => valFL(b) - valFL(a))
-			.slice(0, 60);
+			.slice(0, 150);
 	});
 	function aggiungiDaPicker(g: { chiave: string; fantalab?: { prezzo_atteso: number } | null }) {
 		const cons = asta.valutazione(g as never).fascia.riferimento;
@@ -376,7 +383,7 @@
 				role="dialog"
 				tabindex="-1"
 				onclick={(e) => e.stopPropagation()}
-				onkeydown={(e) => e.stopPropagation()}
+				onkeydown={(e) => e.key !== 'Escape' && e.stopPropagation()}
 			>
 				<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
 					<h2 style="margin:0;font-size:15px;">
@@ -385,7 +392,14 @@
 					</h2>
 					<button style="margin-left:auto;font-size:11px;" onclick={() => (picker = null)}>Chiudi ✕</button>
 				</div>
-				<div style="overflow:auto;max-height:60vh;">
+				<!-- svelte-ignore a11y_autofocus -->
+				<input
+					autofocus
+					placeholder="Filtra per nome o squadra…"
+					bind:value={pickerQuery}
+					style="width:100%;margin-bottom:8px;"
+				/>
+				<div style="overflow:auto;max-height:56vh;">
 					{#each candidatiPicker as g (g.chiave)}
 						{@const cons = asta.valutazione(g).fascia.riferimento}
 						{@const def = prezzoDefault(g, cons)}
