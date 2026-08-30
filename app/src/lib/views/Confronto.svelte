@@ -47,10 +47,12 @@
 		const scartoMax = Math.max(0, ...rip.map((x) => Math.abs(x.speso_pct - x.quota_pct)));
 		return Math.max(0, 100 - scartoMax);
 	}
-	function potereResiduo(sq: string) {
-		const b = asta.bilanci[sq];
-		const vuoti = asta.config.limiti.TOT - b.g_presi;
-		return vuoti > 0 ? Math.max(0, b.c_rimasti) / vuoti : 0;
+	function fantamediaRosa(sq: string) {
+		const vals = asta
+			.rosa(sq)
+			.map((a) => a.player?.fc?.expectedFantamedia)
+			.filter((v): v is number => v != null && v > 0);
+		return vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : 0;
 	}
 	function bigIndex(sq: string) {
 		return asta.rosa(sq).reduce((s, a) => {
@@ -69,7 +71,7 @@
 			{ id: 'titxi', label: 'Titolarità XI', nota: '% titolarità media dei soli 11 titolari', fmt: 'pct', v: (s) => xiDi(s).tit / 100 },
 			{ id: 'efficienza', label: 'Efficienza', nota: 'PMA acquistato per credito speso', fmt: 'dec', v: (s) => pmaTotale(s) / Math.max(1, spesaDi(s)) },
 			{ id: 'equilibrio', label: 'Equilibrio reparti', nota: '100 − scarto max dalla quota P/D/C/A', fmt: 'n', v: (s) => equilibrio(s) },
-			{ id: 'potere', label: 'Potere residuo', nota: 'Crediti liberi per slot ancora da riempire', fmt: 'dec', v: (s) => potereResiduo(s) },
+			{ id: 'fmrosa', label: 'Fantamedia rosa', nota: 'Fantamedia attesa media dell\'intera rosa', fmt: 'dec', v: (s) => fantamediaRosa(s) },
 			{ id: 'big', label: 'Big in rosa', nota: 'Top = 2, Semi-Top = 1', fmt: 'n', v: (s) => bigIndex(s) }
 		];
 		if (asta.isMantra)
