@@ -912,6 +912,43 @@ export class Asta {
 		this.scenari = resto;
 	}
 
+	/** Esporta SOLO i piani/scenari della modalità corrente (non tocca rose/squadre). */
+	esportaScenari(): string {
+		return JSON.stringify(
+			{
+				fantatool: 'scenari',
+				modalita: normModalita(this.config.modalita),
+				esportato: new Date().toISOString(),
+				scenari: this.scenari
+			},
+			null,
+			2
+		);
+	}
+
+	/** Importa piani da file: li unisce a quelli esistenti (sovrascrive per nome). */
+	importaScenari(json: string): number {
+		const raw = JSON.parse(json);
+		const src =
+			raw && typeof raw === 'object' && raw.scenari && typeof raw.scenari === 'object'
+				? raw.scenari
+				: raw;
+		if (!src || typeof src !== 'object') throw new Error('File piani non valido');
+		const puliti: Scenari = {};
+		for (const [nome, piano] of Object.entries(src as Record<string, unknown>)) {
+			if (!piano || typeof piano !== 'object') continue;
+			const p: Record<string, number> = {};
+			for (const [k, v] of Object.entries(piano as Record<string, unknown>)) {
+				const n = Math.max(1, Math.round(Number(v) || 0));
+				if (Number.isFinite(n)) p[k] = n;
+			}
+			puliti[nome] = p;
+		}
+		if (!Object.keys(puliti).length) throw new Error('Nessun piano valido nel file');
+		this.scenari = { ...this.scenari, ...puliti };
+		return Object.keys(puliti).length;
+	}
+
 	rinominaScenario(vecchio: string, nuovo: string) {
 		const nome = nuovo.trim();
 		if (!nome || nome === vecchio || nome in this.scenari) return;

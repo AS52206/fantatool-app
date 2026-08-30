@@ -164,6 +164,32 @@
 				}
 		return [...m.values()];
 	});
+
+	// --- esporta / importa SOLO i piani (utile per spostarli tra browser/PC) ---
+	let pianiInput: HTMLInputElement;
+	function scaricaTesto(txt: string, nome: string) {
+		const a = document.createElement('a');
+		a.href = URL.createObjectURL(new Blob([txt], { type: 'application/json' }));
+		a.download = nome;
+		a.click();
+		URL.revokeObjectURL(a.href);
+	}
+	function esportaPiani() {
+		const oggi = new Date().toISOString().slice(0, 10);
+		scaricaTesto(asta.esportaScenari(), `piani-${asta.config.modalita}-${oggi}.json`);
+	}
+	async function importaPiani(e: Event) {
+		const inp = e.target as HTMLInputElement;
+		const f = inp.files?.[0];
+		inp.value = '';
+		if (!f) return;
+		try {
+			const n = asta.importaScenari(await f.text());
+			alert(`${n} pian${n === 1 ? 'o' : 'i'} importat${n === 1 ? 'o' : 'i'} in ${asta.config.modalita.toUpperCase()}.`);
+		} catch (err) {
+			alert('Import piani fallito: ' + (err instanceof Error ? err.message : err));
+		}
+	}
 </script>
 
 <svelte:window onkeydown={(e) => e.key === 'Escape' && (picker = null)} />
@@ -173,6 +199,10 @@
 		<button onclick={() => (attivo = n)} class:primary={n === attivo}>{n}</button>
 	{/each}
 	<button onclick={() => (attivo = asta.nuovoScenario())}>+ Nuovo piano</button>
+	<span style="width:1px;height:20px;background:var(--border);margin:0 2px;"></span>
+	<button onclick={esportaPiani} disabled={!nomi.length} title="Scarica solo i piani di questa modalità (non tocca rose e squadre)">⬇︎ Esporta piani</button>
+	<button onclick={() => pianiInput.click()} title="Aggiungi piani da un file (li unisce a quelli esistenti)">⬆︎ Importa piani</button>
+	<input bind:this={pianiInput} type="file" accept=".json" style="display:none" onchange={importaPiani} />
 </div>
 
 {#if attivo}
