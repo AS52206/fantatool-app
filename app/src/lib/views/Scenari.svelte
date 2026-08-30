@@ -1,8 +1,14 @@
 <script lang="ts">
 	import { asta } from '$lib/stores/auction.svelte';
 	import { normalizzaNome } from '$lib/engine/names';
-	import { MODULI_MANTRA } from '$lib/engine/mantra';
+	import {
+		MODULI_MANTRA,
+		PROFILI_ROSA_MANTRA,
+		PIANO_ROSA_MANTRA_30,
+		analizzaPianoRosaMantra
+	} from '$lib/engine/mantra';
 	import { buildCampoClassic, buildCampoMantra, MODULI_CLASSIC, type GiocatoreCampo } from '$lib/campo';
+	import type { Ruolo } from '$lib/domain/types';
 	import RoleTag from '$lib/ui/RoleTag.svelte';
 	import Crest from '$lib/ui/Crest.svelte';
 	import FormationPitch from '$lib/ui/FormationPitch.svelte';
@@ -94,6 +100,42 @@
 		asta.isMantra ? buildCampoMantra(campoInput, modulo) : buildCampoClassic(campoInput, modulo)
 	);
 
+	/** Ricambi consigliati per la rosa Mantra completa (modulo + n° giocatori di lega). */
+	const ricambiMantra = $derived.by(() => {
+		if (!asta.isMantra) return [];
+		const tot = asta.config.limiti.TOT || 25;
+		const somma30 = Object.values(PIANO_ROSA_MANTRA_30).reduce((s, n) => s + n, 0);
+		const chiavi = PROFILI_ROSA_MANTRA.map((p) => p[0]);
+		const piano: Record<string, number> = {};
+		let acc = 0;
+		chiavi.forEach((k, i) => {
+			if (i === chiavi.length - 1) piano[k] = Math.max(0, tot - acc);
+			else {
+				piano[k] = Math.round((PIANO_ROSA_MANTRA_30[k] * tot) / somma30);
+				acc += piano[k];
+			}
+		});
+		const ruoli = righe
+			.filter((r) => r.stato !== 'PERSO')
+			.map((r) => r.ruoloMantra || r.ruolo);
+		const a = analizzaPianoRosaMantra(ruoli, piano, tot, modulo);
+		return PROFILI_ROSA_MANTRA.map(([chiave, etichetta, roli]) => {
+			const d = a.profili[chiave] as { presenti: number; obiettivo: number; mancanti: number };
+			return { chiave, etichetta, roli, ...d };
+		});
+	});
+
+	/** Ricambi consigliati Classic: slot rimanenti per reparto sul totale di lega. */
+	const ricambiClassic = $derived.by(() => {
+		if (asta.isMantra) return [];
+		return (['P', 'D', 'C', 'A'] as Ruolo[]).map((r) => {
+			const presenti = righe.filter((x) => x.stato !== 'PERSO' && x.ruolo === r).length;
+			const obiettivo = asta.config.limiti[r] ?? 0;
+			return { chiave: r, etichetta: r, roli: [r], presenti, obiettivo, mancanti: Math.max(0, obiettivo - presenti) };
+		});
+	});
+	const ricambi = $derived(asta.isMantra ? ricambiMantra : ricambiClassic);
+
 	/** Slot ancora scoperti nel modulo scelto, raggruppati per ruolo. */
 	const ruoliDaCoprire = $derived.by(() => {
 		const m = new Map<string, { etichetta: string; ruolo?: string; linea: string; n: number }>();
@@ -170,10 +212,41 @@
 				</div>
 
 				<div>
-					<h3 style="margin:0 0 6px;font-size:13px;">
-						Panchina <span class="muted mono" style="font-size:11px;">({campo.panchina.length})</span>
+					<h3 style="margin:0 0 2px;font-size:13px;">
+						Ricambi consigliati
+						<span class="muted mono" style="font-size:11px;">· {asta.isMantra ? modulo + ', ' : ''}{asta.config.limiti.TOT} in rosa</span>
 					</h3>
-					{#if campo.panchina.length}
+					<p class="muted" style="font-size:10px;margin:0 0 6px;">
+						quanti giocatori per ruolo per una rosa completa e con ricambi
+					</p>
+					<div style="display:flex;flex-direction:column;gap:4px;">
+						{#each ricambi as p}
+							<button
+								class="row-player"
+								style="justify-content:flex-start;{p.mancanti === 0 ? 'opacity:0.6;' : ''}"
+								onclick={() => (picker = { ruolo: asta.isMantra ? undefined : p.chiave, etichetta: p.roli.join('/'), linea: 'ricambio' })}
+							>
+								<span class="tag" data-ruolo={asta.isMantra ? undefined : p.chiave}>{asta.isMantra ? p.chiave : p.etichetta}</span>
+								{#if asta.isMantra}<span class="muted" style="font-size:11px;">{p.etichetta}</span>{/if}
+								<span class="mono" style="margin-left:auto;">
+									<span style:color={p.presenti >= p.obiettivo ? 'var(--ok)' : 'var(--text)'}>{p.presenti}</span
+									><span class="muted">/{p.obiettivo}</span>
+								</span>
+								{#if p.mancanti > 0}
+									<span class="mono" style="color:var(--cyan);width:34px;text-align:right;">+{p.mancanti}</span>
+								{:else}
+									<span class="mono" style="color:var(--ok);width:34px;text-align:right;">✓</span>
+								{/if}
+							</button>
+						{/each}
+					</div>
+				</div>
+
+				{#if campo.panchina.length}
+					<div>
+						<h3 style="margin:0 0 6px;font-size:13px;">
+							In panchina nel piano <span class="muted mono" style="font-size:11px;">({campo.panchina.length})</span>
+						</h3>
 						<div style="display:flex;flex-direction:column;gap:4px;">
 							{#each campo.panchina as p}
 								<div style="display:flex;align-items:center;gap:6px;font-size:12px;">
@@ -184,10 +257,8 @@
 								</div>
 							{/each}
 						</div>
-					{:else}
-						<p class="muted" style="font-size:12px;margin:0;">Nessuna riserva nel piano.</p>
-					{/if}
-				</div>
+					</div>
+				{/if}
 			</div>
 		</div>
 	</div>
