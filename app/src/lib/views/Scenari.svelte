@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { asta } from '$lib/stores/auction.svelte';
 	import { normalizzaNome } from '$lib/engine/names';
-	import { MODULI_MANTRA, PROFILI_ROSA_MANTRA, PIANO_ROSA_MANTRA_30 } from '$lib/engine/mantra';
+	import {
+		MODULI_MANTRA,
+		PROFILI_ROSA_MANTRA,
+		PIANO_ROSA_MANTRA_30,
+		ORDINE_RUOLI_MANTRA,
+		normalizzaRuoliMantra
+	} from '$lib/engine/mantra';
 	import { buildCampoClassic, buildCampoMantra, MODULI_CLASSIC, type GiocatoreCampo } from '$lib/campo';
 	import type { Ruolo } from '$lib/domain/types';
 	import RoleTag from '$lib/ui/RoleTag.svelte';
@@ -146,6 +152,24 @@
 	const ricambi = $derived(asta.isMantra ? ricambiMantra : ricambiClassic);
 	const totalePiano = $derived(righe.filter((r) => r.stato !== 'PERSO').length);
 	const righePerse = $derived(righe.filter((r) => r.stato === 'PERSO'));
+
+	// ordine reparto per la tabella del piano
+	const ORDINE_CLASSIC: Record<string, number> = { P: 0, D: 1, C: 2, A: 3 };
+	function chiaveOrdine(r: { ruolo: string; ruoloMantra: string }): number {
+		if (asta.isMantra) {
+			const rm = normalizzaRuoliMantra(r.ruoloMantra);
+			return rm.length ? ORDINE_RUOLI_MANTRA.indexOf(rm[0]) : 99;
+		}
+		return ORDINE_CLASSIC[r.ruolo] ?? 99;
+	}
+	const righeTabella = $derived(
+		[...righe].sort(
+			(a, b) =>
+				chiaveOrdine(a) - chiaveOrdine(b) ||
+				(b.max ?? 0) - (a.max ?? 0) ||
+				a.nome.localeCompare(b.nome)
+		)
+	);
 
 	/** Slot ancora scoperti nel modulo scelto, raggruppati per ruolo. */
 	const ruoliDaCoprire = $derived.by(() => {
@@ -362,7 +386,7 @@
 			<table style="width:100%;border-collapse:collapse;font-size:13px;">
 				<thead><tr style="text-align:left;"><th>R</th><th>Giocatore</th><th>Max</th><th>Cons.</th><th title="PMA Fantalab">FL</th><th title="% titolarità">%TIT</th><th>Stato</th><th></th></tr></thead>
 				<tbody>
-					{#each righe as r (r.chiave)}
+					{#each righeTabella as r (r.chiave)}
 						{@const tit = r.giocatore?.fc?.expectedTitolarita ?? 0}
 						<tr style="border-top:1px solid var(--border);">
 							<td><RoleTag ruolo={r.ruolo} ruoloMantra={r.ruoloMantra} /></td>
