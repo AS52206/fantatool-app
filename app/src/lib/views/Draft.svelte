@@ -2,12 +2,18 @@
 	import { asta } from '$lib/stores/auction.svelte';
 	import { normalizzaNome } from '$lib/engine/names';
 	import { MOLTIPLICATORI_FLAG_MANUALE } from '$lib/engine/pricing';
+	import { ORDINE_RUOLI_MANTRA } from '$lib/engine/mantra';
 	import RoleTag from '$lib/ui/RoleTag.svelte';
 	import Crest from '$lib/ui/Crest.svelte';
 	import BudgetBar from '$lib/ui/BudgetBar.svelte';
 	import type { Giocatore, Ruolo } from '$lib/domain/types';
 
 	const RUOLI: Ruolo[] = ['P', 'D', 'C', 'A'];
+	const tokensRuoloMantra = (v: unknown) =>
+		String(v ?? '')
+			.split(/[;,/\s]+/)
+			.map((x) => x.trim())
+			.filter(Boolean);
 	const coloreLivello: Record<string, string> = {
 		OK: 'var(--ok)',
 		ATTENZIONE: 'var(--warn)',
@@ -15,7 +21,11 @@
 	};
 
 	let query = $state('');
-	let ruoloFiltro = $state<Ruolo | 'TUTTI'>('TUTTI');
+	let ruoloFiltro = $state<string>('TUTTI');
+	$effect(() => {
+		void asta.isMantra;
+		ruoloFiltro = 'TUTTI';
+	});
 	let selezionato = $state<Giocatore | null>(null);
 	let flagScelto = $state('');
 	let prezzoInput = $state(1);
@@ -29,7 +39,11 @@
 	const risultati = $derived.by(() => {
 		const q = normalizzaNome(query);
 		let list = asta.giocatori.filter((g) => !presi.has(g.id));
-		if (ruoloFiltro !== 'TUTTI') list = list.filter((g) => g.ruolo === ruoloFiltro);
+		if (ruoloFiltro !== 'TUTTI') {
+			list = asta.isMantra
+				? list.filter((g) => tokensRuoloMantra(g.ruoloMantra).includes(ruoloFiltro))
+				: list.filter((g) => g.ruolo === ruoloFiltro);
+		}
 		if (q) list = list.filter((g) => g.chiave.includes(q) || normalizzaNome(g.squadra).includes(q));
 		return [...list].sort((a, b) => b.quotazione - a.quotazione).slice(0, 40);
 	});
@@ -145,7 +159,11 @@
 				<input bind:this={ricercaEl} placeholder="Cerca giocatore o squadra…  ( / )" bind:value={query} style="flex:1;" />
 				<select bind:value={ruoloFiltro}>
 					<option value="TUTTI">Tutti</option>
-					{#each RUOLI as r}<option value={r}>{r}</option>{/each}
+					{#if asta.isMantra}
+						{#each ORDINE_RUOLI_MANTRA as r}<option value={r}>{r}</option>{/each}
+					{:else}
+						{#each RUOLI as r}<option value={r}>{r}</option>{/each}
+					{/if}
 				</select>
 			</div>
 			<div class="muted" style="font-size:10px;margin-bottom:8px;letter-spacing:0.3px;">
