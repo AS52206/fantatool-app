@@ -100,7 +100,7 @@
 	const totalePianoMio = $derived(asta.rosa(asta.miaSquadra).length);
 	const ricambiMio = $derived(
 		asta.isMantra
-			? ricambiMantraDa(campoInputMio.map((g) => g.ruoloMantra), asta.config.limiti.TOT)
+			? ricambiMantraDa(campoInputMio.map((g) => g.ruoloMantra), asta.config.limiti.TOT, moduloMio)
 			: ricambiClassicDa(campoInputMio.map((g) => g.ruolo), asta.config.limiti)
 	);
 
@@ -247,6 +247,9 @@
 						· {totalePianoMio}/{asta.config.limiti.TOT} in rosa
 					</span>
 				</h3>
+				<p class="muted" style="font-size:10px;margin:0 0 6px;">
+					{#if asta.isMantra}per il modulo {moduloMio} · un giocatore polivalente (es. Dd;E) conta in ogni ruolo che può coprire{:else}giocatori per reparto per la rosa completa{/if}
+				</p>
 				<div style="display:flex;flex-direction:column;gap:4px;">
 					{#each ricambiMio as p}
 						<div style="display:flex;align-items:center;gap:6px;font-size:12px;background:var(--panel-3);border:1px solid var(--border);border-radius:var(--r-sm);padding:var(--pad-row) 10px;{p.mancanti === 0 ? 'opacity:0.6;' : ''}">
