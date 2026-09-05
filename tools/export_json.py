@@ -137,6 +137,45 @@ def leggi_fantacrediti(percorso: Path) -> dict[str, dict]:
     return mappa
 
 
+def leggi_mantra_post(percorso: Path) -> dict[str, dict]:
+    """Listone Mantra "post mercato": un foglio Excel per ruolo atomico
+    (Por, Dc, B, Ds, Dd, E, M, C, W, T, A, Pc). Ogni giocatore compare in un
+    foglio per ciascun ruolo che può coprire, con lo stesso Prezzo/PMA
+    ripetuto: l'insieme dei fogli in cui appare è quindi il suo ruoloMantra
+    completo (più affidabile del solo testo della colonna RM del listone).
+    Aggiorna solo prezzo atteso / PMA% (fantalab) e ruoloMantra: gli altri
+    campi del foglio (Fascia, Titolarità, Note...) sono annotazioni personali
+    dell'utente, non dati puliti da importare automaticamente."""
+    try:
+        xl = pd.ExcelFile(percorso)
+    except (OSError, ValueError) as exc:
+        print(f"  ! impossibile leggere {percorso.name}: {exc}", file=sys.stderr)
+        return {}
+    righe: dict[str, dict] = {}
+    for foglio in xl.sheet_names:
+        try:
+            df = pd.read_excel(xl, sheet_name=foglio)
+        except (ValueError, OSError):
+            continue
+        c_nome = col(df, "nome")
+        c_prezzo = col(df, "prezzo")
+        c_pma = col(df, "pma")
+        if not c_nome:
+            continue
+        for _, r in df.iterrows():
+            chiave = normalizza_nome(r.get(c_nome))
+            if not chiave:
+                continue
+            rec = righe.setdefault(chiave, {"prezzo_atteso": 0.0, "pma_pct": 0.0, "ruoli": []})
+            if foglio not in rec["ruoli"]:
+                rec["ruoli"].append(foglio)
+            if c_prezzo:
+                rec["prezzo_atteso"] = num(r.get(c_prezzo))
+            if c_pma:
+                rec["pma_pct"] = num(str(r.get(c_pma, "")).replace("%", ""))
+    return righe
+
+
 RUOLO_MANTRA_A_ESTESO = {
     "Por": "Por", "Dc": "Dc", "Dd": "Dd", "Ds": "Ds", "E": "E", "M": "M",
     "C": "C", "W": "W", "T": "T", "A": "A", "Pc": "Pc",
@@ -148,6 +187,7 @@ def costruisci(stagione: str, modalita: str, partecipanti: int) -> dict:
     p_listone = base / "listone.xlsx"
     p_fc = base / "fantacrediti" / f"{partecipanti}-partecipanti.xlsx"
     p_fantalab = RADICE / "data" / stagione / "fantalab" / "serie_a_listone.json"
+    p_mantra_post = base / "mantra-post.xlsx"
 
     if not p_listone.exists():
         sys.exit(f"listone mancante: {p_listone}")
@@ -180,6 +220,11 @@ def costruisci(stagione: str, modalita: str, partecipanti: int) -> dict:
         except (ValueError, OSError):
             pass
 
+    # listone Mantra "post mercato" (opzionale): aggiorna prezzo/PMA e ruoloMantra
+    mantra_post: dict[str, dict] = {}
+    if modalita == "mantra" and p_mantra_post.exists():
+        mantra_post = leggi_mantra_post(p_mantra_post)
+
     players = []
     for _, r in df.iterrows():
         nome = str(r.get(c_nome, "")).strip()
@@ -189,6 +234,11 @@ def costruisci(stagione: str, modalita: str, partecipanti: int) -> dict:
         chiave = normalizza_nome(nome)
         m = fc_per_id.get(pid) or fc.get(chiave) or {}
         fl = fantalab.get(chiave, {})
+        mp = mantra_post.get(chiave)
+        ruolo_mantra_post = None
+        if mp:
+            fl = {**fl, "prezzo_atteso": mp["prezzo_atteso"], "pma_pct": mp["pma_pct"]}
+            ruolo_mantra_post = ";".join(mp["ruoli"])
 
         quota = num(r.get(c_qta), 1) if c_qta else 1
         # fm / pg: SOLO dal listone corrente (come fa fantatool/app.py, che passa
@@ -207,7 +257,7 @@ def costruisci(stagione: str, modalita: str, partecipanti: int) -> dict:
             "nome": nome,
             "chiave": chiave,
             "ruolo": str(r.get(c_ruolo, "")).strip().upper()[:1] if c_ruolo else "",
-            "ruoloMantra": (str(r.get(c_rm, "")).strip() if c_rm else "") or m.get("roleMantra", ""),
+            "ruoloMantra": ruolo_mantra_post or (str(r.get(c_rm, "")).strip() if c_rm else "") or m.get("roleMantra", ""),
             "squadra": str(r.get(c_squadra, "")).strip() if c_squadra else "",
             "quotazione": quota,
             "fvm": num(r.get(c_fvm)) if c_fvm else 0.0,
@@ -240,9 +290,11 @@ def costruisci(stagione: str, modalita: str, partecipanti: int) -> dict:
                 "listone": {"file": p_listone.name, "impronta": impronta(p_listone)},
                 "fantacrediti": {"file": p_fc.name, "impronta": impronta(p_fc)} if p_fc.exists() else None,
                 "fantalab": {"file": p_fantalab.name, "impronta": impronta(p_fantalab)} if p_fantalab.exists() else None,
+                "mantra_post": {"file": p_mantra_post.name, "impronta": impronta(p_mantra_post)} if mantra_post else None,
             },
             "totale_giocatori": len(players),
             "con_fantacrediti": sum(1 for p in players if p["fc"]),
+            "con_mantra_post": sum(1 for p in players if mantra_post.get(p["chiave"])) if mantra_post else 0,
         },
         "players": players,
     }
@@ -265,6 +317,8 @@ def main() -> None:
     m = bundle["meta"]
     print(f"OK  {out.relative_to(RADICE)}")
     print(f"    {m['totale_giocatori']} giocatori, {m['con_fantacrediti']} con metriche Fantacrediti")
+    if m["sorgenti"].get("mantra_post"):
+        print(f"    {m['con_mantra_post']} giocatori aggiornati da {m['sorgenti']['mantra_post']['file']} (prezzo/PMA/ruoloMantra)")
     tot = max(1, m["totale_giocatori"])
     if m["con_fantacrediti"] / tot < 0.6:
         p_fc = RADICE / "data" / args.stagione / args.modalita / "fantacrediti" / f"{args.partecipanti}-partecipanti.xlsx"
