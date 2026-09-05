@@ -2,10 +2,12 @@
 	import { asta } from '$lib/stores/auction.svelte';
 	import { normalizzaNome } from '$lib/engine/names';
 	import { MOLTIPLICATORI_FLAG_MANUALE } from '$lib/engine/pricing';
-	import { ORDINE_RUOLI_MANTRA } from '$lib/engine/mantra';
+	import { ORDINE_RUOLI_MANTRA, MODULI_MANTRA } from '$lib/engine/mantra';
+	import { buildCampoClassic, buildCampoMantra, MODULI_CLASSIC, type GiocatoreCampo } from '$lib/campo';
 	import RoleTag from '$lib/ui/RoleTag.svelte';
 	import Crest from '$lib/ui/Crest.svelte';
 	import BudgetBar from '$lib/ui/BudgetBar.svelte';
+	import FormationPitch from '$lib/ui/FormationPitch.svelte';
 	import type { Giocatore, Ruolo } from '$lib/domain/types';
 
 	const RUOLI: Ruolo[] = ['P', 'D', 'C', 'A'];
@@ -55,6 +57,32 @@
 		const el = listaEl?.querySelector(`[data-i="${evidenziato}"]`) as HTMLElement | null;
 		el?.scrollIntoView({ block: 'nearest' });
 	});
+
+	// --- mini campo: come si sta riempiendo la mia rosa ---
+	let moduloMio = $state('');
+	const moduliDisponibiliMio = $derived(asta.isMantra ? Object.keys(MODULI_MANTRA) : MODULI_CLASSIC);
+	$effect(() => {
+		if (!moduliDisponibiliMio.includes(moduloMio))
+			moduloMio = asta.isMantra ? (asta.moduliTargetValidi[0] ?? '3-4-1-2') : '4-3-3';
+	});
+	const campoInputMio = $derived(
+		asta.rosa(asta.miaSquadra).map(
+			(a): GiocatoreCampo => ({
+				chiave: String(a.giocatoreId),
+				nome: a.nome,
+				club: a.squadraSerieA,
+				ruolo: a.ruolo || 'C',
+				ruoloMantra: a.player?.ruoloMantra,
+				prezzo: a.prezzo,
+				titolarita: a.player?.fc?.expectedTitolarita ?? null,
+				pmaFl: a.player?.fantalab?.prezzo_atteso ?? null,
+				stato: 'PRESO'
+			})
+		)
+	);
+	const campoMio = $derived(
+		asta.isMantra ? buildCampoMantra(campoInputMio, moduloMio) : buildCampoClassic(campoInputMio, moduloMio)
+	);
 
 	const ultimiAcquisti = $derived(
 		[...asta.acquisti].sort((a, b) => b.ordine - a.ordine).slice(0, 8)
@@ -449,6 +477,27 @@
 				<div class="muted" style="font-size:10px;margin-top:4px;">scarto vs PMA</div>
 			</div>
 		{/if}
+
+		<div class="panel">
+			<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+				<h2 style="margin:0;font-size:15px;">Il mio campo</h2>
+				<select bind:value={moduloMio} style="font-family:var(--mono);font-size:11px;padding:3px 6px;">
+					{#each moduliDisponibiliMio as m}<option value={m}>{m}</option>{/each}
+				</select>
+				<span class="muted" style="font-size:11px;">{campoMio.linee.reduce((s, l) => s + l.slot.filter((x) => x.stato !== 'VUOTO').length, 0)}/11 coperti</span>
+			</div>
+			<FormationPitch linee={campoMio.linee} titolo={campoMio.modulo} />
+			{#if campoMio.panchina.length}
+				<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;font-size:11px;">
+					<span class="muted mono" style="align-self:center;">PANCHINA</span>
+					{#each campoMio.panchina as p}
+						<span class="tag" data-ruolo={asta.isMantra ? undefined : p.ruolo}>
+							{asta.isMantra ? p.ruoloMantra || p.ruolo : p.ruolo} {p.nome}
+						</span>
+					{/each}
+				</div>
+			{/if}
+		</div>
 
 		<div class="panel">
 			<h2 style="margin:0 0 8px;font-size:16px;">Rosa · {asta.miaSquadra}</h2>
