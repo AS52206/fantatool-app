@@ -384,11 +384,12 @@
 			</div>
 
 			<table style="width:100%;border-collapse:collapse;font-size:13px;">
-				<thead><tr style="text-align:left;"><th>R</th><th>Giocatore</th><th>Max</th><th>Cons.</th><th title="PMA Fantalab">FL</th><th title="% titolarità">%TIT</th><th>Stato</th><th></th></tr></thead>
+				<thead><tr style="text-align:left;"><th title="Numero progressivo">#</th><th>R</th><th>Giocatore</th><th>Max</th><th>Cons.</th><th title="PMA Fantalab">FL</th><th title="% titolarità">%TIT</th><th>Stato</th><th></th></tr></thead>
 				<tbody>
-					{#each righeTabella as r (r.chiave)}
+					{#each righeTabella as r, i (r.chiave)}
 						{@const tit = r.giocatore?.fc?.expectedTitolarita ?? 0}
 						<tr style="border-top:1px solid var(--border);">
+							<td class="mono muted">{i + 1}</td>
 							<td><RoleTag ruolo={r.ruolo} ruoloMantra={r.ruoloMantra} /></td>
 							<td style="white-space:nowrap;">
 								<Crest nome={r.giocatore?.squadra} size={14} /> {r.nome}{#if r.stato !== 'LIBERO'}<span class="muted" style="font-size:11px;"> · {r.proprietario} {r.prezzoEffettivo}</span>{/if}</td>
