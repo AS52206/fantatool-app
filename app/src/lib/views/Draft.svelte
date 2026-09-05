@@ -4,6 +4,7 @@
 	import { MOLTIPLICATORI_FLAG_MANUALE } from '$lib/engine/pricing';
 	import { ORDINE_RUOLI_MANTRA, MODULI_MANTRA } from '$lib/engine/mantra';
 	import { buildCampoClassic, buildCampoMantra, MODULI_CLASSIC, type GiocatoreCampo } from '$lib/campo';
+	import { ricambiMantraDa, ricambiClassicDa } from '$lib/ricambi';
 	import RoleTag from '$lib/ui/RoleTag.svelte';
 	import Crest from '$lib/ui/Crest.svelte';
 	import BudgetBar from '$lib/ui/BudgetBar.svelte';
@@ -82,6 +83,25 @@
 	);
 	const campoMio = $derived(
 		asta.isMantra ? buildCampoMantra(campoInputMio, moduloMio) : buildCampoClassic(campoInputMio, moduloMio)
+	);
+	/** Slot ancora scoperti nell'XI del modulo scelto. */
+	const ruoliDaCoprireMio = $derived.by(() => {
+		const m = new Map<string, { etichetta: string; linea: string; n: number }>();
+		for (const linea of campoMio.linee)
+			for (const s of linea.slot)
+				if ((s.stato ?? 'VUOTO') === 'VUOTO') {
+					const key = s.etichetta ?? s.ruolo ?? '?';
+					const cur = m.get(key) ?? { etichetta: s.etichetta ?? key, linea: linea.nome, n: 0 };
+					cur.n += 1;
+					m.set(key, cur);
+				}
+		return [...m.values()];
+	});
+	const totalePianoMio = $derived(asta.rosa(asta.miaSquadra).length);
+	const ricambiMio = $derived(
+		asta.isMantra
+			? ricambiMantraDa(campoInputMio.map((g) => g.ruoloMantra), asta.config.limiti.TOT)
+			: ricambiClassicDa(campoInputMio.map((g) => g.ruolo), asta.config.limiti)
 	);
 
 	const ultimiAcquisti = $derived(
@@ -178,6 +198,76 @@
 </script>
 
 <svelte:window onkeydown={daTastiera} />
+
+<div class="panel" style="margin-bottom:16px;">
+	<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+		<h2 style="margin:0;font-size:15px;">Il mio campo</h2>
+		<select bind:value={moduloMio} style="font-family:var(--mono);">
+			{#each moduliDisponibiliMio as m}<option value={m}>{m}</option>{/each}
+		</select>
+		<span class="muted" style="font-size:11px;">
+			{campoMio.linee.reduce((s, l) => s + l.slot.filter((x) => x.stato !== 'VUOTO').length, 0)}/11 coperti
+		</span>
+	</div>
+	<div class="campo-wrap">
+		<div style="flex:1 1 420px;min-width:0;">
+			<FormationPitch linee={campoMio.linee} titolo={campoMio.modulo} />
+			{#if campoMio.panchina.length}
+				<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;font-size:11px;">
+					<span class="muted mono" style="align-self:center;">PANCHINA</span>
+					{#each campoMio.panchina as p}
+						<span class="tag" data-ruolo={asta.isMantra ? undefined : p.ruolo}>
+							{asta.isMantra ? p.ruoloMantra || p.ruolo : p.ruolo} {p.nome}
+						</span>
+					{/each}
+				</div>
+			{/if}
+		</div>
+		<div class="campo-side">
+			<div>
+				<h3 style="margin:0 0 6px;font-size:13px;">Ruoli da coprire <span class="muted mono" style="font-size:11px;">· {moduloMio}</span></h3>
+				{#if ruoliDaCoprireMio.length}
+					<div style="display:flex;flex-direction:column;gap:5px;">
+						{#each ruoliDaCoprireMio as r}
+							<div style="display:flex;align-items:center;gap:6px;font-size:12px;background:var(--panel-3);border:1px solid var(--border);border-radius:var(--r-sm);padding:var(--pad-row) 10px;">
+								<span class="tag" data-ruolo={asta.isMantra ? undefined : r.etichetta}>{r.etichetta}</span>
+								{#if r.n > 1}<span class="mono" style="color:var(--cyan);">×{r.n}</span>{/if}
+								<span class="muted" style="font-size:11px;">{r.linea}</span>
+							</div>
+						{/each}
+					</div>
+				{:else}
+					<p class="muted" style="font-size:12px;margin:0;">XI completo per questo modulo. ✓</p>
+				{/if}
+			</div>
+			<div>
+				<h3 style="margin:0 0 2px;font-size:13px;">
+					Ricambi consigliati
+					<span class="mono" style="font-size:11px;color:{totalePianoMio >= asta.config.limiti.TOT ? 'var(--ok)' : 'var(--muted)'};">
+						· {totalePianoMio}/{asta.config.limiti.TOT} in rosa
+					</span>
+				</h3>
+				<div style="display:flex;flex-direction:column;gap:4px;">
+					{#each ricambiMio as p}
+						<div style="display:flex;align-items:center;gap:6px;font-size:12px;background:var(--panel-3);border:1px solid var(--border);border-radius:var(--r-sm);padding:var(--pad-row) 10px;{p.mancanti === 0 ? 'opacity:0.6;' : ''}">
+							<span class="tag" data-ruolo={asta.isMantra ? undefined : p.chiave}>{asta.isMantra ? p.chiave : p.etichetta}</span>
+							{#if asta.isMantra}<span class="muted" style="font-size:11px;">{p.etichetta}</span>{/if}
+							<span class="mono" style="margin-left:auto;">
+								<span style:color={p.presenti >= p.obiettivo ? 'var(--ok)' : 'var(--text)'}>{p.presenti}</span
+								><span class="muted">/{p.obiettivo}</span>
+							</span>
+							{#if p.mancanti > 0}
+								<span class="mono" style="color:var(--cyan);width:34px;text-align:right;">+{p.mancanti}</span>
+							{:else}
+								<span class="mono" style="color:var(--ok);width:34px;text-align:right;">✓</span>
+							{/if}
+						</div>
+					{/each}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 
 <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:start;">
 	<!-- SINISTRA: ricerca + consiglio -->
@@ -477,27 +567,6 @@
 				<div class="muted" style="font-size:10px;margin-top:4px;">scarto vs PMA</div>
 			</div>
 		{/if}
-
-		<div class="panel">
-			<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
-				<h2 style="margin:0;font-size:15px;">Il mio campo</h2>
-				<select bind:value={moduloMio} style="font-family:var(--mono);font-size:11px;padding:3px 6px;">
-					{#each moduliDisponibiliMio as m}<option value={m}>{m}</option>{/each}
-				</select>
-				<span class="muted" style="font-size:11px;">{campoMio.linee.reduce((s, l) => s + l.slot.filter((x) => x.stato !== 'VUOTO').length, 0)}/11 coperti</span>
-			</div>
-			<FormationPitch linee={campoMio.linee} titolo={campoMio.modulo} />
-			{#if campoMio.panchina.length}
-				<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;font-size:11px;">
-					<span class="muted mono" style="align-self:center;">PANCHINA</span>
-					{#each campoMio.panchina as p}
-						<span class="tag" data-ruolo={asta.isMantra ? undefined : p.ruolo}>
-							{asta.isMantra ? p.ruoloMantra || p.ruolo : p.ruolo} {p.nome}
-						</span>
-					{/each}
-				</div>
-			{/if}
-		</div>
 
 		<div class="panel">
 			<h2 style="margin:0 0 8px;font-size:16px;">Rosa · {asta.miaSquadra}</h2>

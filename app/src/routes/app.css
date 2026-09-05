@@ -399,6 +399,21 @@ select:focus {
 	height: 100%;
 }
 
+/* --- campo + colonna laterale (Scenari, Draft) --- */
+.campo-wrap {
+	display: flex;
+	gap: 16px;
+	align-items: flex-start;
+	flex-wrap: wrap;
+}
+.campo-side {
+	flex: 1 1 220px;
+	min-width: 200px;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
 /* --- riga giocatore --- */
 .row-player {
 	width: 100%;

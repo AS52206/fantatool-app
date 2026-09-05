@@ -1,15 +1,9 @@
 <script lang="ts">
 	import { asta } from '$lib/stores/auction.svelte';
 	import { normalizzaNome } from '$lib/engine/names';
-	import {
-		MODULI_MANTRA,
-		PROFILI_ROSA_MANTRA,
-		PIANO_ROSA_MANTRA_30,
-		ORDINE_RUOLI_MANTRA,
-		normalizzaRuoliMantra
-	} from '$lib/engine/mantra';
+	import { MODULI_MANTRA, ORDINE_RUOLI_MANTRA, normalizzaRuoliMantra } from '$lib/engine/mantra';
 	import { buildCampoClassic, buildCampoMantra, MODULI_CLASSIC, type GiocatoreCampo } from '$lib/campo';
-	import type { Ruolo } from '$lib/domain/types';
+	import { ricambiMantraDa, ricambiClassicDa } from '$lib/ricambi';
 	import RoleTag from '$lib/ui/RoleTag.svelte';
 	import Crest from '$lib/ui/Crest.svelte';
 	import FormationPitch from '$lib/ui/FormationPitch.svelte';
@@ -108,49 +102,13 @@
 		asta.isMantra ? buildCampoMantra(campoInput, modulo) : buildCampoClassic(campoInput, modulo)
 	);
 
-	const tokensRuolo = (rm: unknown) =>
-		String(rm ?? '')
-			.split(/[;,/]/)
-			.map((s) => s.trim())
-			.filter(Boolean);
-
-	/** Ricambi consigliati per la rosa Mantra completa (modulo + n° giocatori di lega).
-	 *  Un giocatore polivalente (es. Dd;E) conta in OGNI ruolo che può coprire. */
-	const ricambiMantra = $derived.by(() => {
-		if (!asta.isMantra) return [];
-		const tot = asta.config.limiti.TOT || 25;
-		const somma30 = Object.values(PIANO_ROSA_MANTRA_30).reduce((s, n) => s + n, 0);
-		const chiavi = PROFILI_ROSA_MANTRA.map((p) => p[0]);
-		const piano: Record<string, number> = {};
-		let acc = 0;
-		chiavi.forEach((k, i) => {
-			if (i === chiavi.length - 1) piano[k] = Math.max(0, tot - acc);
-			else {
-				piano[k] = Math.round((PIANO_ROSA_MANTRA_30[k] * tot) / somma30);
-				acc += piano[k];
-			}
-		});
-		const ruoliPlan = righe
-			.filter((r) => r.stato !== 'PERSO')
-			.map((r) => tokensRuolo(r.ruoloMantra || r.ruolo));
-		return PROFILI_ROSA_MANTRA.map(([chiave, etichetta, roli]) => {
-			const obiettivo = piano[chiave] ?? 0;
-			const presenti = ruoliPlan.filter((toks) => toks.some((t) => roli.includes(t))).length;
-			return { chiave, etichetta, roli, presenti, obiettivo, mancanti: Math.max(0, obiettivo - presenti) };
-		});
-	});
-
-	/** Ricambi consigliati Classic: slot rimanenti per reparto sul totale di lega. */
-	const ricambiClassic = $derived.by(() => {
-		if (asta.isMantra) return [];
-		return (['P', 'D', 'C', 'A'] as Ruolo[]).map((r) => {
-			const presenti = righe.filter((x) => x.stato !== 'PERSO' && x.ruolo === r).length;
-			const obiettivo = asta.config.limiti[r] ?? 0;
-			return { chiave: r, etichetta: r, roli: [r], presenti, obiettivo, mancanti: Math.max(0, obiettivo - presenti) };
-		});
-	});
-	const ricambi = $derived(asta.isMantra ? ricambiMantra : ricambiClassic);
-	const totalePiano = $derived(righe.filter((r) => r.stato !== 'PERSO').length);
+	const righePianoAttive = $derived(righe.filter((r) => r.stato !== 'PERSO'));
+	const ricambi = $derived(
+		asta.isMantra
+			? ricambiMantraDa(righePianoAttive.map((r) => r.ruoloMantra || r.ruolo), asta.config.limiti.TOT)
+			: ricambiClassicDa(righePianoAttive.map((r) => r.ruolo), asta.config.limiti)
+	);
+	const totalePiano = $derived(righePianoAttive.length);
 	const righePerse = $derived(righe.filter((r) => r.stato === 'PERSO'));
 
 	// ordine reparto per la tabella del piano
@@ -503,19 +461,6 @@
 {/if}
 
 <style>
-	.campo-wrap {
-		display: flex;
-		gap: 16px;
-		align-items: flex-start;
-		flex-wrap: wrap;
-	}
-	.campo-side {
-		flex: 1 1 220px;
-		min-width: 200px;
-		display: flex;
-		flex-direction: column;
-		gap: 14px;
-	}
 	.picker-overlay {
 		position: fixed;
 		inset: 0;
