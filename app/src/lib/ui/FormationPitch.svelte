@@ -179,14 +179,14 @@
 		border: 1px solid rgba(255, 255, 255, 0.12);
 		border-radius: var(--r);
 		background:
-			radial-gradient(140% 70% at 50% 0%, rgba(94, 255, 156, 0.06), transparent 55%),
-			repeating-linear-gradient(0deg, #0b1a13 0 40px, #0d1f16 40px 80px);
-		box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.45);
+			radial-gradient(140% 75% at 50% 0%, rgba(120, 255, 175, 0.14), transparent 60%),
+			repeating-linear-gradient(0deg, #1f5138 0 40px, #245c40 40px 80px);
+		box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.28);
 		overflow: hidden;
 	}
 	.mark {
 		position: absolute;
-		border: 1px solid rgba(255, 255, 255, 0.08);
+		border: 1px solid rgba(255, 255, 255, 0.16);
 		pointer-events: none;
 	}
 	.circle {
@@ -202,7 +202,7 @@
 		right: 12px;
 		top: 50%;
 		border: none;
-		border-top: 1px solid rgba(255, 255, 255, 0.08);
+		border-top: 1px solid rgba(255, 255, 255, 0.16);
 	}
 	.pitch-title {
 		position: absolute;
@@ -212,7 +212,7 @@
 		text-align: center;
 		font: 700 12px/1 var(--mono);
 		letter-spacing: 4px;
-		color: rgba(255, 255, 255, 0.55);
+		color: rgba(255, 255, 255, 0.72);
 	}
 	/* il campo è sempre verde scuro: testo chiaro a prescindere dal tema */
 	.pitch-frame :global(*) {
