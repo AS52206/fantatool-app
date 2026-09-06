@@ -1,8 +1,11 @@
 /// <reference types="@sveltejs/kit" />
 /**
- * Service worker: rende l'app installabile e completamente offline.
- * Strategia: precache di tutto il build + asset statici all'installazione,
- * poi cache-first per le richieste GET locali (nessuna rete a runtime).
+ * Service worker: rende l'app installabile e utilizzabile offline.
+ *
+ * Strategia **network-first** (con cache di ripiego): l'app è servita in locale,
+ * quindi quasi sempre la rete c'è ed è la copia più fresca — così una ricompila
+ * si vede subito, senza restare bloccati su una versione vecchia in cache.
+ * La cache serve solo da rete di sicurezza quando il server locale non risponde.
  */
 import { build, files, version } from '$service-worker';
 
@@ -11,7 +14,10 @@ const PRECACHE = [...build, ...files];
 
 self.addEventListener('install', (event: any) => {
 	event.waitUntil(
-		caches.open(CACHE).then((c) => c.addAll(PRECACHE)).then(() => (self as any).skipWaiting())
+		caches
+			.open(CACHE)
+			.then((c) => c.addAll(PRECACHE))
+			.then(() => (self as any).skipWaiting())
 	);
 });
 
@@ -31,21 +37,22 @@ self.addEventListener('fetch', (event: any) => {
 	if (url.origin !== location.origin) return;
 
 	event.respondWith(
-		caches.open(CACHE).then(async (cache) => {
-			const cached = await cache.match(req);
-			if (cached) return cached;
+		(async () => {
+			const cache = await caches.open(CACHE);
 			try {
 				const res = await fetch(req);
+				// aggiorna la copia offline con l'ultima versione servita
 				if (res.ok && res.type === 'basic') cache.put(req, res.clone());
 				return res;
-			} catch (err) {
-				// offline e non in cache: per una navigazione, ripiega sulla home.
+			} catch {
+				const cached = await cache.match(req);
+				if (cached) return cached;
 				if (req.mode === 'navigate') {
-					const fallback = await cache.match('/');
-					if (fallback) return fallback;
+					const home = await cache.match('/');
+					if (home) return home;
 				}
-				throw err;
+				throw new Error('offline e nessuna copia in cache');
 			}
-		})
+		})()
 	);
 });
