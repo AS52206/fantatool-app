@@ -4,19 +4,26 @@
 	import './app.css';
 	let { children } = $props();
 
-	// Quando entra in scena un service worker aggiornato (dopo una ricompila),
-	// ricarica una volta sola per servire subito la versione fresca.
-	onMount(() => {
+	// Bonifica: versioni precedenti registravano un service worker che teneva
+	// l'app in cache e impediva di vedere gli aggiornamenti. Lo disinstalliamo
+	// (e svuotiamo le cache) una volta sola, poi ricarichiamo pulito.
+	onMount(async () => {
 		if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
-		navigator.serviceWorker.addEventListener('controllerchange', () => {
-			try {
-				if (sessionStorage.getItem('sw-reloaded')) return;
-				sessionStorage.setItem('sw-reloaded', '1');
-			} catch {
-				/* storage non disponibile: ricarica comunque */
+		try {
+			const regs = await navigator.serviceWorker.getRegistrations();
+			if (!regs.length) return;
+			await Promise.all(regs.map((r) => r.unregister()));
+			if (typeof caches !== 'undefined') {
+				const chiavi = await caches.keys();
+				await Promise.all(chiavi.map((k) => caches.delete(k)));
 			}
-			location.reload();
-		});
+			if (!sessionStorage.getItem('sw-pulito')) {
+				sessionStorage.setItem('sw-pulito', '1');
+				location.reload();
+			}
+		} catch {
+			/* niente da fare */
+		}
 	});
 </script>
 

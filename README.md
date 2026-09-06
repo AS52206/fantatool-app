@@ -11,8 +11,10 @@ Rigenera i dati, compila l'app se serve, la serve **come file statici** su
 `http://localhost:8770` e apre il browser. Nessun server di sviluppo, nessun
 watcher, nessun websocket: il runtime dell'asta è solo file su disco.
 
-Da Chrome/Brave puoi fare **"Installa app"** una volta: Fantatool finisce nel
-dock con finestra propria e funziona offline (service worker + manifest).
+Da Chrome/Brave puoi fare **"Installa app" / "Crea scorciatoia (apri come
+finestra)"**: Fantatool finisce nel dock con finestra propria. Ogni ricarica
+prende sempre l'ultima build dal server locale (nessuna cache che ti blocca su
+una versione vecchia).
 
 La prima volta serve **Node.js**:
 
