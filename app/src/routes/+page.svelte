@@ -149,6 +149,14 @@
 	}
 
 	let mostraSnapshot = $state(false);
+
+	function guardiaUscita(e: BeforeUnloadEvent) {
+		if (asta.avviata && !asta.altraSchedaAttiva) {
+			e.preventDefault();
+			e.returnValue = '';
+		}
+	}
+
 	function scorciatoieGlobali(e: KeyboardEvent) {
 		const tag = (e.target as HTMLElement | null)?.tagName;
 		if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
@@ -159,7 +167,7 @@
 	}
 </script>
 
-<svelte:window onkeydown={scorciatoieGlobali} />
+<svelte:window onkeydown={scorciatoieGlobali} onbeforeunload={guardiaUscita} />
 
 <div style="max-width:1280px;margin:0 auto;padding:var(--pad);">
 	<header class="appbar">
@@ -186,6 +194,21 @@
 			<input bind:this={roseInput} type="file" accept=".json,.csv,.tsv,.txt,.xlsx,.xls" style="display:none" onchange={scegliRoseFile} />
 		</div>
 	</header>
+
+	{#if asta.erroreSalvataggio}
+		<div class="panel" role="alert" style="margin-bottom:12px;border-color:#ef4444;background:rgba(239,68,68,0.12);">
+			<b style="color:#ef4444;">⚠️ {asta.erroreSalvataggio}</b>
+			<button style="margin-left:8px;font-size:11px;" onclick={() => scarica(asta.esporta(), `asta-${oggi()}.json`, 'application/json')}>⬇︎ Scarica backup ora</button>
+		</div>
+	{/if}
+
+	{#if asta.altraSchedaAttiva}
+		<div class="panel" role="alert" style="margin-bottom:12px;border-color:#f59e0b;background:rgba(245,158,11,0.12);">
+			<b style="color:#f59e0b;">⚠️ Fantatool è aperto in un'altra scheda</b>
+			<span class="muted" style="font-size:12px;"> — questa scheda è disallineata. Usa una scheda sola.</span>
+			<button style="margin-left:8px;font-size:11px;" onclick={() => asta.ricaricaDaStorage()}>↻ Allinea questa scheda</button>
+		</div>
+	{/if}
 
 	{#if mostraSnapshot}
 		{@const backup = asta.elencoBackup}

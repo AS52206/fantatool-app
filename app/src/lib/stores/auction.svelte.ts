@@ -33,12 +33,18 @@ import {
 	analizzaFragilitaModulo,
 	analizzaRosaMantra,
 	calcolaCateneSostituzioneMantra,
+	calcolaScarsitaRuoliMantra,
 	contaIncompatibiliModuli,
 	impattoCandidatoMantra,
 	MODULI_MANTRA,
 	valutaCandidatoSuModuli,
 	type GiocatoreMantraInput
 } from '../engine/mantra';
+import {
+	allertaRuoliChiave,
+	giocatoriPerno,
+	raccomandaFamiglie
+} from '../mantraHints';
 
 /** Quote di budget per reparto (percentuali), come QUOTE_RUOLO dell'app. */
 export const QUOTE_RUOLO: Record<Ruolo, number> = { P: 6, D: 16, C: 30, A: 48 };
@@ -149,6 +155,10 @@ export class Asta {
 	scenari = $state<Scenari>({});
 	codaChiamate = $state<number[]>([]);
 	ultimoSalvataggio = $state<number | null>(null);
+	/** Messaggio d'errore se l'ultima scrittura su localStorage è fallita (quota/privato). */
+	erroreSalvataggio = $state<string | null>(null);
+	/** true se un'altra scheda ha modificato la stessa asta: questa è ormai disallineata. */
+	altraSchedaAttiva = $state(false);
 
 	/** true durante il caricamento/switch: sospende l'autosave. */
 	private caricando = false;
@@ -179,12 +189,36 @@ export class Asta {
 				try {
 					localStorage.setItem(chiave, JSON.stringify(snap));
 					this.ultimoSalvataggio = Date.now();
+					this.erroreSalvataggio = null;
 					this.aggiornaRing(snap);
-				} catch {
-					/* quota piena o storage non disponibile: la UI mostra l'avviso */
+				} catch (e) {
+					// quota piena o storage non disponibile: la UI mostra l'avviso rosso
+					this.erroreSalvataggio =
+						e instanceof Error && /quota/i.test(e.name + e.message)
+							? 'Spazio locale esaurito: esporta subito un backup.'
+							: 'Salvataggio locale non riuscito: esporta subito un backup.';
 				}
 			});
 		});
+
+		// Un'altra scheda che scrive sulla stessa asta rende questa disallineata:
+		// l'evento `storage` scatta solo nelle altre schede, mai in quella che scrive.
+		if (typeof window !== 'undefined') {
+			window.addEventListener('storage', (e) => {
+				if (this.caricando) return;
+				if (e.key === chiaveMod(this.config.modalita) || e.key === CHIAVE_ATTIVA)
+					this.altraSchedaAttiva = true;
+			});
+		}
+	}
+
+	/** Ricarica lo stato dell'asta corrente da localStorage (dopo modifica da altra scheda). */
+	ricaricaDaStorage() {
+		const m = normModalita(this.config.modalita);
+		this.caricando = true;
+		this.applicaSnapshot(caricaMod(m), m);
+		this.caricando = false;
+		this.altraSchedaAttiva = false;
 	}
 
 	/** Carica uno snapshot (o i default) nello store, forzando la modalità. */
@@ -493,6 +527,41 @@ export class Asta {
 		return analizzaFragilitaModulo(this.rosaMantraInput(this.miaSquadra), modulo);
 	}
 
+	/** Verso quale famiglia di moduli conviene costruire la rosa (primo anno). */
+	get raccomandazioneFamiglieMantra() {
+		return raccomandaFamiglie(this.rosaMantraInput(this.miaSquadra));
+	}
+
+	/** I polivalenti che tengono in piedi più moduli target contemporaneamente. */
+	get giocatoriPernoMantra() {
+		return giocatoriPerno(this.rosaMantraInput(this.miaSquadra), this.moduliTargetValidi);
+	}
+
+	/** Scarsità nel mercato libero per ruolo Mantra (giocatori affidabili / squadra). */
+	get scarsitaRuoliMantra() {
+		const presi = this.giocatoreIdPresi;
+		const liberi: GiocatoreMantraInput[] = this.giocatori
+			.filter((g) => !presi.has(g.id) && g.ruoloMantra)
+			.map((g) => ({
+				chiave: String(g.id),
+				nome: g.nome,
+				ruoli: g.ruoloMantra,
+				titolarita: g.fc?.expectedTitolarita ?? 0
+			}));
+		return calcolaScarsitaRuoliMantra(liberi, this.config.partecipanti);
+	}
+
+	/** Ruoli chiave richiesti dai moduli target ma scoperti nella mia rosa. */
+	get allertaRuoliChiaveMantra() {
+		const scarsita: Record<string, string> = {};
+		for (const s of this.scarsitaRuoliMantra) scarsita[s.ruolo] = s.stato;
+		return allertaRuoliChiave(
+			this.rosaMantraInput(this.miaSquadra),
+			this.moduliTargetValidi,
+			scarsita
+		);
+	}
+
 	/** Catene di sostituzione (chi entra togliendo ogni titolare) sul modulo target. */
 	get cateneMiaRosaMantra() {
 		const an = this.analisiMiaRosaMantra;
@@ -583,6 +652,16 @@ export class Asta {
 	 * calcola_fascia_operativa -> decisione immediata + profili rivali.
 	 */
 	valutazione(g: Giocatore, opts: { flagOverride?: string; prezzoLive?: number } = {}) {
+		const base = this.valutazioneBase(g, opts);
+		return { ...base, decisione: this.decisionePrezzo(base, opts.prezzoLive) };
+	}
+
+	/**
+	 * Parte "pesante" della valutazione: dipende dal giocatore e dallo stato
+	 * dell'asta, NON dal prezzo live. Separata così la UI può ricalcolare solo
+	 * la `decisione` a ogni +/- sul prezzo senza rifare tutta la pipeline.
+	 */
+	valutazioneBase(g: Giocatore, opts: { flagOverride?: string } = {}) {
 		const budget = this.config.budgetMax;
 		const ruolo = (g.ruolo || 'A') as Ruolo;
 		const flag = opts.flagOverride ?? deduciFlagDaFantacrediti(g.fc);
@@ -669,15 +748,6 @@ export class Asta {
 
 		const poteri = calcolaPoteriAcquisto(bMia, ruolo, this.config.limiti, budget, QUOTE_RUOLO);
 		const slotRuoloVuoti = Math.max(0, (this.config.limiti[ruolo] ?? 0) - (bMia.perRuolo[ruolo] ?? 0));
-		const decisione = valutaDecisioneImmediata({
-			prezzoCorrente: opts.prezzoLive ?? fascia.riferimento,
-			fasciaMin: fascia.min,
-			fasciaMax: fascia.max,
-			limiteStrategico: poteri.strategico,
-			budgetResiduo: bMia.c_rimasti ?? 0,
-			slotVuoti: bMia.slot_vuoti ?? 0,
-			slotRuoloVuoti
-		});
 
 		const profili = profilaRivali(
 			bilanci,
@@ -720,9 +790,36 @@ export class Asta {
 		}
 
 		return {
-			flag, fallback, fascia, fonte, decisione, poteri, profili, fase, scarsita, mantra,
-			indiceInflazione: indice
+			flag, fallback, fascia, fonte, poteri, profili, fase, scarsita, mantra,
+			indiceInflazione: indice,
+			// parametri prezzo-indipendenti per decisionePrezzo()
+			_dec: {
+				fasciaMin: fascia.min,
+				fasciaMax: fascia.max,
+				riferimento: fascia.riferimento,
+				limiteStrategico: poteri.strategico,
+				budgetResiduo: bMia.c_rimasti ?? 0,
+				slotVuoti: bMia.slot_vuoti ?? 0,
+				slotRuoloVuoti
+			}
 		};
+	}
+
+	/** Decisione immediata per un prezzo live (parte "leggera" della valutazione). */
+	decisionePrezzo(base: { _dec: {
+		fasciaMin: number; fasciaMax: number; riferimento: number; limiteStrategico: number;
+		budgetResiduo: number; slotVuoti: number; slotRuoloVuoti: number;
+	} }, prezzoLive?: number) {
+		const d = base._dec;
+		return valutaDecisioneImmediata({
+			prezzoCorrente: prezzoLive ?? d.riferimento,
+			fasciaMin: d.fasciaMin,
+			fasciaMax: d.fasciaMax,
+			limiteStrategico: d.limiteStrategico,
+			budgetResiduo: d.budgetResiduo,
+			slotVuoti: d.slotVuoti,
+			slotRuoloVuoti: d.slotRuoloVuoti
+		});
 	}
 
 	/**

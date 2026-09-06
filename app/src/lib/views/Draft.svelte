@@ -2,9 +2,10 @@
 	import { asta } from '$lib/stores/auction.svelte';
 	import { normalizzaNome } from '$lib/engine/names';
 	import { MOLTIPLICATORI_FLAG_MANUALE } from '$lib/engine/pricing';
-	import { ORDINE_RUOLI_MANTRA, MODULI_MANTRA } from '$lib/engine/mantra';
+	import { ORDINE_RUOLI_MANTRA, MODULI_MANTRA, assegnaGiocatoriModulo } from '$lib/engine/mantra';
 	import { buildCampoClassic, buildCampoMantra, MODULI_CLASSIC, type GiocatoreCampo } from '$lib/campo';
-	import { ricambiMantraDa, ricambiClassicDa } from '$lib/ricambi';
+	import { ricambiMantraDaModuli, ricambiClassicDa } from '$lib/ricambi';
+	import { coperturaGiocatoreModuli, famigliaDelModulo } from '$lib/mantraHints';
 	import RoleTag from '$lib/ui/RoleTag.svelte';
 	import Crest from '$lib/ui/Crest.svelte';
 	import BudgetBar from '$lib/ui/BudgetBar.svelte';
@@ -84,9 +85,31 @@
 	const campoMio = $derived(
 		asta.isMantra ? buildCampoMantra(campoInputMio, moduloMio) : buildCampoClassic(campoInputMio, moduloMio)
 	);
-	/** Slot ancora scoperti nell'XI del modulo scelto. */
+	/** Moduli su cui ragionano "ruoli da coprire" e "ricambi": in Mantra tutti i
+	 *  target impostati (la famiglia), non solo quello disegnato in campo. */
+	const moduliRagionamento = $derived(
+		asta.isMantra ? asta.moduliTargetValidi : [moduloMio]
+	);
+	/** Slot ancora scoperti: in Classic sul modulo scelto, in Mantra come unione
+	 *  degli slot mancanti su tutti i moduli target. */
 	const ruoliDaCoprireMio = $derived.by(() => {
 		const m = new Map<string, { etichetta: string; linea: string; n: number }>();
+		if (asta.isMantra) {
+			const rosaInput = asta.rosaMantraInput(asta.miaSquadra);
+			for (const modulo of moduliRagionamento) {
+				const esito = assegnaGiocatoriModulo(rosaInput, modulo);
+				const perSlot = new Map<string, number>();
+				for (const s of esito.mancanti) perSlot.set(s, (perSlot.get(s) ?? 0) + 1);
+				for (const [etichetta, n] of perSlot) {
+					const cur = m.get(etichetta) ?? { etichetta, linea: modulo, n: 0 };
+					// tieni il massimo tra i moduli: se 3-5-2 chiede 2 A/Pc e 3-4-3 ne chiede 1
+					cur.n = Math.max(cur.n, n);
+					if (!m.has(etichetta)) cur.linea = 'target';
+					m.set(etichetta, cur);
+				}
+			}
+			return [...m.values()];
+		}
 		for (const linea of campoMio.linee)
 			for (const s of linea.slot)
 				if ((s.stato ?? 'VUOTO') === 'VUOTO') {
@@ -100,9 +123,32 @@
 	const totalePianoMio = $derived(asta.rosa(asta.miaSquadra).length);
 	const ricambiMio = $derived(
 		asta.isMantra
-			? ricambiMantraDa(campoInputMio.map((g) => g.ruoloMantra), asta.config.limiti.TOT, moduloMio)
+			? ricambiMantraDaModuli(
+					campoInputMio.map((g) => g.ruoloMantra),
+					asta.config.limiti.TOT,
+					moduliRagionamento
+				)
 			: ricambiClassicDa(campoInputMio.map((g) => g.ruolo), asta.config.limiti)
 	);
+
+	// --- guida Mantra (primo anno): apri/chiudi ricordato ---
+	let guidaAperta = $state(false);
+	try {
+		guidaAperta = localStorage.getItem('fantatool.guidaMantra') !== 'chiusa';
+	} catch {
+		guidaAperta = true;
+	}
+	function toggleGuida() {
+		guidaAperta = !guidaAperta;
+		try {
+			localStorage.setItem('fantatool.guidaMantra', guidaAperta ? 'aperta' : 'chiusa');
+		} catch {
+			/* ignora */
+		}
+	}
+	/** Quanto è "jolly" un giocatore sui moduli target. */
+	const coperturaMantraDi = (rm: unknown) =>
+		coperturaGiocatoreModuli(rm, asta.moduliTargetValidi);
 
 	const ultimiAcquisti = $derived(
 		[...asta.acquisti].sort((a, b) => b.ordine - a.ordine).slice(0, 8)
@@ -159,10 +205,15 @@
 			proprietarioScelto = asta.miaSquadra;
 	}
 
-	const val = $derived.by(() =>
+	// Parte pesante: ricalcolata solo al cambio giocatore / flag / stato asta.
+	const valBase = $derived.by(() =>
 		selezionato
-			? asta.valutazione(selezionato, { flagOverride: flagScelto || undefined, prezzoLive: prezzoInput })
+			? asta.valutazioneBase(selezionato, { flagOverride: flagScelto || undefined })
 			: null
+	);
+	// Parte leggera: solo la decisione segue il prezzo live a ogni +/-.
+	const val = $derived(
+		valBase ? { ...valBase, decisione: asta.decisionePrezzo(valBase, prezzoInput) } : null
 	);
 
 	let ultimoSelId = $state(-1);
@@ -199,6 +250,49 @@
 
 <svelte:window onkeydown={daTastiera} />
 
+{#if asta.isMantra}
+	<div class="panel" style="margin-bottom:16px;border-color:color-mix(in srgb, var(--accent) 30%, var(--border));">
+		<button
+			onclick={toggleGuida}
+			style="width:100%;text-align:left;background:transparent;border:none;padding:0;display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text-strong);"
+		>
+			<span style="font-size:13px;">{guidaAperta ? '▾' : '▸'}</span>
+			<strong style="font-size:14px;">Guida Mantra · primo anno</strong>
+			<span class="muted" style="margin-left:auto;font-size:11px;">
+				{guidaAperta ? 'nascondi' : 'mostra'}
+			</span>
+		</button>
+		{#if guidaAperta}
+			<div style="font-size:12px;line-height:1.55;margin-top:8px;display:grid;gap:6px;">
+				<div>
+					<strong>Notazione slot.</strong> <code>Dc/B</code> = lo slot accetta un centrale
+					<em>o</em> un braccetto; <code>W/A</code> = ala <em>o</em> attaccante. Uno slot
+					"ibrido" a cavallo di due reparti pesa metà su ciascuno nel calcolo dei ricambi.
+				</div>
+				<div>
+					<strong>Ragiona per famiglia di moduli, non per uno solo.</strong> Imposta 2–3 moduli
+					target compatibili (in Serie A → Impostazioni): la rosa va costruita per coprirli
+					tutti, così un infortunio o un cambio modulo non ti blocca.
+				</div>
+				<div>
+					<strong>La polivalenza vale più del punteggio.</strong> Un <code>Dd;E</code> o
+					<code>M;C</code> copre slot su più linee e più moduli: in lista trovi l'indicatore
+					<span class="jolly">🔗 jolly</span>. Pagali un sovrapprezzo.
+				</div>
+				<div>
+					<strong>Ruoli rari:</strong> i <code>T</code> (trequartisti) e i <code>Pc</code>
+					(punte centrali pure) sono pochi. Se un modulo target li richiede, prendi titolare
+					+ riserva presto — il pannello "Ruoli chiave scoperti" te lo ricorda.
+				</div>
+				<div>
+					<strong>Difesa a 3 o a 4?</strong> Deciditi presto: a 3 servono <code>Dc/B</code>
+					e tanti <code>E</code>; a 4 servono <code>Dd</code>/<code>Ds</code> di ruolo.
+				</div>
+			</div>
+		{/if}
+	</div>
+{/if}
+
 <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:start;">
 	<!-- SINISTRA: ricerca + consiglio -->
 	<div style="display:flex;flex-direction:column;gap:16px;">
@@ -234,6 +328,14 @@
 						<span style="margin-left:auto;" class="muted mono">
 							Qt {g.quotazione}{#if g.fc?.pma}· PMA {g.fc.pma}{/if}{#if g.fantalab?.prezzo_atteso}· FL {g.fantalab.prezzo_atteso}{/if}{#if g.fc?.expectedTitolarita}· {Math.round(g.fc.expectedTitolarita)}%{/if}
 						</span>
+						{#if asta.isMantra}
+							{@const cop = coperturaMantraDi(g.ruoloMantra)}
+							{#if cop.ponte}
+								<span class="jolly" title="Jolly: copre slot su {cop.linee.join(', ')} — {cop.slotCompatibili}/{cop.slotTotali} slot nei moduli target">🔗 {cop.slotCompatibili}</span>
+							{:else if cop.slotCompatibili >= Math.max(3, cop.slotTotali * 0.35)}
+								<span class="jolly jolly--soft" title="{cop.slotCompatibili}/{cop.slotTotali} slot nei moduli target">{cop.slotCompatibili}</span>
+							{/if}
+						{/if}
 						<button
 							class="coda-add"
 							title={asta.inCoda(g.id) ? 'Togli dalla coda' : 'Aggiungi alla coda chiamate'}
@@ -298,12 +400,18 @@
 				</div>
 
 				{#if val.mantra}
+					{@const cop = coperturaMantraDi(selezionato.ruoloMantra)}
 					<div style="border:1px solid var(--border);border-radius:6px;padding:6px 8px;margin-bottom:10px;font-size:12px;">
 						<strong>Mantra</strong> · ruoli {selezionato.ruoloMantra || '—'} · Δ copertura:
 						<span style:color={val.mantra.delta_copertura > 0 ? 'var(--ok)' : 'var(--muted)'}>{val.mantra.delta_copertura > 0 ? '+' : ''}{val.mantra.delta_copertura}</span>
 						{#if val.mantra.nuovi_moduli_completi.length}· completa: {val.mantra.nuovi_moduli_completi.join(', ')}{/if}
 						<div class="muted" style="font-size:11px;">
 							{val.mantra.per_modulo.map((m) => `${m.modulo} ${m.delta >= 0 ? '+' : ''}${m.delta}${m.completato ? ' ✓' : ''}`).join(' · ')}
+						</div>
+						<div style="font-size:11px;margin-top:3px;">
+							{#if cop.ponte}<span class="jolly">🔗 jolly</span> {/if}copre
+							<b>{cop.slotCompatibili}/{cop.slotTotali}</b> slot dei moduli target
+							{#if cop.linee.length}· linee: {cop.linee.join(', ')}{/if}
 						</div>
 					</div>
 				{/if}
@@ -427,6 +535,63 @@
 			</div>
 
 			{#if asta.acquisti.some((a) => a.proprietario === asta.miaSquadra)}
+				{@const fam = asta.raccomandazioneFamiglieMantra}
+				{@const perni = asta.giocatoriPernoMantra}
+				<div class="panel">
+					<h2 style="margin:0 0 6px;font-size:15px;">Famiglia di moduli consigliata</h2>
+					{#each fam as f, i}
+						<div style="padding:6px 0;{i > 0 ? 'border-top:1px solid var(--border);opacity:0.75;' : ''}">
+							<div style="display:flex;gap:8px;align-items:baseline;">
+								<strong style="font-size:13px;">{f.nome}</strong>
+								{#if i === 0}<span class="tag" style="color:var(--ok);">punta qui</span>{/if}
+								<span class="muted mono" style="margin-left:auto;font-size:11px;">
+									{f.moduloMigliore} {f.coperturaMax}/11{#if f.moduliCompleti.length} · {f.moduliCompleti.length} compl.{/if}
+								</span>
+							</div>
+							{#if i === 0}
+								<div class="muted" style="font-size:11px;margin:2px 0;">{f.descrizione}</div>
+								{#if f.ruoliMancanti.length}
+									<div style="font-size:11px;">Slot ancora scoperti: <span class="mono">{f.ruoliMancanti.slice(0, 8).join(' · ')}{f.ruoliMancanti.length > 8 ? ' …' : ''}</span></div>
+								{/if}
+							{/if}
+						</div>
+					{/each}
+					{#if perni.length}
+						<div style="border-top:1px solid var(--border);margin-top:4px;padding-top:6px;">
+							<div class="muted" style="font-size:11px;margin-bottom:2px;">Giocatori-perno (tengono più moduli target):</div>
+							{#each perni as p}
+								<div style="font-size:12px;padding:1px 0;">
+									<strong>{p.nome}</strong> <span class="muted">({p.ruoli})</span>
+									<span class="mono muted" style="font-size:11px;">· {p.moduliSchierato}/{p.moduliTotali} moduli</span>
+								</div>
+							{/each}
+						</div>
+					{/if}
+				</div>
+
+				{@const alr = asta.allertaRuoliChiaveMantra}
+				{#if alr.length}
+					<div class="panel" style="border-color:{alr.some((a) => a.livello === 'CRITICO') ? 'var(--bad)' : 'var(--warn)'};">
+						<h2 style="margin:0 0 4px;font-size:15px;">Ruoli chiave scoperti</h2>
+						<div class="muted" style="font-size:11px;margin-bottom:4px;">
+							Richiesti in modo rigido dai tuoi moduli target.
+						</div>
+						{#each alr.slice(0, 6) as a}
+							<div style="font-size:12px;padding:2px 0;display:flex;gap:6px;align-items:center;">
+								<span class="tag" style="color:{a.livello === 'CRITICO' ? 'var(--bad)' : 'var(--warn)'};">{a.ruolo}</span>
+								<span>hai <b>{a.inRosa}</b>/{a.slotRichiesti}</span>
+								<span class="muted" style="font-size:11px;">{a.moduli.join(', ')}</span>
+								{#if a.scarsita && a.scarsita !== 'OK'}
+									<span class="mono" style="margin-left:auto;color:var(--bad);font-size:11px;">mercato {a.scarsita}</span>
+								{/if}
+							</div>
+						{/each}
+						{#if alr.length > 6}<div class="muted" style="font-size:11px;">+{alr.length - 6} altri</div>{/if}
+					</div>
+				{/if}
+			{/if}
+
+			{#if asta.acquisti.some((a) => a.proprietario === asta.miaSquadra)}
 				{@const fr = asta.fragilitaMiaRosaMantra}
 				<div class="panel" style="border-color:{fr.livello === 'FRAGILE' ? 'var(--bad)' : fr.livello === 'ATTENZIONE' ? 'var(--warn)' : 'var(--border)'};">
 					<div style="display:flex;gap:8px;align-items:baseline;">
@@ -474,7 +639,7 @@
 				</div>
 				<div class="campo-side">
 					<div>
-						<h3 style="margin:0 0 6px;font-size:13px;">Ruoli da coprire <span class="muted mono" style="font-size:11px;">· {moduloMio}</span></h3>
+						<h3 style="margin:0 0 6px;font-size:13px;">Ruoli da coprire <span class="muted mono" style="font-size:11px;">· {asta.isMantra ? moduliRagionamento.join(' / ') : moduloMio}</span></h3>
 						{#if ruoliDaCoprireMio.length}
 							<div style="display:flex;flex-direction:column;gap:5px;">
 								{#each ruoliDaCoprireMio as r}
@@ -486,7 +651,7 @@
 								{/each}
 							</div>
 						{:else}
-							<p class="muted" style="font-size:12px;margin:0;">XI completo per questo modulo. ✓</p>
+							<p class="muted" style="font-size:12px;margin:0;">XI completo{asta.isMantra ? ' su tutti i moduli target' : ' per questo modulo'}. ✓</p>
 						{/if}
 					</div>
 					<div>
@@ -497,7 +662,7 @@
 							</span>
 						</h3>
 						<p class="muted" style="font-size:10px;margin:0 0 6px;">
-							{#if asta.isMantra}per il modulo {moduloMio} · un giocatore polivalente (es. Dd;E) conta in ogni ruolo che può coprire{:else}giocatori per reparto per la rosa completa{/if}
+							{#if asta.isMantra}sui moduli target {moduliRagionamento.join(' / ')} · un giocatore polivalente (es. Dd;E) conta in ogni ruolo che può coprire{:else}giocatori per reparto per la rosa completa{/if}
 						</p>
 						<div style="display:flex;flex-direction:column;gap:4px;">
 							{#each ricambiMio as p}
@@ -618,5 +783,25 @@
 	}
 	.row-player {
 		cursor: pointer;
+	}
+	.jolly {
+		font: 600 10px/1 var(--mono);
+		background: color-mix(in srgb, var(--cyan) 18%, transparent);
+		color: var(--cyan);
+		border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+		border-radius: 4px;
+		padding: 2px 4px;
+		white-space: nowrap;
+	}
+	.jolly--soft {
+		background: var(--tag-bg);
+		color: var(--muted);
+		border-color: var(--border-strong);
+	}
+	code {
+		font: 600 11px/1.4 var(--mono);
+		background: var(--tag-bg);
+		border-radius: 3px;
+		padding: 0 3px;
 	}
 </style>
