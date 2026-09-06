@@ -138,7 +138,7 @@
 									>
 										{#each s.riserve.slice(0, 4) as r, ri}
 											<span class="ris" style="z-index:{20 - ri};" title={r.nome}>
-												<Jersey club={r.club} size={18} />
+												<Jersey club={r.club} size={26} />
 											</span>
 										{/each}
 										{#if s.riserve.length > 4}<span class="ris-more">+{s.riserve.length - 4}</span>{/if}
@@ -292,7 +292,7 @@
 	}
 	.kit {
 		position: relative;
-		filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
+		filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.55));
 	}
 	.dot {
 		position: absolute;
@@ -321,22 +321,30 @@
 	.riserve {
 		display: flex;
 		align-items: center;
-		margin-top: 2px;
-		padding-left: 6px;
+		margin-top: 3px;
 	}
 	.ris {
 		display: inline-flex;
-		margin-left: -6px;
-		filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55));
-		opacity: 0.92;
+		align-items: center;
+		justify-content: center;
+		margin-left: -9px;
+		padding: 2px;
+		border-radius: 50%;
+		background: rgba(6, 20, 14, 0.72);
+		box-shadow:
+			0 0 0 1px rgba(255, 255, 255, 0.35),
+			0 2px 4px rgba(0, 0, 0, 0.5);
 	}
 	.ris:first-child {
 		margin-left: 0;
 	}
 	.ris-more {
-		font: 700 8px/1 var(--mono);
-		color: rgba(255, 255, 255, 0.6);
-		margin-left: 3px;
+		font: 700 9px/1 var(--mono);
+		color: #fff;
+		margin-left: 4px;
+		background: rgba(6, 20, 14, 0.72);
+		border-radius: 8px;
+		padding: 2px 4px;
 	}
 	.empty {
 		font: 700 11px/1 var(--mono);
