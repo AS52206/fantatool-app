@@ -119,7 +119,7 @@
 	const righePianoAttive = $derived(righe.filter((r) => r.stato !== 'PERSO'));
 	const ricambi = $derived(
 		asta.isMantra
-			? ricambiMantraDa(righePianoAttive.map((r) => r.ruoloMantra || r.ruolo), asta.config.limiti.TOT, modulo)
+			? ricambiMantraDa(righePianoAttive.map((r) => r.ruoloMantra || r.ruolo), asta.config.limiti.TOT, modulo, asta.config.limiti.P)
 			: ricambiClassicDa(righePianoAttive.map((r) => r.ruolo), asta.config.limiti)
 	);
 	const totalePiano = $derived(righePianoAttive.length);
@@ -310,7 +310,7 @@
 						</span>
 					</h3>
 					<p class="muted" style="font-size:10px;margin:0 0 6px;">
-						{#if asta.isMantra}per il modulo {modulo} · un giocatore polivalente (es. Dd;E) conta in ogni ruolo che può coprire{:else}giocatori per reparto per la rosa completa{/if}
+						{#if asta.isMantra}quanti tenerne per profilo sul modulo {modulo} · tabella BABBOFANTACALCIO scalata alla rosa da {asta.config.limiti.TOT} · un polivalente (es. Dd;E) conta in ogni profilo{:else}giocatori per reparto per la rosa completa{/if}
 					</p>
 					<div style="display:flex;flex-direction:column;gap:4px;">
 						{#each ricambi as p}

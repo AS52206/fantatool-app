@@ -2,8 +2,45 @@
  * Ricambi consigliati per una rosa completa: quanti giocatori per ruolo
  * servono in base al modulo/rosa di lega. Condiviso tra Scenari e Draft.
  */
-import { PROFILI_ROSA_MANTRA, MODULI_MANTRA } from './engine/mantra';
+import { PROFILI_ROSA_MANTRA, MODULI_MANTRA, PIANO_ROSA_MANTRA_PER_MODULO } from './engine/mantra';
 import type { LimitiRuoli, Ruolo } from './domain/types';
+
+const CHIAVI_PROFILO = PROFILI_ROSA_MANTRA.map((p) => p[0]);
+/** Movimento nella tabella BABBOFANTACALCIO (3 portieri + 25 = 28). */
+const BASE_MOVIMENTO = 25;
+
+/** Ripartisce `tot` sui `pesi` (uno per chiave) con il metodo dei resti massimi. */
+function ripartisci(chiavi: string[], pesi: number[], tot: number): Record<string, number> {
+	const interi = pesi.map((g) => Math.max(0, Math.floor(g)));
+	let resto = tot - interi.reduce((s, n) => s + n, 0);
+	const ord = pesi
+		.map((g, i) => ({ i, frac: g - Math.floor(g) }))
+		.sort((a, b) => b.frac - a.frac || pesi[b.i] - pesi[a.i]);
+	for (let j = 0; j < resto && j < ord.length; j++) interi[ord[j].i] += 1;
+	const out: Record<string, number> = {};
+	chiavi.forEach((k, i) => (out[k] = interi[i]));
+	return out;
+}
+
+/**
+ * Target per profilo dalla tabella BABBOFANTACALCIO (modulo → giocatori per
+ * ruolo), **scalato** alla rosa reale: portieri fissi = `portieri`, i restanti
+ * scalati da 25 a `totRosa - portieri`. Ritorna null se il modulo non è in
+ * tabella (si usa allora il calcolo derivato dal peso dell'undici).
+ */
+export function pianoRosaPerModulo(
+	modulo: string,
+	totRosa: number,
+	portieri = 3
+): Record<string, number> | null {
+	const base = PIANO_ROSA_MANTRA_PER_MODULO[modulo];
+	if (!base) return null;
+	const por = Math.max(0, Math.round(portieri));
+	const movKeys = CHIAVI_PROFILO.filter((k) => k !== 'Por');
+	const movTarget = Math.max(0, Math.round(totRosa) - por);
+	const pesi = movKeys.map((k) => ((base[k] ?? 0) * movTarget) / BASE_MOVIMENTO);
+	return { Por: por, ...ripartisci(movKeys, pesi, movTarget) };
+}
 
 export interface Ricambio {
 	chiave: string;
@@ -39,27 +76,12 @@ function pesiProfiloPerModulo(modulo: string): Record<string, number> {
 	return pesi;
 }
 
-/** Mantra: target per profilo calcolati sul modulo scelto (uno slot "ibrido"
- *  come W/A pesa su entrambi i profili che copre). Un giocatore polivalente
- *  (es. Dd;E) conta comunque in ogni ruolo che può coprire. */
-export function ricambiMantraDa(
-	ruoliMantra: (string | null | undefined)[],
-	totRosa: number,
-	modulo: string
+/** Costruisce le righe Ricambio da un piano (profilo → obiettivo) e dai ruoli
+ *  dei giocatori posseduti. Un polivalente (es. Dd;E) conta in ogni profilo. */
+function costruisciRicambi(
+	piano: Record<string, number>,
+	ruoliMantra: (string | null | undefined)[]
 ): Ricambio[] {
-	const tot = totRosa || 25;
-	const pesi = pesiProfiloPerModulo(modulo);
-	const sommaPesi = Object.values(pesi).reduce((s, n) => s + n, 0) || 1;
-	const chiavi = PROFILI_ROSA_MANTRA.map((p) => p[0]);
-	const piano: Record<string, number> = {};
-	let acc = 0;
-	chiavi.forEach((k, i) => {
-		if (i === chiavi.length - 1) piano[k] = Math.max(0, tot - acc);
-		else {
-			piano[k] = Math.round((pesi[k] * tot) / sommaPesi);
-			acc += piano[k];
-		}
-	});
 	const tokensPerGiocatore = ruoliMantra.map(tokensRuolo);
 	return PROFILI_ROSA_MANTRA.map(([chiave, etichetta, roli]) => {
 		const obiettivo = piano[chiave] ?? 0;
@@ -75,47 +97,73 @@ export function ricambiMantraDa(
 	});
 }
 
-/** Mantra, più moduli target: come `ricambiMantraDa` ma i pesi per profilo
- *  sono la media sui moduli indicati, così la spesa segue l'intera "famiglia"
- *  e non un singolo modulo. */
-export function ricambiMantraDaModuli(
-	ruoliMantra: (string | null | undefined)[],
-	totRosa: number,
-	moduli: string[]
-): Ricambio[] {
-	const validi = [...new Set(moduli)].filter((m) => m in MODULI_MANTRA);
-	if (validi.length <= 1) return ricambiMantraDa(ruoliMantra, totRosa, validi[0] ?? '');
-
-	const tot = totRosa || 25;
-	const chiavi = PROFILI_ROSA_MANTRA.map((p) => p[0]);
-	const pesi: Record<string, number> = Object.fromEntries(chiavi.map((k) => [k, 0]));
-	for (const m of validi) {
-		const pm = pesiProfiloPerModulo(m);
-		for (const k of chiavi) pesi[k] += (pm[k] ?? 0) / validi.length;
-	}
+/** Piano derivato dal peso dell'undici titolare (fallback se il modulo non è
+ *  nella tabella BABBOFANTACALCIO). */
+function pianoDerivato(pesi: Record<string, number>, tot: number): Record<string, number> {
 	const sommaPesi = Object.values(pesi).reduce((s, n) => s + n, 0) || 1;
 	const piano: Record<string, number> = {};
 	let acc = 0;
-	chiavi.forEach((k, i) => {
-		if (i === chiavi.length - 1) piano[k] = Math.max(0, tot - acc);
+	CHIAVI_PROFILO.forEach((k, i) => {
+		if (i === CHIAVI_PROFILO.length - 1) piano[k] = Math.max(0, tot - acc);
 		else {
 			piano[k] = Math.round((pesi[k] * tot) / sommaPesi);
 			acc += piano[k];
 		}
 	});
-	const tokensPerGiocatore = ruoliMantra.map(tokensRuolo);
-	return PROFILI_ROSA_MANTRA.map(([chiave, etichetta, roli]) => {
-		const obiettivo = piano[chiave] ?? 0;
-		const presenti = tokensPerGiocatore.filter((toks) => toks.some((t) => roli.includes(t))).length;
-		return {
-			chiave,
-			etichetta,
-			roli: [...roli],
-			presenti,
-			obiettivo,
-			mancanti: Math.max(0, obiettivo - presenti)
-		};
-	});
+	return piano;
+}
+
+/**
+ * Mantra: quanti giocatori per profilo tenere in rosa sul modulo scelto.
+ * Usa la tabella per-modulo di BABBOFANTACALCIO (scalata alla rosa reale);
+ * se il modulo non c'è, ripiega sul calcolo pesato dell'undici titolare.
+ */
+export function ricambiMantraDa(
+	ruoliMantra: (string | null | undefined)[],
+	totRosa: number,
+	modulo: string,
+	portieri = 3
+): Ricambio[] {
+	const tot = totRosa || 25;
+	const piano =
+		pianoRosaPerModulo(modulo, tot, portieri) ?? pianoDerivato(pesiProfiloPerModulo(modulo), tot);
+	return costruisciRicambi(piano, ruoliMantra);
+}
+
+/** Mantra, più moduli target: media dei piani per-modulo, così la spesa segue
+ *  l'intera "famiglia" e non un singolo modulo. */
+export function ricambiMantraDaModuli(
+	ruoliMantra: (string | null | undefined)[],
+	totRosa: number,
+	moduli: string[],
+	portieri = 3
+): Ricambio[] {
+	const validi = [...new Set(moduli)].filter((m) => m in MODULI_MANTRA);
+	if (validi.length <= 1) return ricambiMantraDa(ruoliMantra, totRosa, validi[0] ?? '', portieri);
+
+	const tot = totRosa || 25;
+	const piani = validi
+		.map((m) => pianoRosaPerModulo(m, tot, portieri))
+		.filter((p): p is Record<string, number> => p !== null);
+
+	let piano: Record<string, number>;
+	if (piani.length) {
+		const por = piani[0].Por ?? Math.max(0, Math.round(portieri));
+		const movKeys = CHIAVI_PROFILO.filter((k) => k !== 'Por');
+		const movTarget = Math.max(0, Math.round(tot) - por);
+		const media = movKeys.map(
+			(k) => piani.reduce((s, p) => s + (p[k] ?? 0), 0) / piani.length
+		);
+		piano = { Por: por, ...ripartisci(movKeys, media, movTarget) };
+	} else {
+		const pesi: Record<string, number> = Object.fromEntries(CHIAVI_PROFILO.map((k) => [k, 0]));
+		for (const m of validi) {
+			const pm = pesiProfiloPerModulo(m);
+			for (const k of CHIAVI_PROFILO) pesi[k] += (pm[k] ?? 0) / validi.length;
+		}
+		piano = pianoDerivato(pesi, tot);
+	}
+	return costruisciRicambi(piano, ruoliMantra);
 }
 
 /** Classic: slot rimanenti per reparto P/D/C/A sul totale di lega. */

@@ -65,6 +65,27 @@ export const PIANO_ROSA_MANTRA_30: Record<string, number> = {
 	Por: 3, 'Dc/B': 5, 'Dd/Ds': 2, E: 4, 'M/C': 6, 'W/T': 5, 'A/Pc': 5
 };
 
+/**
+ * Quanti giocatori tenere in rosa per profilo, **per modulo** — tabella di
+ * BABBOFANTACALCIO (ipotesi rose con 3 portieri + 25 di movimento = 28).
+ * Le sigle atomiche del video sono aggregate ai 7 profili del tool:
+ *   dc → Dc/B · ds/dd/(ds/dd) → Dd/Ds · e → E · m,c → M/C · w,t,(w/t) → W/T · a,pc → A/Pc
+ * Va scalata alla rosa reale (vedi `pianoRosaPerModulo` in ricambi.ts).
+ */
+export const PIANO_ROSA_MANTRA_PER_MODULO: Record<string, Record<string, number>> = {
+	'3-4-3':   { Por: 3, 'Dc/B': 8, 'Dd/Ds': 0, E: 5, 'M/C': 5, 'W/T': 1, 'A/Pc': 6 },
+	'3-4-1-2': { Por: 3, 'Dc/B': 8, 'Dd/Ds': 0, E: 5, 'M/C': 5, 'W/T': 3, 'A/Pc': 4 },
+	'3-4-2-1': { Por: 3, 'Dc/B': 8, 'Dd/Ds': 0, E: 3, 'M/C': 5, 'W/T': 5, 'A/Pc': 4 },
+	'3-5-2':   { Por: 3, 'Dc/B': 8, 'Dd/Ds': 0, E: 3, 'M/C': 8, 'W/T': 3, 'A/Pc': 3 },
+	'3-5-1-1': { Por: 3, 'Dc/B': 8, 'Dd/Ds': 0, E: 0, 'M/C': 6, 'W/T': 6, 'A/Pc': 5 },
+	'4-3-3':   { Por: 3, 'Dc/B': 6, 'Dd/Ds': 6, E: 0, 'M/C': 7, 'W/T': 0, 'A/Pc': 6 },
+	'4-3-1-2': { Por: 3, 'Dc/B': 6, 'Dd/Ds': 6, E: 0, 'M/C': 7, 'W/T': 3, 'A/Pc': 3 },
+	'4-4-2':   { Por: 3, 'Dc/B': 6, 'Dd/Ds': 6, E: 2, 'M/C': 5, 'W/T': 3, 'A/Pc': 3 },
+	'4-1-4-1': { Por: 3, 'Dc/B': 6, 'Dd/Ds': 6, E: 0, 'M/C': 4, 'W/T': 6, 'A/Pc': 3 },
+	'4-4-1-1': { Por: 3, 'Dc/B': 6, 'Dd/Ds': 6, E: 0, 'M/C': 5, 'W/T': 4, 'A/Pc': 4 },
+	'4-2-3-1': { Por: 3, 'Dc/B': 6, 'Dd/Ds': 5, E: 0, 'M/C': 5, 'W/T': 5, 'A/Pc': 4 }
+};
+
 function opzioniSlot(etichetta: string): string[] {
 	return String(etichetta)
 		.split('/')

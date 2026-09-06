@@ -134,7 +134,8 @@
 			? ricambiMantraDaModuli(
 					campoInputMio.map((g) => g.ruoloMantra),
 					asta.config.limiti.TOT,
-					moduliRagionamento
+					moduliRagionamento,
+					asta.config.limiti.P
 				)
 			: ricambiClassicDa(campoInputMio.map((g) => g.ruolo), asta.config.limiti)
 	);
@@ -675,7 +676,7 @@
 							</span>
 						</h3>
 						<p class="muted" style="font-size:10px;margin:0 0 6px;">
-							{#if asta.isMantra}sui moduli target {moduliRagionamento.join(' / ')} · un giocatore polivalente (es. Dd;E) conta in ogni ruolo che può coprire{:else}giocatori per reparto per la rosa completa{/if}
+							{#if asta.isMantra}quanti tenerne per profilo sui moduli target {moduliRagionamento.join(' / ')} · tabella BABBOFANTACALCIO scalata alla rosa da {asta.config.limiti.TOT} · un polivalente (es. Dd;E) conta in ogni profilo{:else}giocatori per reparto per la rosa completa{/if}
 						</p>
 						<div style="display:flex;flex-direction:column;gap:4px;">
 							{#each ricambiMio as p}
