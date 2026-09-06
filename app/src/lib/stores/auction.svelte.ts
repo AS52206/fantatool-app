@@ -83,6 +83,8 @@ interface Snapshot {
 	acquisti: Acquisto[];
 	avviata: boolean;
 	scenari?: Scenari;
+	/** Modulo scelto per ogni piano (nome piano → modulo). Indipendente per piano. */
+	scenariModulo?: Record<string, string>;
 	/** Coda chiamate: id dei giocatori che stai per chiamare / aspettando. */
 	codaChiamate?: number[];
 }
@@ -153,6 +155,8 @@ export class Asta {
 	avviata = $state(false);
 	giocatori = $state<Giocatore[]>([]);
 	scenari = $state<Scenari>({});
+	/** Modulo scelto per ogni piano — indipendente da piano a piano. */
+	scenariModulo = $state<Record<string, string>>({});
 	codaChiamate = $state<number[]>([]);
 	ultimoSalvataggio = $state<number | null>(null);
 	/** Messaggio d'errore se l'ultima scrittura su localStorage è fallita (quota/privato). */
@@ -183,6 +187,7 @@ export class Asta {
 					acquisti: this.acquisti,
 					avviata: this.avviata,
 					scenari: this.scenari,
+					scenariModulo: this.scenariModulo,
 					codaChiamate: this.codaChiamate
 				};
 				if (this.caricando) return;
@@ -238,6 +243,7 @@ export class Asta {
 		this.acquisti = s?.acquisti ?? [];
 		this.avviata = s?.avviata ?? false;
 		this.scenari = s?.scenari ?? {};
+		this.scenariModulo = s?.scenariModulo ?? {};
 		this.codaChiamate = s?.codaChiamate ?? [];
 		this.storiaUndo = [];
 		this.storiaRedo = [];
@@ -335,6 +341,7 @@ export class Asta {
 					acquisti: this.acquisti,
 					avviata: this.avviata,
 					scenari: this.scenari,
+					scenariModulo: this.scenariModulo,
 					codaChiamate: this.codaChiamate
 				})
 			);
@@ -1037,6 +1044,19 @@ export class Asta {
 	eliminaScenario(nome: string) {
 		const { [nome]: _, ...resto } = this.scenari;
 		this.scenari = resto;
+		const { [nome]: _m, ...restoMod } = this.scenariModulo;
+		this.scenariModulo = restoMod;
+	}
+
+	/** Modulo salvato per un piano (o undefined se non ancora scelto). */
+	moduloScenario(nome: string): string | undefined {
+		return this.scenariModulo[nome];
+	}
+
+	/** Imposta il modulo di UN piano, senza toccare gli altri. */
+	setModuloScenario(nome: string, modulo: string) {
+		if (!nome) return;
+		this.scenariModulo = { ...this.scenariModulo, [nome]: modulo };
 	}
 
 	/** Esporta SOLO i piani/scenari della modalità corrente (non tocca rose/squadre). */
@@ -1046,7 +1066,8 @@ export class Asta {
 				fantatool: 'scenari',
 				modalita: normModalita(this.config.modalita),
 				esportato: new Date().toISOString(),
-				scenari: this.scenari
+				scenari: this.scenari,
+				scenariModulo: this.scenariModulo
 			},
 			null,
 			2
@@ -1073,6 +1094,14 @@ export class Asta {
 		}
 		if (!Object.keys(puliti).length) throw new Error('Nessun piano valido nel file');
 		this.scenari = { ...this.scenari, ...puliti };
+		// moduli per piano, se presenti nel file
+		const modSrc = raw?.scenariModulo;
+		if (modSrc && typeof modSrc === 'object') {
+			const modPuliti: Record<string, string> = {};
+			for (const [nome, m] of Object.entries(modSrc as Record<string, unknown>))
+				if (nome in puliti && typeof m === 'string' && m) modPuliti[nome] = m;
+			this.scenariModulo = { ...this.scenariModulo, ...modPuliti };
+		}
 		return Object.keys(puliti).length;
 	}
 
@@ -1081,6 +1110,8 @@ export class Asta {
 		if (!nome || nome === vecchio || nome in this.scenari) return;
 		const { [vecchio]: piano, ...resto } = this.scenari;
 		this.scenari = { ...resto, [nome]: piano ?? {} };
+		const { [vecchio]: mod, ...restoMod } = this.scenariModulo;
+		this.scenariModulo = mod ? { ...restoMod, [nome]: mod } : restoMod;
 	}
 
 	setTargetScenario(nome: string, chiave: string, prezzoMax: number) {

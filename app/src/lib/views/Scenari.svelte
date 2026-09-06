@@ -17,12 +17,18 @@
 	let attivo = $state<string>('');
 	let query = $state('');
 	let confrontaCon = $state<string>('');
-	let modulo = $state('');
 	const moduliDisponibili = $derived(asta.isMantra ? Object.keys(MODULI_MANTRA) : MODULI_CLASSIC);
-	$effect(() => {
-		if (!moduliDisponibili.includes(modulo))
-			modulo = asta.isMantra ? (asta.moduliTargetValidi[0] ?? '3-4-1-2') : '4-3-3';
+	const moduloDefault = $derived(
+		asta.isMantra ? (asta.moduliTargetValidi[0] ?? '3-4-1-2') : '4-3-3'
+	);
+	// Il modulo è per-piano: ogni piano ricorda il suo, cambiarlo non tocca gli altri.
+	const modulo = $derived.by(() => {
+		const m = asta.moduloScenario(attivo);
+		return m && moduliDisponibili.includes(m) ? m : moduloDefault;
 	});
+	function impostaModulo(m: string) {
+		if (attivo) asta.setModuloScenario(attivo, m);
+	}
 
 	const nomi = $derived(Object.keys(asta.scenari));
 	$effect(() => {
@@ -202,7 +208,12 @@
 	<div class="panel" style="margin-bottom:16px;">
 		<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
 			<h2 style="margin:0;font-size:15px;">Disposizione in campo</h2>
-			<select bind:value={modulo} style="font-family:var(--mono);">
+			<select
+				value={modulo}
+				onchange={(e) => impostaModulo((e.currentTarget as HTMLSelectElement).value)}
+				style="font-family:var(--mono);"
+				title="Modulo di questo piano (ogni piano ha il suo)"
+			>
 				{#each moduliDisponibili as m}<option value={m}>{m}</option>{/each}
 			</select>
 			<span class="muted" style="font-size:11px;">
@@ -332,7 +343,11 @@
 			<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
 				<input
 					value={attivo}
-					onchange={(e) => asta.rinominaScenario(attivo, (e.target as HTMLInputElement).value)}
+					onchange={(e) => {
+						const nuovo = (e.currentTarget as HTMLInputElement).value.trim();
+						asta.rinominaScenario(attivo, nuovo);
+						if (nuovo in asta.scenari) attivo = nuovo;
+					}}
 					style="font-weight:700;flex:1;" />
 				<button style="color:var(--bad);" onclick={() => { if (confirm('Eliminare il piano?')) asta.eliminaScenario(attivo); }}>Elimina</button>
 			</div>
