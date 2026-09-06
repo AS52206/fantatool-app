@@ -95,6 +95,60 @@
 		URL.revokeObjectURL(a.href);
 	}
 	const oggi = () => new Date().toISOString().slice(0, 10);
+
+	// ---- Backup automatico su file (fuori da localStorage) ----------------
+	// Assicurazione contro browser/profilo corrotti o "cancella dati sito":
+	// scrive l'export completo su un file scelto una volta, ogni pochi acquisti.
+	const backupAutoSupportato =
+		typeof window !== 'undefined' && 'showSaveFilePicker' in window;
+	let backupHandle = $state<FileSystemFileHandle | null>(null);
+	let backupErrore = $state(false);
+	let ultimoBackupN = -1;
+	const BACKUP_OGNI = 5;
+
+	async function attivaBackupAuto() {
+		if (backupHandle) {
+			backupHandle = null; // toggle off
+			return;
+		}
+		try {
+			backupHandle = await (
+				window as unknown as {
+					showSaveFilePicker: (o: unknown) => Promise<FileSystemFileHandle>;
+				}
+			).showSaveFilePicker({
+				suggestedName: `fantatool-asta-${oggi()}.json`,
+				types: [
+					{ description: 'Backup Fantatool', accept: { 'application/json': ['.json'] } }
+				]
+			});
+			backupErrore = false;
+			await scriviBackupAuto();
+		} catch {
+			/* l'utente ha annullato il selettore file */
+		}
+	}
+
+	async function scriviBackupAuto() {
+		if (!backupHandle) return;
+		try {
+			const w = await (
+				backupHandle as unknown as { createWritable: () => Promise<WritableStreamDefaultWriter> }
+			).createWritable();
+			await w.write(asta.esporta());
+			await w.close();
+			ultimoBackupN = asta.acquisti.length;
+			backupErrore = false;
+		} catch {
+			backupErrore = true; // permesso revocato / file rimosso
+		}
+	}
+
+	$effect(() => {
+		const n = asta.acquisti.length;
+		if (backupHandle && n > 0 && n !== ultimoBackupN && n % BACKUP_OGNI === 0)
+			scriviBackupAuto();
+	});
 	let esportandoXlsx = $state(false);
 	async function esportaXlsx() {
 		esportandoXlsx = true;
@@ -177,6 +231,24 @@
 		<span class="muted mono" style="font-size:11px;">{metaTxt}</span>
 		<div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
 			<span class="tag" title="Salvataggio automatico locale">💾 {ora(asta.ultimoSalvataggio)}</span>
+			{#if backupAutoSupportato}
+				<button
+					class="tag"
+					style={backupHandle
+						? backupErrore
+							? 'color:#ef4444;border-color:#ef4444;'
+							: 'color:var(--ok);border-color:var(--ok);'
+						: ''}
+					onclick={attivaBackupAuto}
+					title={backupHandle
+						? backupErrore
+							? 'Backup su file non riuscito: riattivalo'
+							: `Backup automatico su file ogni ${BACKUP_OGNI} acquisti — clic per disattivare`
+						: 'Scegli un file dove salvare in automatico un backup completo ogni pochi acquisti (da riattivare a ogni riapertura)'}
+				>
+					{backupHandle ? (backupErrore ? '⚠️ Backup file' : '● Backup file') : '○ Backup file'}
+				</button>
+			{/if}
 			<button class="icon-btn" onclick={() => ui.toggleTema()} title="Tema chiaro / scuro">{ui.tema === 'scuro' ? '☀︎' : '☾'}</button>
 			<button class="icon-btn" onclick={() => ui.toggleDensita()} title="Densità comoda / compatta">{ui.densita === 'comoda' ? '▤' : '▦'}</button>
 			<button onclick={() => (mostraSetup = !mostraSetup)}>⚙️ Setup</button>
@@ -392,6 +464,26 @@
 			{/each}
 		</nav>
 
-		<ViewCorrente />
+		<svelte:boundary onerror={(e) => console.error('Errore nella schermata:', e)}>
+			<ViewCorrente />
+
+			{#snippet failed(error, reset)}
+				<div class="panel" role="alert" style="border-color:#ef4444;background:rgba(239,68,68,0.12);">
+					<b style="color:#ef4444;">⚠️ Questa schermata ha avuto un errore</b>
+					<p class="muted mono" style="font-size:12px;white-space:pre-wrap;">
+						{error instanceof Error ? error.message : String(error)}
+					</p>
+					<p style="font-size:12px;">
+						L'asta è salva: acquisti e budget sono nel salvataggio locale. Scarica un backup e riprova.
+					</p>
+					<div style="display:flex;gap:8px;flex-wrap:wrap;">
+						<button onclick={reset}>↻ Riprova</button>
+						<button onclick={() => scarica(asta.esporta(), `asta-${oggi()}.json`, 'application/json')}>⬇︎ Scarica backup</button>
+						<button onclick={() => (tab = 'draft')}>← Torna al Draft</button>
+						<button onclick={() => location.reload()}>⟳ Ricarica app</button>
+					</div>
+				</div>
+			{/snippet}
+		</svelte:boundary>
 	{/if}
 </div>

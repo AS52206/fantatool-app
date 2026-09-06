@@ -1,7 +1,10 @@
 #!/bin/zsh
-# Avvia Fantatool (app Svelte, Mac). Doppio click da Finder.
-# Modalità sviluppo: il server resta in ascolto sui file.
-# Quando il codice cambia, la pagina si aggiorna da sola — basta il refresh, mai riavviare.
+# Avvia Fantatool (Mac). Doppio click da Finder.
+#
+# Modalità PRODUZIONE: compila l'app in file statici e li serve con un server
+# minimale (nessun dev server, nessun watcher, nessun compilatore a runtime).
+# È il runtime pensato per l'asta: molto più stabile.
+# Dopo aver cambiato il codice, rilancia questo comando: ricompila da solo.
 set -e
 cd "$(dirname "$0")"
 
@@ -33,13 +36,27 @@ if [[ ! -d node_modules ]] || [[ package.json -nt node_modules ]]; then
 	npm install --silent
 fi
 
+# Ricompila solo se serve: build mancante, oppure codice/dati più recenti.
+serve_da_compilare=0
+if [[ ! -f build/index.html ]]; then
+	serve_da_compilare=1
+else
+	if [[ -n "$(find src static package.json svelte.config.js vite.config.js -newer build/index.html 2>/dev/null | head -1)" ]]; then
+		serve_da_compilare=1
+	fi
+fi
+if [[ $serve_da_compilare -eq 1 ]]; then
+	echo "Compilo l'app…"
+	npm run build
+	echo ""
+fi
+
 # Libera la porta da un'eventuale istanza precedente.
 lsof -tiTCP:"$PORT" -sTCP:LISTEN 2>/dev/null | xargs kill 2>/dev/null || true
 sleep 0.3
 
 echo "Servo su $URL  (Ctrl+C per fermare)"
-echo "Le modifiche si vedono con un semplice refresh della pagina."
-(sleep 2; open -a "Brave Browser" "$URL" 2>/dev/null || open -a "Google Chrome" "$URL" 2>/dev/null || open "$URL") &
+(sleep 1.5; open -a "Brave Browser" "$URL" 2>/dev/null || open -a "Google Chrome" "$URL" 2>/dev/null || open "$URL") &
 
-# Vite dev server: watch dei file + hot reload. Tutto locale, nessun dato in rete.
-exec npm run dev -- --port "$PORT" --strictPort --host 127.0.0.1
+# Server statico: solo file su disco, nessun processo di build attivo.
+exec node serve.mjs "$PORT"
