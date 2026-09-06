@@ -1,6 +1,15 @@
 <script lang="ts">
 	import Jersey from '$lib/ui/Jersey.svelte';
 
+	export interface RiservaCampo {
+		chiave?: string;
+		nome: string;
+		club?: string;
+		ruolo?: string;
+		titolarita?: number | null;
+		prezzo?: number | null;
+		punteggio?: number;
+	}
 	export interface SlotCampo {
 		etichetta?: string;
 		nome?: string;
@@ -10,6 +19,8 @@
 		titolarita?: number | null;
 		pmaFl?: number | null;
 		stato?: 'PRESO' | 'LIBERO' | 'VUOTO';
+		/** Riserve che coprono questo slot, dalla più forte. */
+		riserve?: RiservaCampo[];
 	}
 	export interface LineaCampo {
 		nome: string;
@@ -117,6 +128,22 @@
 									{#if s.prezzo != null}<span style="color:var(--cyan);">{s.prezzo}</span>{/if}
 									{#if s.titolarita != null && s.titolarita > 0}<span style="color:{titColor(s.titolarita)};">{Math.round(s.titolarita)}%</span>{/if}
 								</div>
+								{#if s.riserve?.length}
+									<div
+										class="riserve"
+										title={'Riserve: ' +
+											s.riserve
+												.map((r) => r.nome + (r.titolarita ? ` ${Math.round(r.titolarita)}%` : ''))
+												.join(' · ')}
+									>
+										{#each s.riserve.slice(0, 4) as r, ri}
+											<span class="ris" style="z-index:{20 - ri};" title={r.nome}>
+												<Jersey club={r.club} size={18} />
+											</span>
+										{/each}
+										{#if s.riserve.length > 4}<span class="ris-more">+{s.riserve.length - 4}</span>{/if}
+									</div>
+								{/if}
 							{:else if onSlotVuoto}
 								<button
 									class="slot-add"
@@ -290,6 +317,26 @@
 		display: flex;
 		gap: 4px;
 		font: 600 9px/1 var(--mono);
+	}
+	.riserve {
+		display: flex;
+		align-items: center;
+		margin-top: 2px;
+		padding-left: 6px;
+	}
+	.ris {
+		display: inline-flex;
+		margin-left: -6px;
+		filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55));
+		opacity: 0.92;
+	}
+	.ris:first-child {
+		margin-left: 0;
+	}
+	.ris-more {
+		font: 700 8px/1 var(--mono);
+		color: rgba(255, 255, 255, 0.6);
+		margin-left: 3px;
 	}
 	.empty {
 		font: 700 11px/1 var(--mono);

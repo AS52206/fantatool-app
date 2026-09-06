@@ -6,9 +6,10 @@ import {
 	LINEE_MODULI_MANTRA,
 	MODULI_MANTRA,
 	assegnaGiocatoriModulo,
+	ruoliCompatibiliConSlot,
 	type GiocatoreMantraInput
 } from './engine/mantra';
-import type { LineaCampo, SlotCampo } from './ui/FormationPitch.svelte';
+import type { LineaCampo, RiservaCampo, SlotCampo } from './ui/FormationPitch.svelte';
 
 export interface GiocatoreCampo {
 	chiave: string;
@@ -30,6 +31,50 @@ export interface Campo {
 }
 
 const NOMI_LINEE = ['PORTA', 'DIFESA', 'CENTROCAMPO', 'TREQUARTI', 'ATTACCO'];
+
+/** Punteggio per ordinare le riserve (il "top" davanti). */
+const punteggioG = (g: GiocatoreCampo) => g.punteggio ?? g.prezzo ?? g.pmaFl ?? 0;
+
+/**
+ * Attacca ogni giocatore di panchina allo slot che può coprire, come riserva.
+ * Ogni riserva finisce in un solo slot (quello con meno riserve, per distribuire
+ * la profondità); le riserve di ciascuno slot restano ordinate dal più forte.
+ * Ritorna i giocatori che non coprono nessuno slot (restano "panchina" piatta).
+ */
+function distribuisciRiserve(
+	linee: LineaCampo[],
+	panchina: GiocatoreCampo[],
+	compat: (g: GiocatoreCampo, s: SlotCampo) => boolean
+): GiocatoreCampo[] {
+	const slotFlat: SlotCampo[] = [];
+	for (const l of linee) for (const s of l.slot) slotFlat.push(s);
+	const conteggio = new Map<SlotCampo, number>();
+	const nonPiazzati: GiocatoreCampo[] = [];
+
+	for (const g of [...panchina].sort((a, b) => punteggioG(b) - punteggioG(a))) {
+		const cands = slotFlat.filter((s) => (s.stato ?? 'VUOTO') !== 'VUOTO' && compat(g, s));
+		if (!cands.length) {
+			nonPiazzati.push(g);
+			continue;
+		}
+		cands.sort((a, b) => (conteggio.get(a) ?? 0) - (conteggio.get(b) ?? 0));
+		const target = cands[0];
+		const ris: RiservaCampo = {
+			chiave: g.chiave,
+			nome: g.nome,
+			club: g.club,
+			ruolo: g.ruoloMantra || g.ruolo,
+			titolarita: g.titolarita ?? null,
+			prezzo: g.prezzo ?? null,
+			punteggio: punteggioG(g)
+		};
+		(target.riserve ??= []).push(ris);
+		conteggio.set(target, (conteggio.get(target) ?? 0) + 1);
+	}
+	for (const s of slotFlat)
+		s.riserve?.sort((a, b) => (b.punteggio ?? 0) - (a.punteggio ?? 0));
+	return nonPiazzati;
+}
 
 /** Ruoli Mantra che possono comporre il reparto difensivo del modificatore. */
 const RUOLI_REPARTO_DIFESA = new Set(['Dc', 'B', 'Dd', 'Ds', 'E', 'M']);
@@ -90,7 +135,8 @@ export function buildCampoClassic(giocatori: GiocatoreCampo[], modulo: string): 
 	});
 
 	const panchina = giocatori.filter((g) => !usati.has(g.chiave));
-	return { modulo, linee, panchina };
+	const residua = distribuisciRiserve(linee, panchina, (g, s) => g.ruolo === s.ruolo);
+	return { modulo, linee, panchina: residua };
 }
 
 export function buildCampoMantra(giocatori: GiocatoreCampo[], modulo: string): Campo {
@@ -139,7 +185,10 @@ export function buildCampoMantra(giocatori: GiocatoreCampo[], modulo: string): C
 
 	const usati = new Set(assegnato.filter(Boolean).map((g) => (g as GiocatoreCampo).chiave));
 	const panchina = giocatori.filter((g) => !usati.has(g.chiave));
-	return { modulo, linee, panchina };
+	const residua = distribuisciRiserve(linee, panchina, (g, s) =>
+		ruoliCompatibiliConSlot(g.ruoloMantra || g.ruolo, s.etichetta ?? '')
+	);
+	return { modulo, linee, panchina: residua };
 }
 
 function slotDa(etichetta: string, g: GiocatoreCampo | null): SlotCampo {
