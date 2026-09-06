@@ -27,7 +27,8 @@ MANIFEST = RADICE / "app" / "src" / "lib" / "assetsManifest.json"
 
 
 def norm(nome: str) -> str:
-    return re.sub(r"[\s'’.]", "", nome.strip().lower())
+    # deve restare allineata a `norm` in app/src/lib/assets.ts
+    return re.sub(r"[\s'’.\-_]", "", nome.strip().lower())
 
 
 def slug(nome: str) -> str:
@@ -57,7 +58,11 @@ def main() -> None:
         if out_dir.exists():
             shutil.rmtree(out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
-        for f in sorted(sorgente.iterdir()):
+        # rglob: raccoglie anche le sottocartelle (es. Stemmi/mantra/, Stemmi/classic/).
+        # La chiave resta il solo nome file, la sottocartella è solo organizzazione.
+        for f in sorted(sorgente.rglob("*")):
+            if not f.is_file():
+                continue
             if f.suffix.lower() not in (".png", ".jpg", ".jpeg", ".webp", ".svg"):
                 continue
             nome_file = f"{slug(f.stem)}{f.suffix.lower()}"

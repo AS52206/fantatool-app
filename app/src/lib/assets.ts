@@ -6,7 +6,8 @@ import manifest from './assetsManifest.json';
 type Manifest = { loghi: Record<string, string>; stemmi: Record<string, string> };
 const m = manifest as Manifest;
 
-const norm = (s: string) => s.trim().toLowerCase().replace(/[\s'’.]/g, '');
+// deve restare allineata a `norm` in tools/sync_assets.py
+const norm = (s: string) => s.trim().toLowerCase().replace(/[\s'’.\-_]/g, '');
 
 /** URL del logo/stemma per un nome, o null se non c'è. */
 export function urlCrest(nome: string | undefined | null, tipo: 'loghi' | 'stemmi'): string | null {
