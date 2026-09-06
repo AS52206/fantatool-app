@@ -86,6 +86,14 @@
 		asta.config.squadre = nuove;
 	}
 
+	// Il taglio dati (PMA/slot) segue il numero di squadre: non è più un campo a
+	// parte. I bundle esistono per 8 e 10 → si sceglie il più vicino.
+	$effect(() => {
+		const n = asta.config.squadre.length;
+		const cut = Math.abs(n - 8) <= Math.abs(n - 10) ? 8 : 10;
+		if (asta.config.partecipanti !== cut) asta.config.partecipanti = cut;
+	});
+
 	function scarica(contenuto: string | Blob, nome: string, tipo?: string) {
 		const blob = contenuto instanceof Blob ? contenuto : new Blob([contenuto], { type: tipo });
 		const a = document.createElement('a');
@@ -386,12 +394,7 @@
 					<label>Numero squadre
 						<input type="number" min="2" max="20" value={asta.config.squadre.length}
 							onchange={(e) => impostaNumeroSquadre(+(e.target as HTMLInputElement).value)} style="width:90px;display:block;" />
-					</label>
-					<label>Taglio dati (PMA/slot)
-						<select value={asta.config.partecipanti} onchange={(e) => (asta.config.partecipanti = +(e.target as HTMLSelectElement).value)} style="display:block;">
-							<option value={8}>8 partecipanti</option>
-							<option value={10}>10 partecipanti</option>
-						</select>
+						<span class="muted" style="font-size:10px;display:block;">dati PMA/slot: taglio {asta.config.partecipanti}</span>
 					</label>
 					{#if asta.isMantra}
 						<label>Portieri
