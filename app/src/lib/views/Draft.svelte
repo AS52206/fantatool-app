@@ -3,7 +3,13 @@
 	import { normalizzaNome } from '$lib/engine/names';
 	import { MOLTIPLICATORI_FLAG_MANUALE } from '$lib/engine/pricing';
 	import { ORDINE_RUOLI_MANTRA, MODULI_MANTRA, assegnaGiocatoriModulo } from '$lib/engine/mantra';
-	import { buildCampoClassic, buildCampoMantra, MODULI_CLASSIC, type GiocatoreCampo } from '$lib/campo';
+	import {
+		buildCampoClassic,
+		buildCampoMantra,
+		MODULI_CLASSIC,
+		repartoDifensivoMantra,
+		type GiocatoreCampo
+	} from '$lib/campo';
 	import { ricambiMantraDaModuli, ricambiClassicDa } from '$lib/ricambi';
 	import { coperturaGiocatoreModuli, famigliaDelModulo } from '$lib/mantraHints';
 	import RoleTag from '$lib/ui/RoleTag.svelte';
@@ -85,6 +91,8 @@
 	const campoMio = $derived(
 		asta.isMantra ? buildCampoMantra(campoInputMio, moduloMio) : buildCampoClassic(campoInputMio, moduloMio)
 	);
+	/** Slot del reparto difensivo (modificatore difesa) sul modulo disegnato. */
+	const repartoDifMio = $derived(asta.isMantra ? repartoDifensivoMantra(campoMio) : []);
 	/** Moduli su cui ragionano "ruoli da coprire" e "ricambi": in Mantra tutti i
 	 *  target impostati (la famiglia), non solo quello disegnato in campo. */
 	const moduliRagionamento = $derived(
@@ -625,7 +633,12 @@
 			</div>
 			<div class="campo-wrap">
 				<div style="flex:1 1 320px;min-width:0;">
-					<FormationPitch linee={campoMio.linee} titolo={campoMio.modulo} />
+					<FormationPitch linee={campoMio.linee} titolo={campoMio.modulo} evidenzia={repartoDifMio} />
+					{#if repartoDifMio.length}
+						<div class="muted" style="font-size:11px;text-align:center;margin-top:3px;">
+							<span style="color:var(--ok);">▬</span> reparto del modificatore difesa · portiere + 5 arretrati
+						</div>
+					{/if}
 					{#if campoMio.panchina.length}
 						<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;font-size:11px;">
 							<span class="muted mono" style="align-self:center;">PANCHINA</span>

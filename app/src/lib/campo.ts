@@ -31,6 +31,30 @@ export interface Campo {
 
 const NOMI_LINEE = ['PORTA', 'DIFESA', 'CENTROCAMPO', 'TREQUARTI', 'ATTACCO'];
 
+/** Ruoli Mantra che possono comporre il reparto difensivo del modificatore. */
+const RUOLI_REPARTO_DIFESA = new Set(['Dc', 'B', 'Dd', 'Ds', 'E', 'M']);
+
+/**
+ * Indici piatti degli slot coinvolti nel **modificatore di difesa** Mantra:
+ * il portiere + i 5 uomini più arretrati del modulo tra Dc/B/Dd/Ds/E/M.
+ * Gli slot di `campo.linee` sono già in ordine dal fondo (porta → attacco),
+ * quindi bastano il portiere e i primi 5 slot difensivamente idonei.
+ * Ritorna [] se il campo non ha 6 slot idonei (es. modalità Classic).
+ */
+export function repartoDifensivoMantra(campo: Campo): number[] {
+	const flat: SlotCampo[] = [];
+	for (const linea of campo.linee) for (const s of linea.slot) flat.push(s);
+	if (flat.length < 6) return [];
+	const idx: number[] = [0]; // portiere
+	for (let i = 1; i < flat.length && idx.length < 6; i++) {
+		const opzioni = String(flat[i].etichetta ?? flat[i].ruolo ?? '')
+			.split('/')
+			.map((x) => x.trim());
+		if (opzioni.some((o) => RUOLI_REPARTO_DIFESA.has(o))) idx.push(i);
+	}
+	return idx.length === 6 ? idx : [];
+}
+
 /** Moduli "classici" comuni: cifre = reparti di movimento dalla difesa. */
 export const MODULI_CLASSIC = ['3-4-3', '4-3-3', '4-4-2', '3-5-2', '4-2-3-1', '3-4-1-2', '4-3-1-2', '4-4-1-1'];
 

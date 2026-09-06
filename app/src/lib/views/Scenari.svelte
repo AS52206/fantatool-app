@@ -2,7 +2,13 @@
 	import { asta } from '$lib/stores/auction.svelte';
 	import { normalizzaNome } from '$lib/engine/names';
 	import { MODULI_MANTRA, ORDINE_RUOLI_MANTRA, normalizzaRuoliMantra } from '$lib/engine/mantra';
-	import { buildCampoClassic, buildCampoMantra, MODULI_CLASSIC, type GiocatoreCampo } from '$lib/campo';
+	import {
+		buildCampoClassic,
+		buildCampoMantra,
+		MODULI_CLASSIC,
+		repartoDifensivoMantra,
+		type GiocatoreCampo
+	} from '$lib/campo';
 	import { ricambiMantraDa, ricambiClassicDa } from '$lib/ricambi';
 	import RoleTag from '$lib/ui/RoleTag.svelte';
 	import Crest from '$lib/ui/Crest.svelte';
@@ -101,6 +107,8 @@
 	const campo = $derived(
 		asta.isMantra ? buildCampoMantra(campoInput, modulo) : buildCampoClassic(campoInput, modulo)
 	);
+	/** Slot del reparto difensivo (modificatore difesa) sul modulo scelto. */
+	const repartoDif = $derived(asta.isMantra ? repartoDifensivoMantra(campo) : []);
 
 	const righePianoAttive = $derived(righe.filter((r) => r.stato !== 'PERSO'));
 	const ricambi = $derived(
@@ -204,8 +212,16 @@
 		</div>
 		<div class="campo-wrap">
 			<div style="flex:1 1 420px;min-width:0;">
-				<FormationPitch linee={campo.linee} titolo={campo.modulo} onSlotVuoto={(i) => (picker = i)} />
+				<FormationPitch
+					linee={campo.linee}
+					titolo={campo.modulo}
+					evidenzia={repartoDif}
+					onSlotVuoto={(i) => (picker = i)}
+				/>
 				<div class="muted" style="font-size:11px;text-align:center;margin-top:2px;">
+					{#if repartoDif.length}
+						<span style="color:var(--ok);">▬</span> reparto del modificatore difesa (portiere + 5 arretrati) ·
+					{/if}
 					Clicca una maglia vuota (o un ruolo qui a destra) per scegliere un giocatore.
 				</div>
 			</div>

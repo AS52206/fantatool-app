@@ -19,12 +19,69 @@
 	let {
 		linee,
 		titolo = '',
-		onSlotVuoto
+		onSlotVuoto,
+		evidenzia = []
 	}: {
 		linee: LineaCampo[];
 		titolo?: string;
 		onSlotVuoto?: (info: { ruolo?: string; etichetta?: string; linea: string }) => void;
+		/** Indici piatti degli slot da evidenziare (contorno verde + linea). */
+		evidenzia?: number[];
 	} = $props();
+
+	// offset dell'indice piatto per ogni linea (per mappare slot → indice globale)
+	const offsets = $derived.by(() => {
+		const o: number[] = [];
+		let acc = 0;
+		for (const l of linee) {
+			o.push(acc);
+			acc += l.slot.length;
+		}
+		return o;
+	});
+	const evSet = $derived(new Set(evidenzia));
+
+	let frameEl: HTMLDivElement | undefined = $state();
+	let linePts = $state('');
+
+	function misura() {
+		if (!frameEl || evidenzia.length < 2) {
+			linePts = '';
+			return;
+		}
+		const fb = frameEl.getBoundingClientRect();
+		// gli slot evidenziati sono nel DOM in ordine piatto (porta → attacco)
+		const els = [...frameEl.querySelectorAll<HTMLElement>('.slot.evid')];
+		const pts = els.map((el) => {
+			const r = el.getBoundingClientRect();
+			return `${(r.left + r.width / 2 - fb.left).toFixed(1)},${(r.top + 24 - fb.top).toFixed(1)}`;
+		});
+		linePts = pts.length >= 2 ? pts.join(' ') : '';
+	}
+
+	$effect(() => {
+		// dipendenze: rimisura quando cambiano modulo / rosa / evidenziati
+		void linee;
+		void evidenzia;
+		void evSet;
+		void frameEl;
+
+		// il chain di derived + il layout (font, maglie) si assestano dopo il
+		// primo paint: rimisura a più riprese finché gli slot .evid ci sono.
+		const timers = [0, 50, 150, 400].map((ms) => setTimeout(misura, ms));
+		const raf = requestAnimationFrame(misura);
+
+		let ro: ResizeObserver | undefined;
+		if (frameEl && typeof ResizeObserver !== 'undefined') {
+			ro = new ResizeObserver(() => misura());
+			ro.observe(frameEl);
+		}
+		return () => {
+			timers.forEach(clearTimeout);
+			cancelAnimationFrame(raf);
+			ro?.disconnect();
+		};
+	});
 
 	const colStato: Record<string, string> = {
 		PRESO: 'var(--ok)',
@@ -35,16 +92,20 @@
 </script>
 
 <div class="pitch">
-	<div class="pitch-frame">
+	<div class="pitch-frame" bind:this={frameEl}>
 		<span class="mark circle"></span>
 		<span class="mark halfway"></span>
 		{#if titolo}<div class="pitch-title">{titolo}</div>{/if}
+		{#if linePts}
+			<svg class="reparto-svg" aria-hidden="true"><polyline points={linePts} /></svg>
+		{/if}
 		<div class="lines">
-			{#each linee as linea}
+			{#each linee as linea, li}
 				<div class="line" style="--n:{linea.slot.length};">
-					{#each linea.slot as s}
+					{#each linea.slot as s, si}
 						{@const st = s.stato ?? 'VUOTO'}
-						<div class="slot" class:libero={st === 'LIBERO'}>
+						{@const fi = offsets[li] + si}
+						<div class="slot" class:libero={st === 'LIBERO'} class:evid={evSet.has(fi)}>
 							{#if s.nome}
 								<div class="kit" title={s.club ?? ''}>
 									<Jersey club={s.club} size={44} />
@@ -132,9 +193,35 @@
 	}
 	.lines {
 		position: relative;
+		z-index: 2;
 		display: flex;
 		flex-direction: column-reverse; /* attacco in alto */
 		gap: 12px;
+	}
+	.reparto-svg {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 1;
+		pointer-events: none;
+		overflow: visible;
+	}
+	.reparto-svg polyline {
+		fill: none;
+		stroke: var(--ok);
+		stroke-width: 2;
+		stroke-dasharray: 4 5;
+		stroke-linejoin: round;
+		stroke-linecap: round;
+		opacity: 0.75;
+	}
+	.slot.evid {
+		border-radius: 12px;
+		background: color-mix(in srgb, var(--ok) 12%, transparent);
+		box-shadow:
+			0 0 0 2px var(--ok),
+			0 0 14px color-mix(in srgb, var(--ok) 40%, transparent);
 	}
 	.line {
 		display: grid;
