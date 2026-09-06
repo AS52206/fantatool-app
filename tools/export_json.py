@@ -182,6 +182,63 @@ RUOLO_MANTRA_A_ESTESO = {
 }
 
 
+def leggi_fantalab_mantra(percorso: Path) -> dict[str, dict]:
+    """Listone Mantra di FantaLab con la stima PMA per numero di partecipanti.
+
+    Colonne attese (foglio "Listone Mantra"):
+        Nome | ... | Ruoli Mantra | Quotazione Mantra | Presenze
+        | PMA a N (%) | PMA a N (crediti su 500)
+
+    Da questo file prendiamo SOLO due cose (per volere esplicito dell'utente):
+      - il prezzo, dalla colonna "PMA a N (crediti su 500)" — crediti su un
+        budget standard di 500, convertiti in pma_pct = crediti / 5 così che
+        lo store li ricalcoli identici con budget 500;
+      - i ruoli Mantra, dalla colonna "Ruoli Mantra" (formato "W/A", "Dc", ...).
+    Nient'altro (quotazione, ruolo classic, presenze) viene importato da qui.
+    Le celle PMA vuote (nessun campione d'asta) → giocatore saltato: il prezzo
+    ripiega sul PMA Fantacrediti come prima.
+    """
+    try:
+        xl = pd.ExcelFile(percorso)
+    except (OSError, ValueError) as exc:
+        print(f"  ! impossibile leggere {percorso.name}: {exc}", file=sys.stderr)
+        return {}
+    foglio = "Listone Mantra" if "Listone Mantra" in xl.sheet_names else xl.sheet_names[0]
+    df = pd.read_excel(xl, sheet_name=foglio)
+    df.columns = [str(c).strip() for c in df.columns]
+
+    c_nome = col(df, "nome", "calciatore", "giocatore")
+    c_rm = col(df, "ruoli mantra", "ruolo mantra", "rm")
+    c_cred = None
+    for c in df.columns:
+        cl = str(c).lower()
+        if "pma" in cl and "credit" in cl:
+            c_cred = c
+            break
+    if not c_nome or c_cred is None:
+        print(f"  ! colonne attese non trovate in {percorso.name}: {list(df.columns)}", file=sys.stderr)
+        return {}
+
+    righe: dict[str, dict] = {}
+    for _, r in df.iterrows():
+        chiave = normalizza_nome(r.get(c_nome))
+        if not chiave:
+            continue
+        crediti = num(r.get(c_cred), default=-1.0)
+        if crediti < 0:  # cella vuota / non disponibile
+            continue
+        rec: dict = {
+            "prezzo_atteso": round(crediti, 2),
+            "pma_pct": round(crediti / 5.0, 2),  # crediti / 500 * 100
+        }
+        if c_rm:
+            ruoli = str(r.get(c_rm, "") or "").strip()
+            if ruoli and ruoli.lower() != "nan":
+                rec["ruoli"] = ruoli
+        righe[chiave] = rec
+    return righe
+
+
 def costruisci(stagione: str, modalita: str, partecipanti: int) -> dict:
     base = RADICE / "data" / stagione / modalita
     p_listone = base / "listone.xlsx"
@@ -225,6 +282,17 @@ def costruisci(stagione: str, modalita: str, partecipanti: int) -> dict:
     if modalita == "mantra" and p_mantra_post.exists():
         mantra_post = leggi_mantra_post(p_mantra_post)
 
+    # listone Mantra FantaLab con PMA per numero di partecipanti (opzionale).
+    # Se presente ha la PRIORITÀ per prezzo (colonna crediti su 500) e ruoli Mantra.
+    p_fantalab_mantra = base / "fantalab" / f"{partecipanti}-partecipanti.xlsx"
+    fantalab_mantra: dict[str, dict] = {}
+    if modalita == "mantra" and p_fantalab_mantra.exists():
+        fantalab_mantra = leggi_fantalab_mantra(p_fantalab_mantra)
+        colpiti = sum(1 for _, rr in df.iterrows()
+                      if normalizza_nome(rr.get(c_nome)) in fantalab_mantra)
+        print(f"  fantalab mantra a {partecipanti}: {len(fantalab_mantra)} righe, "
+              f"{colpiti} giocatori del listone abbinati")
+
     players = []
     for _, r in df.iterrows():
         nome = str(r.get(c_nome, "")).strip()
@@ -239,6 +307,13 @@ def costruisci(stagione: str, modalita: str, partecipanti: int) -> dict:
         if mp:
             fl = {**fl, "prezzo_atteso": mp["prezzo_atteso"], "pma_pct": mp["pma_pct"]}
             ruolo_mantra_post = ";".join(mp["ruoli"])
+
+        # FantaLab Mantra "a N": ha la priorità su tutto per prezzo e ruoli.
+        flm = fantalab_mantra.get(chiave)
+        if flm:
+            fl = {"prezzo_atteso": flm["prezzo_atteso"], "pma_pct": flm["pma_pct"]}
+            if flm.get("ruoli"):
+                ruolo_mantra_post = flm["ruoli"]
 
         quota = num(r.get(c_qta), 1) if c_qta else 1
         # fm / pg: SOLO dal listone corrente (come fa fantatool/app.py, che passa
@@ -291,10 +366,12 @@ def costruisci(stagione: str, modalita: str, partecipanti: int) -> dict:
                 "fantacrediti": {"file": p_fc.name, "impronta": impronta(p_fc)} if p_fc.exists() else None,
                 "fantalab": {"file": p_fantalab.name, "impronta": impronta(p_fantalab)} if p_fantalab.exists() else None,
                 "mantra_post": {"file": p_mantra_post.name, "impronta": impronta(p_mantra_post)} if mantra_post else None,
+                "fantalab_mantra": {"file": p_fantalab_mantra.name, "impronta": impronta(p_fantalab_mantra)} if fantalab_mantra else None,
             },
             "totale_giocatori": len(players),
             "con_fantacrediti": sum(1 for p in players if p["fc"]),
             "con_mantra_post": sum(1 for p in players if mantra_post.get(p["chiave"])) if mantra_post else 0,
+            "con_fantalab_mantra": sum(1 for p in players if fantalab_mantra.get(p["chiave"])) if fantalab_mantra else 0,
         },
         "players": players,
     }
