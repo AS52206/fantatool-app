@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { flip } from 'svelte/animate';
 	import { asta } from '$lib/stores/auction.svelte';
 	import { normalizzaNome } from '$lib/engine/names';
 	import { MOLTIPLICATORI_FLAG_MANUALE } from '$lib/engine/pricing';
@@ -161,6 +162,15 @@
 
 	const ultimiAcquisti = $derived(
 		[...asta.acquisti].sort((a, b) => b.ordine - a.ordine).slice(0, 8)
+	);
+
+	// Squadre ordinate per crediti residui: chi ne ha di più in alto.
+	const squadreOrdinate = $derived(
+		[...asta.config.squadre].sort((a, b) => {
+			const ba = asta.bilanci[a.nome];
+			const bb = asta.bilanci[b.nome];
+			return (bb?.c_rimasti ?? 0) - (ba?.c_rimasti ?? 0) || (ba?.g_presi ?? 0) - (bb?.g_presi ?? 0);
+		})
 	);
 	const consigliatoRapido = (g: Giocatore) =>
 		g.fantalab?.prezzo_atteso || g.fc?.pma || g.quotazione || 1;
@@ -748,14 +758,21 @@
 					<button disabled={!asta.puoiRipetere} title="Ripeti (Cmd+Shift+Z)" onclick={() => asta.ripeti()}>↪︎ Ripeti</button>
 				</div>
 			</div>
-			{#each asta.config.squadre as sq}
+			{#each squadreOrdinate as sq, i (sq.nome)}
 				{@const b = asta.bilanci[sq.nome]}
-				<div style="padding:7px 0 7px 8px;border-top:1px solid var(--border);border-left:3px solid {asta.coloreDi(sq.nome)};margin-left:-8px;">
+				{@const primo = i === 0}
+				{@const ultimo = i === squadreOrdinate.length - 1}
+				<div
+					animate:flip={{ duration: 260 }}
+					style="padding:7px 0 7px 8px;border-top:1px solid var(--border);border-left:3px solid {asta.coloreDi(sq.nome)};margin-left:-8px;"
+				>
 					<div style="display:flex;align-items:center;gap:7px;font-size:13px;">
 						<span style="width:8px;height:8px;border-radius:2px;background:{asta.coloreDi(sq.nome)};flex:0 0 auto;"></span>
 						<Crest nome={sq.stemma || sq.nome} tipo="stemmi" size={18} />
 						<span style={sq.isMia ? 'font-weight:700;color:var(--text-strong);' : ''}>{sq.nome}</span>
 						{#if sq.isMia}<span style="color:var(--accent);">★</span>{/if}
+						{#if primo && asta.avviata}<span class="tag" style="color:var(--ok);font-size:10px;">💰 più crediti</span>
+						{:else if ultimo && asta.avviata}<span class="tag muted" style="font-size:10px;">meno crediti</span>{/if}
 						<span class="mono muted" style="margin-left:auto;font-size:11px;">
 							{b.g_presi}/{asta.config.limiti.TOT} · <span style:color={b.c_rimasti < 0 ? 'var(--bad)' : 'var(--cyan)'}>{b.c_rimasti} cr</span>
 						</span>
