@@ -71,6 +71,29 @@ export function famigliaDelModulo(modulo: string): FamigliaModuli | undefined {
 	return FAMIGLIE_MODULI_MANTRA.find((f) => f.moduli.includes(modulo));
 }
 
+/** Conteggio dei ruoli Mantra posseduti (un polivalente conta in ogni ruolo). */
+function conteggioRuoli(giocatori: GiocatoreMantraInput[]): Record<string, number> {
+	const cnt: Record<string, number> = {};
+	for (const g of giocatori) for (const r of ruoliDi(g)) cnt[r] = (cnt[r] ?? 0) + 1;
+	return cnt;
+}
+
+/**
+ * Frase corta sul perché un modulo calza alla rosa attuale (per il pannello
+ * "Il tuo modulo" nel Draft).
+ */
+export function spiegaSceltaModulo(giocatori: GiocatoreMantraInput[], modulo: string): string {
+	const fam = famigliaDelModulo(modulo);
+	if (!fam) return '';
+	const cnt = conteggioRuoli(giocatori);
+	const centrali = (cnt.Dc ?? 0) + (cnt.B ?? 0);
+	const terzini = (cnt.Dd ?? 0) + (cnt.Ds ?? 0);
+	const esterni = cnt.E ?? 0;
+	if (fam.nome === 'Difesa a 3')
+		return `${centrali} tra Dc/B${esterni ? ` e ${esterni} E` : ', pochi E'}: la difesa a 3 sfrutta meglio la tua rosa`;
+	return `${terzini} terzini di ruolo (Dd/Ds) e ${centrali} centrali: la difesa a 4 ti calza`;
+}
+
 // ---------------------------------------------------------------------------
 // Quanto è "jolly" un giocatore rispetto a un insieme di moduli
 // ---------------------------------------------------------------------------

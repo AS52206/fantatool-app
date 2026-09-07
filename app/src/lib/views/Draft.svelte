@@ -11,7 +11,7 @@
 		type GiocatoreCampo
 	} from '$lib/campo';
 	import { ricambiMantraDaModuli, ricambiClassicDa } from '$lib/ricambi';
-	import { coperturaGiocatoreModuli, famigliaDelModulo } from '$lib/mantraHints';
+	import { coperturaGiocatoreModuli, famigliaDelModulo, spiegaSceltaModulo } from '$lib/mantraHints';
 	import RoleTag from '$lib/ui/RoleTag.svelte';
 	import Crest from '$lib/ui/Crest.svelte';
 	import BudgetBar from '$lib/ui/BudgetBar.svelte';
@@ -526,18 +526,58 @@
 
 		{#if asta.isMantra}
 			{@const am = asta.analisiMiaRosaMantra}
+			{@const rosaInputMio = asta.rosaMantraInput(asta.miaSquadra)}
+			{@const classificaModuli = [...am.moduli].sort(
+				(a, b) => b.coperti - a.coperti || b.punteggio - a.punteggio || (a.modulo < b.modulo ? -1 : 1)
+			)}
+			{@const leaderMod = classificaModuli[0]}
+			{@const famLeader = leaderMod ? famigliaDelModulo(leaderMod.modulo) : undefined}
+			{@const targetSuggeriti = famLeader
+				? classificaModuli.filter((m) => famLeader.moduli.includes(m.modulo)).slice(0, 3).map((m) => m.modulo)
+				: leaderMod
+					? [leaderMod.modulo]
+					: []}
+			{@const targetGiaAllineati =
+				targetSuggeriti.length > 0 &&
+				targetSuggeriti.every((m) => asta.config.moduliTarget.includes(m)) &&
+				asta.config.moduliTarget.length === targetSuggeriti.length}
 			<div class="panel">
-				<h2 style="margin:0 0 6px;font-size:15px;">Copertura Mantra</h2>
-				<div style="font-size:13px;">
-					Miglior modulo: <strong>{am.migliore.modulo}</strong> —
-					<span style:color={am.migliore.completo ? 'var(--ok)' : 'var(--warn)'}>{am.migliore.coperti}/11</span>
-					{#if am.portieri_mancanti}· <span style="color:var(--bad);">manca {am.portieri_mancanti} portiere</span>{/if}
-				</div>
-				{#if am.moduli_completi.length}
-					<div class="muted" style="font-size:12px;">Moduli completi: {am.moduli_completi.join(', ')}</div>
+				<h2 style="margin:0 0 6px;font-size:15px;">Il tuo modulo</h2>
+				{#if leaderMod && am.giocatori > 0}
+					<div style="font-size:13px;">
+						<strong>{leaderMod.modulo}</strong> —
+						<span style:color={leaderMod.completo ? 'var(--ok)' : 'var(--warn)'}>{leaderMod.coperti}/11</span>
+						{#if famLeader}<span class="muted" style="font-size:11px;">· {famLeader.nome}</span>{/if}
+						{#if am.portieri_mancanti}· <span style="color:var(--bad);">manca {am.portieri_mancanti} portiere</span>{/if}
+					</div>
+					<div class="muted" style="font-size:11px;margin:2px 0 4px;">
+						{spiegaSceltaModulo(rosaInputMio, leaderMod.modulo)}
+					</div>
+					<div class="muted mono" style="font-size:11px;">
+						poi: {classificaModuli
+							.slice(1, 4)
+							.map((m) => `${m.modulo} ${m.coperti}/11`)
+							.join(' · ')}
+					</div>
+					{#if am.moduli_completi.length}
+						<div class="muted" style="font-size:11px;margin-top:3px;">Già completi: {am.moduli_completi.join(', ')}</div>
+					{/if}
+					{#if targetSuggeriti.length && !targetGiaAllineati}
+						<button
+							style="font-size:11px;margin-top:6px;"
+							onclick={() => (asta.config.moduliTarget = targetSuggeriti)}
+							title="Allinea i moduli target (usati da Ricambi e Ruoli chiave) a quello che stai comprando"
+						>
+							Usa {targetSuggeriti.join(' / ')} come target
+						</button>
+					{:else if targetGiaAllineati}
+						<div class="muted" style="font-size:11px;margin-top:5px;">✓ moduli target allineati</div>
+					{/if}
+				{:else}
+					<div class="muted" style="font-size:12px;">Compra qualche giocatore: qui vedrai il modulo che ti rende di più.</div>
 				{/if}
-				<div class="muted" style="font-size:11px;margin-top:4px;">
-					target: {asta.moduliTargetValidi
+				<div class="muted" style="font-size:11px;margin-top:6px;border-top:1px solid var(--border);padding-top:4px;">
+					target attuali: {asta.moduliTargetValidi
 						.map((m) => `${m} ${am.moduli.find((x) => x.modulo === m)?.coperti ?? 0}/11`)
 						.join(' · ')}
 				</div>
