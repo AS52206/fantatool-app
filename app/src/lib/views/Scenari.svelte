@@ -106,6 +106,7 @@
 					prezzo: r.stato === 'PRESO' ? r.prezzoEffettivo : r.max,
 					titolarita: r.giocatore?.fc?.expectedTitolarita ?? null,
 					pmaFl: r.giocatore?.fantalab?.prezzo_atteso ?? null,
+					fantamedia: r.giocatore?.fc?.expectedFantamedia ?? null,
 					stato: r.stato === 'PRESO' ? 'PRESO' : 'LIBERO'
 				})
 			)

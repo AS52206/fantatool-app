@@ -18,6 +18,7 @@
 		prezzo?: number | null;
 		titolarita?: number | null;
 		pmaFl?: number | null;
+		fantamedia?: number | null;
 		stato?: 'PRESO' | 'LIBERO' | 'VUOTO';
 		/** Riserve che coprono questo slot, dalla più forte. */
 		riserve?: RiservaCampo[];

@@ -20,6 +20,8 @@ export interface GiocatoreCampo {
 	prezzo?: number | null;
 	titolarita?: number | null;
 	pmaFl?: number | null;
+	/** Fantamedia attesa — usata per il Fattore difensivo. */
+	fantamedia?: number | null;
 	stato?: 'PRESO' | 'LIBERO' | 'VUOTO';
 	punteggio?: number;
 }
@@ -98,6 +100,93 @@ export function repartoDifensivoMantra(campo: Campo): number[] {
 		if (opzioni.some((o) => RUOLI_REPARTO_DIFESA.has(o))) idx.push(i);
 	}
 	return idx.length === 6 ? idx : [];
+}
+
+// ---------------------------------------------------------------------------
+// Fattore difensivo (modificatore di difesa Mantra, portiere incluso)
+// ---------------------------------------------------------------------------
+
+/**
+ * Stima della **media voto senza bonus/malus** dalla fantamedia attesa.
+ * Per i giocatori di movimento fantamedia ≈ voto. Per il portiere la fantamedia
+ * sconta ~0.65 di malus da gol subiti: lo si riaggiunge per avvicinarsi al voto.
+ */
+export function stimaVotoMantra(fantamedia: number, ruoli: string): number {
+	if (!(fantamedia > 0)) return 0;
+	const tokens = String(ruoli).split(/[;,/\s]+/).map((x) => x.trim());
+	const portiere = tokens.includes('Por');
+	const v = portiere ? fantamedia + 0.65 : fantamedia;
+	return Math.min(10, Math.max(1, v));
+}
+
+/** Bonus/malus a giornata per la media voto del reparto difensivo. */
+export function fasciaFattoreDifensivo(media: number): { bonus: number; testo: string } {
+	if (!(media > 0)) return { bonus: 0, testo: '—' };
+	if (media < 6) return { bonus: 0, testo: '0' };
+	if (media < 6.25) return { bonus: 0.5, testo: '+0.5' };
+	if (media < 6.5) return { bonus: 1, testo: '+1' };
+	if (media < 6.75) return { bonus: 1.5, testo: '+1.5' };
+	if (media < 7) return { bonus: 2, testo: '+2' };
+	return { bonus: 2.5, testo: '+2.5' };
+}
+
+export interface AnalisiFattoreDifensivo {
+	titolari: { nome: string; ruolo: string; fantamedia: number }[];
+	vuoti: number;
+	totale: number;
+	media: number;
+	fascia: { bonus: number; testo: string };
+	/** Con un candidato in più nel reparto (se il suo ruolo è idoneo). */
+	conCandidato?: { idoneo: boolean; media: number; fascia: { bonus: number; testo: string } };
+}
+
+/**
+ * Analisi del reparto difensivo per il Fattore difensivo: portiere + 5 arretrati
+ * del modulo, media della fantamedia attesa → fascia bonus. Opzionalmente valuta
+ * l'ingresso di un candidato (prende i migliori per fantamedia).
+ */
+export function analisiFattoreDifensivo(
+	campo: Campo,
+	candidato?: { nome: string; fantamedia: number; ruoloMantra?: string | null }
+): AnalisiFattoreDifensivo {
+	const idx = repartoDifensivoMantra(campo);
+	const flat: SlotCampo[] = [];
+	for (const l of campo.linee) for (const s of l.slot) flat.push(s);
+	const slots = idx.map((i) => flat[i]).filter(Boolean);
+	const totale = slots.length;
+
+	const titolari = slots
+		.filter((s) => s.nome)
+		.map((s) => {
+			const ruolo = s.ruolo ?? s.etichetta ?? '';
+			return {
+				nome: s.nome as string,
+				ruolo,
+				fantamedia: stimaVotoMantra(Number(s.fantamedia) || 0, ruolo)
+			};
+		});
+	const vuoti = totale - titolari.length;
+	const validi = titolari.filter((t) => t.fantamedia > 0).map((t) => t.fantamedia);
+	const media = validi.length ? validi.reduce((a, b) => a + b, 0) / validi.length : 0;
+
+	let conCandidato: AnalisiFattoreDifensivo['conCandidato'];
+	if (candidato && candidato.fantamedia > 0) {
+		const RUOLI_REPARTO = new Set(['Por', 'Dc', 'B', 'Dd', 'Ds', 'E', 'M']);
+		const ruoliCand = String(candidato.ruoloMantra ?? '')
+			.split(/[;,/\s]+/)
+			.map((x) => x.trim());
+		const idoneo = ruoliCand.some((r) => RUOLI_REPARTO.has(r));
+		if (idoneo) {
+			const votoCand = stimaVotoMantra(candidato.fantamedia, candidato.ruoloMantra ?? '');
+			const pool = [...validi, votoCand].sort((a, b) => b - a).slice(0, Math.max(totale, validi.length));
+			const m = pool.length ? pool.reduce((a, b) => a + b, 0) / pool.length : 0;
+			conCandidato = { idoneo: true, media: m, fascia: fasciaFattoreDifensivo(m) };
+		} else {
+			conCandidato = { idoneo: false, media, fascia: fasciaFattoreDifensivo(media) };
+		}
+	}
+
+	return { titolari, vuoti, totale, media, fascia: fasciaFattoreDifensivo(media), conCandidato };
 }
 
 /** Moduli "classici" comuni: cifre = reparti di movimento dalla difesa. */
@@ -201,6 +290,7 @@ function slotDa(etichetta: string, g: GiocatoreCampo | null): SlotCampo {
 		prezzo: g.prezzo,
 		titolarita: g.titolarita,
 		pmaFl: g.pmaFl,
+		fantamedia: g.fantamedia ?? null,
 		stato: g.stato ?? 'PRESO'
 	};
 }

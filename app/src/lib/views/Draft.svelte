@@ -9,6 +9,7 @@
 		buildCampoMantra,
 		MODULI_CLASSIC,
 		repartoDifensivoMantra,
+		analisiFattoreDifensivo,
 		type GiocatoreCampo
 	} from '$lib/campo';
 	import { ricambiMantraDaModuli, ricambiClassicDa } from '$lib/ricambi';
@@ -85,6 +86,7 @@
 				prezzo: a.prezzo,
 				titolarita: a.player?.fc?.expectedTitolarita ?? null,
 				pmaFl: a.player?.fantalab?.prezzo_atteso ?? null,
+				fantamedia: a.player?.fc?.expectedFantamedia ?? null,
 				stato: 'PRESO'
 			})
 		)
@@ -94,6 +96,20 @@
 	);
 	/** Slot del reparto difensivo (modificatore difesa) sul modulo disegnato. */
 	const repartoDifMio = $derived(asta.isMantra ? repartoDifensivoMantra(campoMio) : []);
+	const fattoreDif = $derived(
+		asta.isMantra
+			? analisiFattoreDifensivo(
+					campoMio,
+					selezionato
+						? {
+								nome: selezionato.nome,
+								fantamedia: selezionato.fc?.expectedFantamedia ?? 0,
+								ruoloMantra: selezionato.ruoloMantra
+							}
+						: undefined
+				)
+			: null
+	);
 	/** Moduli su cui ragionano "ruoli da coprire" e "ricambi": in Mantra tutti i
 	 *  target impostati (la famiglia), non solo quello disegnato in campo. */
 	const moduliRagionamento = $derived(
@@ -592,6 +608,63 @@
 						.join(' · ')}
 				</div>
 			</div>
+
+			{#if fattoreDif}
+				<div class="panel">
+					<h2 style="margin:0 0 6px;font-size:15px;">Fattore difensivo</h2>
+					{#if fattoreDif.titolari.length}
+						<div style="font-size:13px;">
+							Media reparto <strong>{fattoreDif.media.toFixed(2)}</strong>
+							<span
+								style:color={fattoreDif.fascia.bonus >= 1.5
+									? 'var(--ok)'
+									: fattoreDif.fascia.bonus > 0
+										? 'var(--warn)'
+										: 'var(--bad)'}
+							>· bonus {fattoreDif.fascia.testo} a giornata</span>
+						</div>
+						<div class="muted" style="font-size:11px;margin:2px 0 4px;">
+							portiere + 5 arretrati ({campoMio.modulo}){#if fattoreDif.vuoti}
+								· <span style="color:var(--warn);">{fattoreDif.vuoti} slot vuoti, media sui presenti</span>{/if}
+						</div>
+						<div style="display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11px;">
+							{#each fattoreDif.titolari as t}
+								<span class="mono">
+									{t.nome}
+									<span
+										style:color={t.fantamedia >= 6.25
+											? 'var(--ok)'
+											: t.fantamedia >= 6
+												? 'var(--warn)'
+												: 'var(--bad)'}
+									>{t.fantamedia ? t.fantamedia.toFixed(2) : '—'}</span>
+								</span>
+							{/each}
+						</div>
+						{#if fattoreDif.conCandidato?.idoneo && selezionato}
+							<div
+								style="font-size:12px;margin-top:6px;border-top:1px solid var(--border);padding-top:5px;"
+							>
+								Se prendi <strong>{selezionato.nome}</strong>: media
+								{fattoreDif.media.toFixed(2)} → <strong>{fattoreDif.conCandidato.media.toFixed(2)}</strong>
+								{#if fattoreDif.conCandidato.fascia.testo !== fattoreDif.fascia.testo}
+									<span style="color:var(--ok);">· {fattoreDif.fascia.testo} → {fattoreDif.conCandidato.fascia.testo}</span>
+								{:else}
+									<span class="muted">· resta {fattoreDif.fascia.testo}</span>
+								{/if}
+							</div>
+						{/if}
+					{:else}
+						<div class="muted" style="font-size:12px;">
+							Prendi portiere e difensori: qui vedrai la media voto del reparto e il bonus a giornata.
+						</div>
+					{/if}
+					<div class="muted" style="font-size:10px;margin-top:5px;">
+						fasce: &lt;6 → 0 · 6 → +0.5 · 6.25 → +1 · 6.5 → +1.5 · 6.75 → +2 · 7 → +2.5
+						<br />voto stimato dalla fantamedia attesa (portiere +0.65 per i gol subiti)
+					</div>
+				</div>
+			{/if}
 
 			{#if asta.acquisti.some((a) => a.proprietario === asta.miaSquadra)}
 				{@const fam = asta.raccomandazioneFamiglieMantra}

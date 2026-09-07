@@ -6,15 +6,13 @@ azione, quindi un crash o un refresh riaprono l'asta esattamente dov'era.
 
 ## Avvio rapido (Mac)
 
-Doppio click su **`app/avvia.command`**.
+Doppio click su **`Fantatool.app`** sul Desktop (o su **`app/asta-stabile.command`**).
 Rigenera i dati, compila l'app se serve, la serve **come file statici** su
-`http://localhost:8770` e apre il browser. Nessun server di sviluppo, nessun
+`http://localhost:8770` e apre Brave/Chrome. Nessun server di sviluppo, nessun
 watcher, nessun websocket: il runtime dell'asta è solo file su disco.
 
-Da Chrome/Brave puoi fare **"Installa app" / "Crea scorciatoia (apri come
-finestra)"**: Fantatool finisce nel dock con finestra propria. Ogni ricarica
-prende sempre l'ultima build dal server locale (nessuna cache che ti blocca su
-una versione vecchia).
+Ogni ricarica (Cmd+Shift+R) prende sempre l'ultima build dal server locale —
+nessuna cache che ti blocca su una versione vecchia.
 
 La prima volta serve **Node.js**:
 
@@ -30,7 +28,7 @@ npm install
 npm run dev        # http://localhost:5173 (sviluppo, con hot reload)
 npm test           # 204 test di parità col motore Python originale
 npm run build      # build statica in app/build/
-npm run serve      # serve app/build/ su http://localhost:8770 (come avvia.command)
+npm run serve      # serve app/build/ su http://localhost:8770
 ```
 
 ## Struttura
@@ -41,7 +39,8 @@ app/                 web-app SvelteKit (SPA statica, local-first)
   src/lib/stores/    stato asta + autosave
   src/routes/        interfaccia
   static/data/       bundle giocatori generati (JSON)
-  avvia.command      launcher Mac
+  asta-stabile.command  launcher Mac (build statica + server, no-cache)
+  serve.mjs             server statico Node alternativo (npm run serve)
 tools/               script Python: conversione dati + generazione casi di test
 data/<stagione>/     file sorgente (listone .xlsx, fantacrediti .xlsx, fantalab .json)
 ```

@@ -29,7 +29,7 @@ cd app && npm run build   # -> app/build/ , servibile da qualunque static server
 ```
 
 ## Avvio rapido (Mac)
-Doppio click su `app/avvia.command`: rigenera il bundle dati, compila se serve,
+Doppio click su `Fantatool.app` (Desktop) o `app/asta-stabile.command`: rigenera il bundle dati, compila se serve,
 serve l'app in locale (`http://localhost:8770`) con un server statico — niente
 dev server, niente websocket. Se il server cade, si riapre e basta.
 
