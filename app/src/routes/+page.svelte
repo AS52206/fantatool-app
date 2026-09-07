@@ -212,6 +212,19 @@
 
 	let mostraSnapshot = $state(false);
 
+	// Tiene la barra tab (col budget) agganciata subito sotto l'header, che può
+	// essere alto 1 o 2 righe a seconda della larghezza.
+	let appbarEl: HTMLElement | undefined = $state();
+	$effect(() => {
+		if (typeof ResizeObserver === 'undefined' || !appbarEl) return;
+		const set = () =>
+			document.documentElement.style.setProperty('--appbar-h', `${appbarEl!.offsetHeight}px`);
+		set();
+		const ro = new ResizeObserver(set);
+		ro.observe(appbarEl);
+		return () => ro.disconnect();
+	});
+
 	function guardiaUscita(e: BeforeUnloadEvent) {
 		if (asta.avviata && !asta.altraSchedaAttiva) {
 			e.preventDefault();
@@ -232,7 +245,7 @@
 <svelte:window onkeydown={scorciatoieGlobali} onbeforeunload={guardiaUscita} />
 
 <div style="max-width:1280px;margin:0 auto;padding:var(--pad);">
-	<header class="appbar">
+	<header class="appbar" bind:this={appbarEl}>
 		<h1 class="brand">
 			<span class="mark"><Logo size={30} /></span> Fantatool <span class="sub">/ asta</span>
 		</h1>
@@ -461,11 +474,25 @@
 			</div>
 		{/if}
 
-		<nav class="tabbar" style="margin-bottom:16px;">
-			{#each TABS as t}
-				<button onclick={() => (tab = t.id)} class:on={tab === t.id}>{t.label}</button>
-			{/each}
-		</nav>
+		<div class="tabrow">
+			<nav class="tabbar">
+				{#each TABS as t}
+					<button onclick={() => (tab = t.id)} class:on={tab === t.id}>{t.label}</button>
+				{/each}
+			</nav>
+			{#if asta.bilanci[asta.miaSquadra]}
+				{@const bm = asta.bilanci[asta.miaSquadra]}
+				{@const slotLiberi = Math.max(0, asta.config.limiti.TOT - bm.g_presi)}
+				<span
+					class="budgetchip"
+					class:neg={bm.c_rimasti < slotLiberi}
+					title="{asta.miaSquadra} · P {bm.perRuolo.P} · D {bm.perRuolo.D} · C {bm.perRuolo.C} · A {bm.perRuolo.A}"
+				>
+					💰 <b>{bm.c_rimasti}</b> cr
+					<span class="budgetchip-sub">{bm.g_presi}/{asta.config.limiti.TOT}{#if slotLiberi}· ~{Math.floor(bm.c_rimasti / slotLiberi)}/slot{/if}</span>
+				</span>
+			{/if}
+		</div>
 
 		<svelte:boundary onerror={(e) => console.error('Errore nella schermata:', e)}>
 			<ViewCorrente />

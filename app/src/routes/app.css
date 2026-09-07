@@ -441,6 +441,48 @@ select:focus {
 }
 
 /* --- barra tab (segmented) --- */
+.tabrow {
+	position: sticky;
+	top: min(calc(var(--appbar-h, 56px) - 1px), 150px);
+	z-index: 20;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-bottom: 16px;
+	padding: 8px 0;
+	background: color-mix(in srgb, var(--bg) 94%, transparent);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+}
+.budgetchip {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 6px;
+	padding: 7px 12px;
+	border-radius: 11px;
+	background: linear-gradient(180deg, var(--panel-3), var(--panel));
+	border: 1px solid color-mix(in srgb, var(--cyan) 30%, var(--border));
+	font: 700 15px/1 var(--mono);
+	color: var(--text-strong);
+	white-space: nowrap;
+}
+.budgetchip b {
+	color: var(--cyan);
+	font-size: 17px;
+}
+.budgetchip.neg {
+	border-color: var(--bad);
+}
+.budgetchip.neg b {
+	color: var(--bad);
+}
+.budgetchip-sub {
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--muted);
+}
 .tabbar {
 	display: inline-flex;
 	gap: 3px;
