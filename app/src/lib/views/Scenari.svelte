@@ -373,10 +373,12 @@
 			</div>
 
 			<table style="width:100%;border-collapse:collapse;font-size:13px;">
-				<thead><tr style="text-align:left;"><th title="Numero progressivo">#</th><th>R</th><th>Giocatore</th><th>Max</th><th>Cons.</th><th title="PMA Fantalab">FL</th><th title="% titolarità">%TIT</th><th>Stato</th><th></th></tr></thead>
+				<thead><tr style="text-align:left;"><th title="Numero progressivo">#</th><th>R</th><th>Giocatore</th><th>Max</th><th title="Quota del budget di lega ({asta.config.budgetMax} cr)">%Bud</th><th>Cons.</th><th title="PMA Fantalab">FL</th><th title="% titolarità">%TIT</th><th>Stato</th><th></th></tr></thead>
 				<tbody>
 					{#each righeTabella as r, i (r.chiave)}
 						{@const tit = r.giocatore?.fc?.expectedTitolarita ?? 0}
+						{@const spesa = r.stato === 'PRESO' ? (r.prezzoEffettivo ?? 0) : r.max}
+						{@const pctBud = asta.config.budgetMax > 0 ? (spesa / asta.config.budgetMax) * 100 : 0}
 						<tr style="border-top:1px solid var(--border);">
 							<td class="mono muted">{i + 1}</td>
 							<td><RoleTag ruolo={r.ruolo} ruoloMantra={r.ruoloMantra} /></td>
@@ -390,6 +392,15 @@
 										onclick={() => asta.setTargetScenario(attivo, r.chiave, r.giocatore!.fantalab!.prezzo_atteso)}>→FL</button>
 								{/if}
 							</td>
+							<td
+								class="mono"
+								style:color={pctBud >= 25
+									? 'var(--bad)'
+									: pctBud >= 15
+										? 'var(--warn)'
+										: 'var(--muted)'}
+								title="{spesa} su {asta.config.budgetMax} cr"
+							>{pctBud ? pctBud.toFixed(1) + '%' : '—'}</td>
 							<td class="mono muted">{r.consigliato ?? '—'}</td>
 							<td class="mono" style="color:var(--warn);">{r.giocatore?.fantalab?.prezzo_atteso ?? '—'}</td>
 							<td class="mono" style:color={tit >= 70 ? 'var(--ok)' : tit >= 45 ? 'var(--warn)' : tit > 0 ? 'var(--bad)' : 'var(--muted)'}>{tit ? Math.round(tit) + '%' : '—'}</td>
