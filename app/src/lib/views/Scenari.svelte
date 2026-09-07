@@ -333,6 +333,13 @@
 							</button>
 						{/each}
 					</div>
+					{#if asta.isMantra && ricambi.every((p) => p.mancanti === 0) && totalePiano < asta.config.limiti.TOT}
+						<div class="muted" style="font-size:11px;margin-top:6px;border-top:1px solid var(--border);padding-top:5px;">
+							Tutti i profili coperti con <b>{totalePiano}</b> giocatori (diversi sono polivalenti e
+							contano su più profili). Restano <b>{asta.config.limiti.TOT - totalePiano}</b> slot
+							che nessun ruolo richiede: riserve extra o scommesse.
+						</div>
+					{/if}
 				</div>
 			</div>
 		</div>
