@@ -133,11 +133,22 @@
 										class="riserve"
 										title={'Riserve: ' +
 											s.riserve
-												.map((r) => r.nome + (r.titolarita ? ` ${Math.round(r.titolarita)}%` : ''))
+												.map(
+													(r) =>
+														r.nome +
+														(r.ruolo ? ` (${r.ruolo})` : '') +
+														(r.titolarita ? ` ${Math.round(r.titolarita)}%` : '')
+												)
 												.join(' · ')}
 									>
 										{#each s.riserve.slice(0, 4) as r, ri}
-											<span class="ris" style="z-index:{20 - ri};" title={r.nome}>
+											<span
+												class="ris"
+												style="z-index:{20 - ri};"
+												title={r.nome +
+													(r.ruolo ? ` — ${r.ruolo}` : '') +
+													(r.titolarita ? ` · ${Math.round(r.titolarita)}%` : '')}
+											>
 												<Jersey club={r.club} size={26} />
 											</span>
 										{/each}
