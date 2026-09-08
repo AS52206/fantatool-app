@@ -2,23 +2,21 @@
 
 Strumento d'asta per il fantacalcio (Classic e Mantra), riscritto da Streamlit
 a una **web-app locale**: tutto lo stato vive nel browser e viene salvato a ogni
-azione, quindi un crash o un refresh riaprono l'asta esattamente dov'era.
+azione. Il recupero dipende dal salvataggio riuscito e dallo stesso browser/profilo.
 
 ## Avvio rapido (Mac)
 
-Doppio click su **`Fantatool.app`** sul Desktop (o su **`app/asta-stabile.command`**).
-Rigenera i dati, compila l'app se serve, la serve **come file statici** su
-`http://localhost:8770` e apre Brave/Chrome. Nessun server di sviluppo, nessun
-watcher, nessun websocket: il runtime dell'asta è solo file su disco.
+Prima dell'asta esegui **`app/aggiorna-asta.command`**: rigenera dati e immagini,
+installa le dipendenze dal lockfile, esegue controlli e test e prepara la build.
+Richiede Node.js/npm e Python 3 con `pandas` e `openpyxl`; gli errori interrompono
+la preparazione e restano visibili. Chiudi prima il server locale.
 
-Ogni ricarica (Cmd+Shift+R) prende sempre l'ultima build dal server locale —
-nessuna cache che ti blocca su una versione vecchia.
-
-La prima volta serve **Node.js**:
-
-```bash
-brew install node
-```
+Il giorno dell'asta apri **`Fantatool.app`** sul Desktop (se collegata al launcher)
+o **`app/asta-stabile.command`**. Avvia solo la build già pronta su
+`http://localhost:8770`: nessuna conversione, installazione o compilazione.
+Se manca la build o la porta è occupata, si ferma con un messaggio; non arresta
+altri processi. Il browser si apre solo quando il server è pronto.
+Usa sempre lo stesso browser/profilo e indirizzo per ritrovare il salvataggio locale.
 
 ## Sviluppo
 
@@ -39,8 +37,9 @@ app/                 web-app SvelteKit (SPA statica, local-first)
   src/lib/stores/    stato asta + autosave
   src/routes/        interfaccia
   static/data/       bundle giocatori generati (JSON)
-  asta-stabile.command  launcher Mac (build statica + server, no-cache)
-  serve.mjs             server statico Node alternativo (npm run serve)
+  asta-stabile.command  launcher Mac della build già pronta
+  aggiorna-asta.command preparazione dati, controlli e build prima dell’asta
+  serve.mjs             server statico Node (anche npm run serve)
 tools/               script Python: conversione dati + generazione casi di test
 data/<stagione>/     file sorgente (listone .xlsx, fantacrediti .xlsx, fantalab .json)
 ```

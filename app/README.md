@@ -1,7 +1,7 @@
 # Fantatool — App asta (Svelte SPA local-first)
 
 Riscrittura del tool d'asta per eliminare i crash di Streamlit durante l'asta live.
-Stato in `localStorage` con autosave a ogni azione: un crash/refresh riapre dov'eri.
+Stato in `localStorage` con autosave a ogni azione. Il recupero richiede un salvataggio riuscito e lo stesso browser/profilo e indirizzo; conserva anche un backup esterno.
 
 ## Sviluppo
 ```
@@ -29,9 +29,16 @@ cd app && npm run build   # -> app/build/ , servibile da qualunque static server
 ```
 
 ## Avvio rapido (Mac)
-Doppio click su `Fantatool.app` (Desktop) o `app/asta-stabile.command`: rigenera il bundle dati, compila se serve,
-serve l'app in locale (`http://localhost:8770`) con un server statico — niente
-dev server, niente websocket. Se il server cade, si riapre e basta.
+Prima dell'asta: doppio click su `app/aggiorna-asta.command`. Rigenera i quattro
+bundle e le immagini, esegue `npm ci`, controlli, test e build. Richiede Node.js/npm
+e Python 3 con pandas/openpyxl. Ogni errore interrompe la preparazione ed è visibile.
+Chiudi il server dell'asta prima di aggiornare: la preparazione rifiuta la porta 8770 occupata.
+
+Durante l'asta: doppio click su `app/asta-stabile.command` (o sul collegamento
+Desktop già configurato). Serve esclusivamente `app/build/` su `http://localhost:8770`.
+Non aggiorna dati, installa dipendenze o compila. Build mancante e porta occupata
+producono un errore chiaro, senza terminare processi esistenti. Il browser predefinito
+si apre solo dopo l'avvio riuscito; usa sempre il browser/profilo della tua asta.
 
 ## Stato del porting
 - [x] Motore prezzo (`calcola_prezzo_consigliato_avanzato`, inflazione ruolo/globale, flag) — 55 test di parità

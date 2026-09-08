@@ -49,6 +49,8 @@ export interface Bundle {
 
 /** Un acquisto registrato durante l'asta. */
 export interface Acquisto {
+	/** Stable owner identity; optional only for legacy imports. */
+	proprietarioId?: string;
 	giocatoreId: number;
 	nome: string;
 	nomePuro: string;
@@ -61,6 +63,7 @@ export interface Acquisto {
 }
 
 export interface Squadra {
+	id?: string;
 	nome: string;
 	isMia: boolean;
 	/** Chiave stemma scelta manualmente (override); altrimenti si abbina per nome. */

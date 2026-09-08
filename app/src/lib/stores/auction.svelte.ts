@@ -1,3 +1,5 @@
+import { identifyTeams } from '../persistence/teams';
+import { WriterLock } from '../persistence/writerLock';
 /**
  * Stato centrale dell'asta — local-first.
  * Ogni mutazione persiste immediatamente su localStorage (sincrono, nessun
@@ -28,7 +30,8 @@ import {
 	type BilancioRivale,
 	type LiberoLite
 } from '../engine/decision';
-import { ottimizzaFinaleAsta } from '../engine/endgame';
+import { ottimizzaFinaleAsta, type OttimizzaInput, type OttimizzaResult } from '../engine/endgame';
+import { EndgameClient } from '../engine/endgameClient';
 import {
 	analizzaFragilitaModulo,
 	analizzaRosaMantra,
@@ -113,12 +116,8 @@ const LIMITI_MANTRA_DEFAULT: LimitiRuoli = { P: 3, D: 11, C: 8, A: 8, TOT: 30 };
 
 function leggiChiave(chiave: string): Snapshot | null {
 	if (typeof localStorage === 'undefined') return null;
-	try {
-		const raw = localStorage.getItem(chiave);
-		return raw ? (JSON.parse(raw) as Snapshot) : null;
-	} catch {
-		return null;
-	}
+	const raw = localStorage.getItem(chiave);
+	return raw ? (JSON.parse(raw) as Snapshot) : null;
 }
 
 /** Snapshot per una modalità: chiave dedicata, con migrazione dal vecchio unico. */
@@ -129,12 +128,6 @@ function caricaMod(modalita: string): Snapshot | null {
 	// migrazione una tantum dal salvataggio unico legacy
 	const legacy = leggiChiave(CHIAVE_LEGACY);
 	if (legacy && normModalita(legacy.config?.modalita ?? 'classic') === m) {
-		try {
-			localStorage.setItem(chiaveMod(m), JSON.stringify(legacy));
-			localStorage.removeItem(CHIAVE_LEGACY);
-		} catch {
-			/* ignora */
-		}
 		return legacy;
 	}
 	return null;
@@ -142,11 +135,11 @@ function caricaMod(modalita: string): Snapshot | null {
 
 function modalitaAttiva(): string {
 	if (typeof localStorage === 'undefined') return 'classic';
-	const salvata = localStorage.getItem(CHIAVE_ATTIVA);
+	let salvata: string | null = null;
+	try { salvata = localStorage.getItem(CHIAVE_ATTIVA); } catch { return 'classic'; }
 	if (salvata && MODI.includes(salvata as (typeof MODI)[number])) return salvata;
 	// se esiste solo il legacy, parti dalla sua modalità
-	const legacy = leggiChiave(CHIAVE_LEGACY);
-	return normModalita(legacy?.config?.modalita ?? 'classic');
+	try { return normModalita(leggiChiave(CHIAVE_LEGACY)?.config?.modalita ?? 'classic'); } catch { return 'classic'; }
 }
 
 export class Asta {
@@ -162,7 +155,15 @@ export class Asta {
 	/** Messaggio d'errore se l'ultima scrittura su localStorage è fallita (quota/privato). */
 	erroreSalvataggio = $state<string | null>(null);
 	/** true se un'altra scheda ha modificato la stessa asta: questa è ormai disallineata. */
-	altraSchedaAttiva = $state(false);
+	altraSchedaAttiva = $state(true);
+	recuperoNecessario = $state(false);
+	private writer = new WriterLock();
+	private disposeEffects?: () => void;
+	private storageListener?: (e: StorageEvent) => void;
+	private lastSaved = "";
+	/** Ultimo risultato endgame (calcolato in worker); null = usa il ripiego sincrono. */
+	private chiusuraStato = $state<OttimizzaResult | null>(null);
+	private endgameClient: EndgameClient | null = null;
 
 	/** true durante il caricamento/switch: sospende l'autosave. */
 	private caricando = false;
@@ -170,18 +171,17 @@ export class Asta {
 	/** Cronologia acquisti per annulla/ripeti (solo sessione, non persistita). */
 	private storiaUndo = $state<Acquisto[][]>([]);
 	private storiaRedo = $state<Acquisto[][]>([]);
-	/** Ultimo numero di acquisti salvato nel ring di backup. */
-	private ultimoRingN = -1;
+	/** Ultimo contenuto salvato nel ring di backup. */
+	private ultimoRingN = "";
 
 	constructor() {
 		const m = modalitaAttiva();
-		this.applicaSnapshot(caricaMod(m), m);
-		if (typeof localStorage !== 'undefined') localStorage.setItem(CHIAVE_ATTIVA, m);
+		try { this.applicaSnapshot(caricaMod(m), m); }
+		catch (e) { this.recuperoNecessario = true; this.erroreSalvataggio = `Salvataggio non leggibile: ripristina un backup. ${String(e)}`; }
 
 		// autosave: ogni cambiamento persiste nella chiave della modalità attiva.
-		$effect.root(() => {
+		this.disposeEffects = $effect.root(() => {
 			$effect(() => {
-				const chiave = chiaveMod(this.config.modalita);
 				const snap: Snapshot = {
 					config: this.config,
 					acquisti: this.acquisti,
@@ -190,45 +190,111 @@ export class Asta {
 					scenariModulo: this.scenariModulo,
 					codaChiamate: this.codaChiamate
 				};
-				if (this.caricando) return;
-				try {
-					localStorage.setItem(chiave, JSON.stringify(snap));
-					this.ultimoSalvataggio = Date.now();
-					this.erroreSalvataggio = null;
-					this.aggiornaRing(snap);
-				} catch (e) {
-					// quota piena o storage non disponibile: la UI mostra l'avviso rosso
-					this.erroreSalvataggio =
-						e instanceof Error && /quota/i.test(e.name + e.message)
-							? 'Spazio locale esaurito: esporta subito un backup.'
-							: 'Salvataggio locale non riuscito: esporta subito un backup.';
+				if (this.caricando || this.altraSchedaAttiva) return;
+				this.persisti(snap);
+			});
+
+			// endgame: quando si avvicina la chiusura, la beam search gira nel worker.
+			$effect(() => {
+				const input = this.chiusuraInput; // traccia le dipendenze reattive
+				const vuoti = Math.max(0, Math.trunc(input.slotVuoti));
+				const soglia = input.sogliaAttivazione ?? 10;
+				if (vuoti === 0 || vuoti > soglia || input.budgetResiduo < vuoti || typeof Worker === 'undefined') {
+					this.chiusuraStato = ottimizzaFinaleAsta(input); // ripiego sincrono, qui è economico
+					return;
 				}
+				(this.endgameClient ??= new EndgameClient()).compute(
+					input,
+					(r) => (this.chiusuraStato = r),
+					() => {
+						try {
+							this.chiusuraStato = ottimizzaFinaleAsta(input);
+						} catch {
+							/* tieni l'ultimo risultato valido */
+						}
+					}
+				);
 			});
 		});
 
 		// Un'altra scheda che scrive sulla stessa asta rende questa disallineata:
 		// l'evento `storage` scatta solo nelle altre schede, mai in quella che scrive.
 		if (typeof window !== 'undefined') {
-			window.addEventListener('storage', (e) => {
+			this.storageListener = (e) => {
 				if (this.caricando) return;
-				if (e.key === chiaveMod(this.config.modalita) || e.key === CHIAVE_ATTIVA)
+				if (e.key === chiaveMod(this.config.modalita) && !this.altraSchedaAttiva) {
+					// Also stop on writes from an older app that does not honor Web Locks.
 					this.altraSchedaAttiva = true;
-			});
+					this.writer.dispose();
+				}
+			};
+			window.addEventListener('storage', this.storageListener);
 		}
 	}
 
-	/** Ricarica lo stato dell'asta corrente da localStorage (dopo modifica da altra scheda). */
+	async attivaScrittura() {
+		if (typeof navigator === 'undefined' || !navigator.locks) {
+			this.erroreSalvataggio = 'Questo browser non supporta la protezione dell’asta. Apri Chrome o Brave aggiornato.';
+			return;
+		}
+		try {
+			await this.writer.acquire(navigator.locks, () => {
+				const m = modalitaAttiva();
+				try { this.applicaSnapshot(caricaMod(m), m); this.recuperoNecessario = false; }
+				catch (e) { this.recuperoNecessario = true; this.erroreSalvataggio = `Salvataggio non leggibile: ripristina un backup. ${String(e)}`; }
+				this.altraSchedaAttiva = false;
+				this.salvaCorrente();
+			});
+		} catch (e) { this.erroreSalvataggio = String(e); }
+	}
+
+	dispose() {
+		this.altraSchedaAttiva = true;
+		this.writer.dispose();
+		this.disposeEffects?.();
+		this.endgameClient?.dispose();
+		this.endgameClient = null;
+		if (this.storageListener && typeof window !== 'undefined') window.removeEventListener('storage', this.storageListener);
+	}
+
+	private verificaScrittura(ripristino = false) {
+		if (this.recuperoNecessario && !ripristino) throw new Error("Ripristina un backup prima di modificare l’asta.");
+		if (this.altraSchedaAttiva) throw new Error('Questa scheda è di sola lettura. Attiva qui l’asta dopo aver chiuso l’altra scheda.');
+	}
+
 	ricaricaDaStorage() {
-		const m = normModalita(this.config.modalita);
-		this.caricando = true;
-		this.applicaSnapshot(caricaMod(m), m);
-		this.caricando = false;
-		this.altraSchedaAttiva = false;
+		if (!this.altraSchedaAttiva) return;
+		this.applicaSnapshot(caricaMod(this.config.modalita), this.config.modalita);
+	}
+
+	private snapshot(): Snapshot {
+		return { config: this.config, acquisti: this.acquisti, avviata: this.avviata,
+			scenari: this.scenari, scenariModulo: this.scenariModulo, codaChiamate: this.codaChiamate };
+	}
+
+	private persisti(snap: Snapshot) {
+		if (this.altraSchedaAttiva || this.recuperoNecessario) return;
+		try {
+			const json = JSON.stringify(snap);
+			const key = chiaveMod(snap.config.modalita);
+			if (this.lastSaved !== key + json) {
+				localStorage.setItem(key, json);
+				this.lastSaved = key + json;
+				this.ultimoSalvataggio = Date.now();
+				this.aggiornaRing(snap);
+			}
+			localStorage.setItem(CHIAVE_ATTIVA, normModalita(snap.config.modalita));
+			this.erroreSalvataggio = null;
+		} catch {
+			this.erroreSalvataggio = 'Salvataggio nel browser non riuscito: scarica subito un backup.';
+		}
 	}
 
 	/** Carica uno snapshot (o i default) nello store, forzando la modalità. */
 	private applicaSnapshot(s: Snapshot | null, modalita: string) {
 		const m = normModalita(modalita);
+		if (s) this.validaSnapshot(s);
+		const identified = identifyTeams(s?.config.squadre ?? structuredClone(CONFIG_DEFAULT.squadre), s?.acquisti ?? []);
 		this.config = {
 			...structuredClone(CONFIG_DEFAULT),
 			// asta Mantra nuova: parte da 3 portieri + 27 di movimento
@@ -240,14 +306,16 @@ export class Asta {
 		if (!Array.isArray(this.config.moduliTarget) || !this.config.moduliTarget.length)
 			this.config.moduliTarget = ['3-4-1-2'];
 		this.ricalcolaTot();
-		this.acquisti = s?.acquisti ?? [];
+		this.config.squadre = identified.squadre;
+		this.acquisti = identified.acquisti;
+		this.lastSaved = "";
 		this.avviata = s?.avviata ?? false;
 		this.scenari = s?.scenari ?? {};
 		this.scenariModulo = s?.scenariModulo ?? {};
 		this.codaChiamate = s?.codaChiamate ?? [];
 		this.storiaUndo = [];
 		this.storiaRedo = [];
-		this.ultimoRingN = -1;
+		this.ultimoRingN = "";
 	}
 
 	// ------------------------------------------------- annulla / ripeti
@@ -265,26 +333,28 @@ export class Asta {
 		return this.storiaRedo.length > 0;
 	}
 	annulla() {
+		this.verificaScrittura();
 		const prev = this.storiaUndo.at(-1);
 		if (!prev) return;
 		this.storiaRedo = [...this.storiaRedo, this.acquisti.map((a) => ({ ...a }))];
 		this.storiaUndo = this.storiaUndo.slice(0, -1);
-		this.acquisti = prev;
+		this.acquisti = identifyTeams(this.config.squadre, prev).acquisti;
 	}
 	ripeti() {
+		this.verificaScrittura();
 		const next = this.storiaRedo.at(-1);
 		if (!next) return;
 		this.storiaUndo = [...this.storiaUndo, this.acquisti.map((a) => ({ ...a }))];
 		this.storiaRedo = this.storiaRedo.slice(0, -1);
-		this.acquisti = next;
+		this.acquisti = identifyTeams(this.config.squadre, next).acquisti;
 	}
 
 	// ------------------------------------------------- ring di backup automatico
 	private aggiornaRing(snap: Snapshot) {
 		if (typeof localStorage === 'undefined' || !snap.avviata) return;
 		const n = snap.acquisti.length;
-		if (n === this.ultimoRingN) return;
-		this.ultimoRingN = n;
+		const fingerprint = JSON.stringify(snap);
+		if (fingerprint === this.ultimoRingN) return;
 		const k = chiaveRing(this.config.modalita);
 		let ring: RingItem[] = [];
 		try {
@@ -295,6 +365,7 @@ export class Asta {
 		ring.push({ t: Date.now(), n, snap: JSON.parse(JSON.stringify(snap)) });
 		try {
 			localStorage.setItem(k, JSON.stringify(ring.slice(-MAX_RING)));
+			this.ultimoRingN = fingerprint;
 		} catch {
 			/* quota piena: salta */
 		}
@@ -313,6 +384,7 @@ export class Asta {
 		}
 	}
 	ripristinaDaBackup(t: number) {
+		this.verificaScrittura();
 		if (typeof localStorage === 'undefined') return;
 		let ring: RingItem[] = [];
 		try {
@@ -324,41 +396,29 @@ export class Asta {
 		if (!item) return;
 		const prima = this.acquisti.map((a) => ({ ...a }));
 		this.caricando = true;
-		this.applicaSnapshot(item.snap, this.config.modalita);
-		this.caricando = false;
+		try { this.applicaSnapshot(item.snap, this.config.modalita); }
+		finally { this.caricando = false; }
 		this.storiaUndo = [prima];
 		this.storiaRedo = [];
 		this.salvaCorrente();
 	}
 
 	private salvaCorrente() {
-		if (typeof localStorage === 'undefined') return;
-		try {
-			localStorage.setItem(
-				chiaveMod(this.config.modalita),
-				JSON.stringify({
-					config: this.config,
-					acquisti: this.acquisti,
-					avviata: this.avviata,
-					scenari: this.scenari,
-					scenariModulo: this.scenariModulo,
-					codaChiamate: this.codaChiamate
-				})
-			);
-		} catch {
-			/* ignora */
-		}
+		this.persisti(this.snapshot());
 	}
 
 	/** Passa a Classic/Mantra: salva l'asta corrente e carica quella dell'altra modalità. */
 	cambiaModalita(nuova: string) {
+		this.verificaScrittura();
 		const m = normModalita(nuova);
 		if (m === normModalita(this.config.modalita)) return;
-		this.caricando = true;
 		this.salvaCorrente();
-		this.applicaSnapshot(caricaMod(m), m);
-		if (typeof localStorage !== 'undefined') localStorage.setItem(CHIAVE_ATTIVA, m);
-		this.caricando = false;
+		if (this.erroreSalvataggio) throw new Error('Prima di cambiare asta, scarica un backup: il salvataggio nel browser non è riuscito.');
+		const next = caricaMod(m);
+		if (next) this.validaSnapshot(next);
+		this.caricando = true;
+		try { this.applicaSnapshot(next, m); }
+		finally { this.caricando = false; }
 		this.salvaCorrente();
 	}
 
@@ -376,6 +436,7 @@ export class Asta {
 
 	/** Imposta gli slot di un reparto (Classic) e ricalcola il totale rosa. */
 	setSlotRuolo(ruolo: Ruolo, valore: number) {
+		this.verificaScrittura();
 		this.config.limiti[ruolo] = Math.max(0, Math.round(valore) || 0);
 		this.ricalcolaTot();
 	}
@@ -383,11 +444,37 @@ export class Asta {
 	/** Rosa Mantra: portieri + giocatori di movimento (il movimento è ripartito
 	 *  in D/C/A solo per le viste per reparto; l'incastro usa i ruoli Mantra). */
 	setSlotMantra(portieri: number, movimento: number) {
+		this.verificaScrittura();
 		const p = Math.max(1, Math.round(portieri) || 3);
 		const m = Math.max(3, Math.round(movimento) || 27);
 		const d = Math.round(m * 0.42);
 		const c = Math.round(m * 0.31);
 		this.config.limiti = { P: p, D: d, C: c, A: m - d - c, TOT: p + m };
+	}
+
+	setNumeroSquadre(n: number) {
+		this.verificaScrittura();
+		const size = Math.max(2, Math.min(20, Math.round(n) || 2));
+		if (this.config.squadre.slice(size).some((s) => this.acquisti.some((a) => a.proprietarioId === s.id)))
+			throw new Error('Non puoi eliminare una squadra con acquisti.');
+		const teams = this.config.squadre.slice(0, size);
+		while (teams.length < size) {
+			let n = teams.length + 1;
+			while (teams.some((s) => s.nome === `Squadra ${n}`)) n++;
+			teams.push({ id: crypto.randomUUID(), nome: `Squadra ${n}`, isMia: false });
+		}
+		if (!teams.some((s) => s.isMia)) teams[0].isMia = true;
+		this.config.squadre = teams;
+	}
+
+	rinominaSquadra(index: number, name: string) {
+		this.verificaScrittura();
+		const teams = this.config.squadre.map((s, i) => ({ ...s, nome: i === index ? name.trim() : s.nome }));
+		const next = identifyTeams(teams, this.acquisti);
+		this.config.squadre = next.squadre;
+		this.acquisti = next.acquisti;
+		this.storiaUndo = this.storiaUndo.map((a) => identifyTeams(teams, a).acquisti);
+		this.storiaRedo = this.storiaRedo.map((a) => identifyTeams(teams, a).acquisti);
 	}
 
 	get squadreNomi(): string[] {
@@ -829,44 +916,49 @@ export class Asta {
 		});
 	}
 
-	/**
-	 * Percorsi di chiusura rosa (endgame). Attivo negli ultimi ~10 slot.
-	 * prezzo teorico = PMA -> PFC -> quotazione; punteggio = FVM -> FM attesa*10 -> quotazione.
-	 */
-	get chiusuraFinale() {
+	/** Input per l'endgame — parte "leggera" (mapping candidati), senza beam search. */
+	private get chiusuraInput(): OttimizzaInput {
 		const presi = this.giocatoreIdPresi;
 		const b = this.bilanciCompleti[this.miaSquadra];
-		const candidati = this.giocatori
-			.filter((g) => !presi.has(g.id) && g.ruolo)
-			.map((g) => ({
-				chiave: String(g.id),
-				nome: g.nome,
-				ruolo: g.ruolo,
-				prezzo: g.fc?.pma || g.fc?.pfc || g.quotazione || 1,
-				punteggio: g.fvm || (g.fc?.expectedFantamedia ?? 0) * 10 || g.quotazione || 0,
-				fonte_prezzo: g.fc?.pma ? 'PMA' : g.fc?.pfc ? 'PFC' : 'QUOTAZIONE'
-			}));
-		const rosaMantra = this.isMantra ? this.rosaMantraInput(this.miaSquadra) : undefined;
-		return ottimizzaFinaleAsta({
-			candidati: this.isMantra
-				? this.giocatori
-						.filter((g) => !presi.has(g.id) && g.ruoloMantra)
-						.map((g) => ({
-							chiave: String(g.id),
-							nome: g.nome,
-							ruoli_mantra: g.ruoloMantra,
-							prezzo: g.fc?.pma || g.fc?.pfc || g.quotazione || 1,
-							punteggio: g.fvm || (g.fc?.expectedFantamedia ?? 0) * 10 || g.quotazione || 0
-						}))
-				: candidati,
+		const candidati = this.isMantra
+			? this.giocatori
+					.filter((g) => !presi.has(g.id) && g.ruoloMantra)
+					.map((g) => ({
+						chiave: String(g.id),
+						nome: g.nome,
+						ruoli_mantra: g.ruoloMantra,
+						prezzo: g.fc?.pma || g.fc?.pfc || g.quotazione || 1,
+						punteggio: g.fvm || (g.fc?.expectedFantamedia ?? 0) * 10 || g.quotazione || 0
+					}))
+			: this.giocatori
+					.filter((g) => !presi.has(g.id) && g.ruolo)
+					.map((g) => ({
+						chiave: String(g.id),
+						nome: g.nome,
+						ruolo: g.ruolo,
+						prezzo: g.fc?.pma || g.fc?.pfc || g.quotazione || 1,
+						punteggio: g.fvm || (g.fc?.expectedFantamedia ?? 0) * 10 || g.quotazione || 0,
+						fonte_prezzo: g.fc?.pma ? 'PMA' : g.fc?.pfc ? 'PFC' : 'QUOTAZIONE'
+					}));
+		return {
+			candidati,
 			budgetResiduo: b.c_rimasti ?? 0,
 			slotVuoti: b.slot_vuoti ?? 0,
 			modalita: this.config.modalita,
 			conteggiRuolo: b.perRuolo,
 			limitiRuolo: this.config.limiti,
-			rosaMantra,
+			rosaMantra: this.isMantra ? this.rosaMantraInput(this.miaSquadra) : undefined,
 			moduliTarget: this.isMantra ? this.moduliTargetValidi : undefined
-		});
+		};
+	}
+
+	/**
+	 * Percorsi di chiusura rosa (endgame). La beam search (~0.4s con 10 slot) gira
+	 * in un Web Worker: qui si legge l'ultimo risultato, con calcolo sincrono come
+	 * ripiego iniziale o se il worker non è disponibile.
+	 */
+	get chiusuraFinale(): OttimizzaResult {
+		return this.chiusuraStato ?? ottimizzaFinaleAsta(this.chiusuraInput);
 	}
 
 	/** Allarmi di chiusura per la mia squadra. */
@@ -896,7 +988,11 @@ export class Asta {
 	}
 
 	assegna(g: Giocatore, prezzo: number, proprietario: string) {
+		this.verificaScrittura();
 		if (this.giocatoreIdPresi.has(g.id)) throw new Error(`${g.nome} è già stato assegnato`);
+		if (!Number.isFinite(prezzo) || prezzo < 1) throw new Error('Prezzo non valido.');
+		const team = this.config.squadre.find((s) => s.nome === proprietario);
+		if (!team) throw new Error('Squadra non valida.');
 		this.registra();
 		const ordine = this.acquisti.reduce((m, a) => Math.max(m, a.ordine), 0) + 1;
 		this.acquisti = [
@@ -909,6 +1005,7 @@ export class Asta {
 				squadraSerieA: g.squadra,
 				prezzo: Math.max(1, Math.round(prezzo)),
 				proprietario,
+				proprietarioId: team.id,
 				ordine,
 				timestamp: Date.now()
 			}
@@ -924,6 +1021,7 @@ export class Asta {
 	}
 
 	rimuovi(giocatoreId: number) {
+		this.verificaScrittura();
 		if (!this.acquisti.some((a) => a.giocatoreId === giocatoreId)) return;
 		this.registra();
 		this.acquisti = this.acquisti.filter((a) => a.giocatoreId !== giocatoreId);
@@ -931,12 +1029,15 @@ export class Asta {
 
 	// ------------------------------------------------- coda chiamate
 	aggiungiCoda(id: number) {
+		this.verificaScrittura();
 		if (!this.codaChiamate.includes(id)) this.codaChiamate = [...this.codaChiamate, id];
 	}
 	rimuoviCoda(id: number) {
+		this.verificaScrittura();
 		this.codaChiamate = this.codaChiamate.filter((x) => x !== id);
 	}
 	svuotaCoda() {
+		this.verificaScrittura();
 		this.codaChiamate = [];
 	}
 	inCoda(id: number): boolean {
@@ -954,13 +1055,12 @@ export class Asta {
 
 	/** Backup completo: entrambe le aste (Classic + Mantra) in un solo file. */
 	esporta(): string {
-		this.salvaCorrente();
 		return JSON.stringify(
 			{
 				fantatool: 'asta',
 				attiva: normModalita(this.config.modalita),
-				classic: leggiChiave(chiaveMod('classic')),
-				mantra: leggiChiave(chiaveMod('mantra')),
+				classic: this.config.modalita === 'classic' ? this.snapshot() : leggiChiave(chiaveMod('classic')),
+				mantra: this.config.modalita === 'mantra' ? this.snapshot() : leggiChiave(chiaveMod('mantra')),
 				esportato: new Date().toISOString()
 			},
 			null,
@@ -968,36 +1068,50 @@ export class Asta {
 		);
 	}
 
-	importa(json: string) {
-		const raw = JSON.parse(json);
-		if (raw && (raw.classic !== undefined || raw.mantra !== undefined)) {
-			// backup completo: ripristina entrambe le modalità
-			this.caricando = true;
-			for (const m of MODI) {
-				const snap = raw[m] as Snapshot | null;
-				if (snap && typeof localStorage !== 'undefined')
-					localStorage.setItem(chiaveMod(m), JSON.stringify(snap));
-			}
-			const attiva = normModalita(raw.attiva ?? this.config.modalita);
-			this.applicaSnapshot(caricaMod(attiva), attiva);
-			if (typeof localStorage !== 'undefined') localStorage.setItem(CHIAVE_ATTIVA, attiva);
-			this.caricando = false;
-			return;
+	private validaSnapshot(s: Snapshot) {
+		if (!s?.config || !Array.isArray(s.config.squadre) || !s.config.squadre.length ||
+			!s.config.limiti || !Array.isArray(s.acquisti) || !Number.isFinite(s.config.budgetMax) || s.config.budgetMax < 1)
+			throw new Error('Backup non valido.');
+		const ids = new Set<number>();
+		for (const a of s.acquisti) {
+			if (!Number.isFinite(a.giocatoreId) || ids.has(a.giocatoreId) || !Number.isFinite(a.prezzo) || a.prezzo < 1)
+				throw new Error('Backup con acquisti duplicati o prezzi non validi.');
+			ids.add(a.giocatoreId);
 		}
-		// file a singola modalità (vecchio formato): entra solo in quella modalità
-		const s = raw as Snapshot;
-		if (!s.config || !Array.isArray(s.acquisti)) throw new Error('File non valido');
-		const m = normModalita(s.config.modalita ?? this.config.modalita);
+		identifyTeams(s.config.squadre, s.acquisti);
+	}
+
+	importa(json: string) {
+		this.verificaScrittura(true);
+		const raw = JSON.parse(json);
+		const multi = raw && (raw.classic !== undefined || raw.mantra !== undefined);
+		const attiva = normModalita(multi ? raw.attiva ?? this.config.modalita : raw?.config?.modalita ?? this.config.modalita);
+		const snapshots: Partial<Record<'classic' | 'mantra', Snapshot>> = {};
+		if (multi) {
+			for (const m of MODI) if (raw[m]) snapshots[m] = raw[m];
+		} else snapshots[attiva] = raw;
+		if (!Object.keys(snapshots).length) throw new Error('Backup vuoto.');
+		for (const snap of Object.values(snapshots)) this.validaSnapshot(snap);
+		// Keep an independent recovery copy before a multi-key restore. Validate first.
+		const previous = MODI.map((m) => [chiaveMod(m), localStorage.getItem(chiaveMod(m))] as const);
+		localStorage.setItem('fantatool.pre-import.v1', this.recuperoNecessario ? JSON.stringify(previous) : this.esporta());
 		this.caricando = true;
-		this.applicaSnapshot(s, m);
-		this.avviata = s.avviata ?? this.acquisti.length > 0;
-		if (typeof localStorage !== 'undefined') localStorage.setItem(CHIAVE_ATTIVA, m);
-		this.caricando = false;
+		try {
+			for (const m of MODI) if (snapshots[m]) localStorage.setItem(chiaveMod(m), JSON.stringify(snapshots[m]));
+			this.applicaSnapshot(snapshots[attiva] ?? caricaMod(attiva), attiva);
+			this.recuperoNecessario = false;
+		} catch (error) {
+			for (const [key, value] of previous) {
+				try { if (value === null) localStorage.removeItem(key); else localStorage.setItem(key, value); } catch { /* pre-import copy retained */ }
+			}
+			throw error;
+		} finally { this.caricando = false; }
 		this.salvaCorrente();
 	}
 
 	/** Azzera SOLO l'asta della modalità corrente. */
 	reset() {
+		this.verificaScrittura();
 		const m = normModalita(this.config.modalita);
 		this.applicaSnapshot(null, m);
 	}
@@ -1007,6 +1121,7 @@ export class Asta {
 	 * le squadre partecipanti dai proprietari e popola gli acquisti.
 	 */
 	applicaImportRose(squadre: string[], acquisti: Acquisto[]) {
+		this.verificaScrittura();
 		const esistenti = new Map(
 			this.config.squadre.map((s) => [s.nome, { stemma: s.stemma, colore: s.colore }] as const)
 		);
@@ -1019,12 +1134,14 @@ export class Asta {
 		}));
 		if (nuove.length && !nuove.some((s) => s.isMia)) nuove[0].isMia = true;
 		this.config.squadre = nuove.length ? nuove : this.config.squadre;
-		this.acquisti = acquisti;
+		const identified = identifyTeams(this.config.squadre, acquisti.map((a) => ({ ...a, proprietarioId: undefined })));
+		this.config.squadre = identified.squadre;
+		this.acquisti = identified.acquisti;
 		this.avviata = true;
 		this.codaChiamate = [];
 		this.storiaUndo = [];
 		this.storiaRedo = [];
-		this.ultimoRingN = -1;
+		this.ultimoRingN = "";
 	}
 
 	// ---------------------------------------------------------------- SCENARI
@@ -1033,6 +1150,7 @@ export class Asta {
 	}
 
 	nuovoScenario(nome?: string): string {
+		this.verificaScrittura();
 		const base = nome?.trim() || `Piano ${Object.keys(this.scenari).length + 1}`;
 		let n = base;
 		let i = 2;
@@ -1042,6 +1160,7 @@ export class Asta {
 	}
 
 	eliminaScenario(nome: string) {
+		this.verificaScrittura();
 		const { [nome]: _, ...resto } = this.scenari;
 		this.scenari = resto;
 		const { [nome]: _m, ...restoMod } = this.scenariModulo;
@@ -1055,6 +1174,7 @@ export class Asta {
 
 	/** Imposta il modulo di UN piano, senza toccare gli altri. */
 	setModuloScenario(nome: string, modulo: string) {
+		this.verificaScrittura();
 		if (!nome) return;
 		this.scenariModulo = { ...this.scenariModulo, [nome]: modulo };
 	}
@@ -1076,6 +1196,7 @@ export class Asta {
 
 	/** Importa piani da file: li unisce a quelli esistenti (sovrascrive per nome). */
 	importaScenari(json: string): number {
+		this.verificaScrittura();
 		const raw = JSON.parse(json);
 		const src =
 			raw && typeof raw === 'object' && raw.scenari && typeof raw.scenari === 'object'
@@ -1106,6 +1227,7 @@ export class Asta {
 	}
 
 	rinominaScenario(vecchio: string, nuovo: string) {
+		this.verificaScrittura();
 		const nome = nuovo.trim();
 		if (!nome || nome === vecchio || nome in this.scenari) return;
 		const { [vecchio]: piano, ...resto } = this.scenari;
@@ -1115,11 +1237,13 @@ export class Asta {
 	}
 
 	setTargetScenario(nome: string, chiave: string, prezzoMax: number) {
+		this.verificaScrittura();
 		const piano = { ...(this.scenari[nome] ?? {}), [chiave]: Math.max(1, Math.round(prezzoMax)) };
 		this.scenari = { ...this.scenari, [nome]: piano };
 	}
 
 	rimuoviDaScenario(nome: string, chiave: string) {
+		this.verificaScrittura();
 		const { [chiave]: _, ...piano } = this.scenari[nome] ?? {};
 		this.scenari = { ...this.scenari, [nome]: piano };
 	}

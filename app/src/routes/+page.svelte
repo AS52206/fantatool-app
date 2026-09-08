@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { FileBackupQueue } from '$lib/persistence/fileBackup';
 	import { asta } from '$lib/stores/auction.svelte';
 	import { caricaBundle } from '$lib/data/load';
 	import { stemmiDisponibili } from '$lib/assets';
@@ -38,13 +39,16 @@
 	let mostraSetup = $state(false);
 	let fileInput: HTMLInputElement;
 	let bundleCaricato = $state('');
+	let richiestaDati = 0;
 
 	async function caricaDati(stagione: string, modalita: string, partecipanti: number) {
 		const chiave = `${stagione}/${modalita}/${partecipanti}`;
 		if (chiave === bundleCaricato) return;
+		const richiesta = ++richiestaDati;
 		statoDati = 'carico';
 		try {
 			const b = await caricaBundle(stagione, modalita, partecipanti);
+			if (richiesta !== richiestaDati) return;
 			asta.setGiocatori(b.players);
 			bundleCon = b.meta.con_fantacrediti;
 			bundleTot = b.meta.totale_giocatori;
@@ -52,6 +56,7 @@
 			bundleCaricato = chiave;
 			statoDati = 'ok';
 		} catch (e) {
+			if (richiesta !== richiestaDati) return;
 			if (partecipanti !== 8) {
 				asta.config.partecipanti = 8;
 				return;
@@ -62,7 +67,8 @@
 	}
 
 	onMount(() => {
-		mostraSetup = !asta.avviata;
+		void asta.attivaScrittura().then(() => { mostraSetup = !asta.avviata; });
+		return () => asta.dispose();
 	});
 	const stemmi = stemmiDisponibili();
 	$effect(() => {
@@ -70,7 +76,7 @@
 	});
 
 	function impostaModalita(m: string) {
-		asta.cambiaModalita(m);
+		try { asta.cambiaModalita(m); } catch (e) { alert(String(e)); }
 	}
 	function toggleModulo(mod: string) {
 		const s = new Set(asta.config.moduliTarget);
@@ -78,17 +84,20 @@
 		asta.config.moduliTarget = [...s];
 	}
 	function impostaNumeroSquadre(n: number) {
-		n = Math.max(2, Math.min(20, n || 2));
-		const nuove = [...asta.config.squadre];
-		while (nuove.length < n) nuove.push({ nome: `Squadra ${nuove.length + 1}`, isMia: false });
-		nuove.length = n;
-		if (!nuove.some((s) => s.isMia) && nuove[0]) nuove[0].isMia = true;
-		asta.config.squadre = nuove;
+		try { asta.setNumeroSquadre(n); } catch (e) { alert(String(e)); }
+	}
+	let setupSbloccato = $state(false);
+	const setupProtetto = $derived(asta.avviata && !setupSbloccato);
+	function rinominaSquadra(i: number, e: Event) {
+		const input = e.target as HTMLInputElement;
+		try { asta.rinominaSquadra(i, input.value); }
+		catch (error) { alert(String(error)); input.value = asta.config.squadre[i].nome; }
 	}
 
 	// Il taglio dati (PMA/slot) segue il numero di squadre: non è più un campo a
 	// parte. I bundle esistono per 8 e 10 → si sceglie il più vicino.
 	$effect(() => {
+		if (asta.altraSchedaAttiva) return;
 		const n = asta.config.squadre.length;
 		const cut = Math.abs(n - 8) <= Math.abs(n - 10) ? 8 : 10;
 		if (asta.config.partecipanti !== cut) asta.config.partecipanti = cut;
@@ -111,51 +120,56 @@
 		typeof window !== 'undefined' && 'showSaveFilePicker' in window;
 	let backupHandle = $state<FileSystemFileHandle | null>(null);
 	let backupErrore = $state(false);
-	let ultimoBackupN = -1;
-	const BACKUP_OGNI = 5;
+	let backupQueue: FileBackupQueue | null = null;
+	let backupOccupato = $state(false);
+	let ultimoBackup = $state<number | null>(null);
+	let backupContenuto = '';
+	let backupRichiesto = $state('');
+	let backupSalvato = $state('');
+	const backupInCorso = $derived(!!backupHandle && backupRichiesto !== backupSalvato);
 
 	async function attivaBackupAuto() {
-		if (backupHandle) {
-			backupHandle = null; // toggle off
-			return;
-		}
+		if (backupOccupato) return;
+		backupOccupato = true;
 		try {
-			backupHandle = await (
-				window as unknown as {
-					showSaveFilePicker: (o: unknown) => Promise<FileSystemFileHandle>;
-				}
-			).showSaveFilePicker({
+			if (backupHandle && !backupErrore) {
+				await backupQueue?.flush();
+				backupHandle = null;
+				backupQueue = null;
+				return;
+			}
+			await backupQueue?.flush();
+			const handle = await (window as unknown as {
+				showSaveFilePicker: (o: unknown) => Promise<FileSystemFileHandle>;
+			}).showSaveFilePicker({
 				suggestedName: `fantatool-asta-${oggi()}.json`,
-				types: [
-					{ description: 'Backup Fantatool', accept: { 'application/json': ['.json'] } }
-				]
+				types: [{ description: 'Backup Fantatool', accept: { 'application/json': ['.json'] } }]
 			});
+			backupQueue = new FileBackupQueue(async (text) => {
+				const writable = await handle.createWritable();
+				try { await writable.write(text); await writable.close(); }
+				catch (error) { await writable.abort().catch(() => {}); throw error; }
+			}, {
+				onSaved: (text) => { backupSalvato = text; ultimoBackup = Date.now(); backupErrore = false; },
+				onError: () => { backupErrore = true; }
+			});
+			backupContenuto = '';
+			backupHandle = handle;
 			backupErrore = false;
-			await scriviBackupAuto();
-		} catch {
-			/* l'utente ha annullato il selettore file */
-		}
-	}
-
-	async function scriviBackupAuto() {
-		if (!backupHandle) return;
-		try {
-			const w = await (
-				backupHandle as unknown as { createWritable: () => Promise<WritableStreamDefaultWriter> }
-			).createWritable();
-			await w.write(asta.esporta());
-			await w.close();
-			ultimoBackupN = asta.acquisti.length;
-			backupErrore = false;
-		} catch {
-			backupErrore = true; // permesso revocato / file rimosso
-		}
+		} catch (error) {
+			if (!(error instanceof DOMException && error.name === 'AbortError')) backupErrore = true;
+		} finally { backupOccupato = false; }
 	}
 
 	$effect(() => {
-		const n = asta.acquisti.length;
-		if (backupHandle && n > 0 && n !== ultimoBackupN && n % BACKUP_OGNI === 0)
-			scriviBackupAuto();
+		if (!backupHandle || !backupQueue || asta.altraSchedaAttiva || asta.recuperoNecessario) return;
+		const text = asta.esporta();
+		// Export timestamp is metadata, not an auction mutation.
+		const stable = JSON.stringify({ ...JSON.parse(text), esportato: undefined });
+		if (stable === backupContenuto) return;
+		backupContenuto = stable;
+		backupRichiesto = text;
+		backupQueue.enqueue(text);
 	});
 	let esportandoXlsx = $state(false);
 	async function esportaXlsx() {
@@ -235,6 +249,7 @@
 	function scorciatoieGlobali(e: KeyboardEvent) {
 		const tag = (e.target as HTMLElement | null)?.tagName;
 		if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+		if (asta.altraSchedaAttiva) return;
 		if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
 			e.preventDefault();
 			e.shiftKey ? asta.ripeti() : asta.annulla();
@@ -244,14 +259,23 @@
 
 <svelte:window onkeydown={scorciatoieGlobali} onbeforeunload={guardiaUscita} />
 
-<div style="max-width:1280px;margin:0 auto;padding:var(--pad);">
+{#if asta.altraSchedaAttiva}
+	<div class="panel" role="status" style="margin:16px;">
+		<b>Sola lettura — un’altra scheda può essere attiva.</b>
+		<p>Chiudi l’altra scheda, poi attiva l’asta qui. Lo stato verrà ricaricato prima di abilitare le modifiche.</p>
+		{#if asta.erroreSalvataggio}<p>{asta.erroreSalvataggio}</p>{/if}
+		<button onclick={() => asta.attivaScrittura()}>Attiva asta qui</button>
+		<button onclick={() => asta.ricaricaDaStorage()}>Aggiorna lettura</button>
+	</div>
+{/if}
+<div inert={asta.altraSchedaAttiva} style="max-width:1280px;margin:0 auto;padding:var(--pad);">
 	<header class="appbar" bind:this={appbarEl}>
 		<h1 class="brand">
 			<span class="mark"><Logo size={30} /></span> Fantatool <span class="sub">/ asta</span>
 		</h1>
 		<span class="muted mono" style="font-size:11px;">{metaTxt}</span>
 		<div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-			<span class="tag" title="Salvataggio automatico locale">💾 {ora(asta.ultimoSalvataggio)}</span>
+			<span class="tag" title="Salvataggio automatico locale">💾 Browser {ora(asta.ultimoSalvataggio)}</span>
 			{#if backupAutoSupportato}
 				<button
 					class="tag"
@@ -261,19 +285,20 @@
 							: 'color:var(--ok);border-color:var(--ok);'
 						: ''}
 					onclick={attivaBackupAuto}
+					disabled={backupOccupato}
 					title={backupHandle
 						? backupErrore
 							? 'Backup su file non riuscito: riattivalo'
-							: `Backup automatico su file ogni ${BACKUP_OGNI} acquisti — clic per disattivare`
-						: 'Scegli un file dove salvare in automatico un backup completo ogni pochi acquisti (da riattivare a ogni riapertura)'}
+							: 'Backup su file dopo ogni modifica — clic per disattivare'
+						: 'Scegli un file dove salvare in automatico un backup completo dopo ogni modifica (da riattivare a ogni riapertura)'}
 				>
-					{backupHandle ? (backupErrore ? '⚠️ Backup file' : '● Backup file') : '○ Backup file'}
+					{backupHandle ? (backupErrore ? '⚠️ Backup file' : backupInCorso ? '… Backup file' : `● File ${ora(ultimoBackup)}`) : '○ Backup file'}
 				</button>
 			{/if}
 			<button class="icon-btn" onclick={() => ui.toggleTema()} title="Tema chiaro / scuro">{ui.tema === 'scuro' ? '☀︎' : '☾'}</button>
 			<button class="icon-btn" onclick={() => ui.toggleDensita()} title="Densità comoda / compatta">{ui.densita === 'comoda' ? '▤' : '▦'}</button>
 			<button onclick={() => (mostraSetup = !mostraSetup)}>⚙️ Setup</button>
-			<button onclick={() => scarica(asta.esporta(), `asta-${oggi()}.json`, 'application/json')}>⬇︎ Backup</button>
+			<button disabled={asta.recuperoNecessario} onclick={() => scarica(asta.esporta(), `asta-${oggi()}.json`, 'application/json')}>⬇︎ Backup</button>
 			{#if asta.acquisti.length}
 				<button onclick={() => (mostraSnapshot = !mostraSnapshot)} title="Ripristina da uno snapshot automatico">🕑 Snapshot</button>
 				<button onclick={() => scarica(asta.esportaCsv(), `rose-${oggi()}.csv`, 'text/csv')}>⬇︎ CSV</button>
@@ -291,16 +316,13 @@
 	{#if asta.erroreSalvataggio}
 		<div class="panel" role="alert" style="margin-bottom:12px;border-color:#ef4444;background:rgba(239,68,68,0.12);">
 			<b style="color:#ef4444;">⚠️ {asta.erroreSalvataggio}</b>
-			<button style="margin-left:8px;font-size:11px;" onclick={() => scarica(asta.esporta(), `asta-${oggi()}.json`, 'application/json')}>⬇︎ Scarica backup ora</button>
+			<button disabled={asta.recuperoNecessario} style="margin-left:8px;font-size:11px;" onclick={() => scarica(asta.esporta(), `asta-${oggi()}.json`, 'application/json')}>⬇︎ Scarica backup ora</button>
 		</div>
 	{/if}
 
-	{#if asta.altraSchedaAttiva}
-		<div class="panel" role="alert" style="margin-bottom:12px;border-color:#f59e0b;background:rgba(245,158,11,0.12);">
-			<b style="color:#f59e0b;">⚠️ Fantatool è aperto in un'altra scheda</b>
-			<span class="muted" style="font-size:12px;"> — questa scheda è disallineata. Usa una scheda sola.</span>
-			<button style="margin-left:8px;font-size:11px;" onclick={() => asta.ricaricaDaStorage()}>↻ Allinea questa scheda</button>
-		</div>
+
+	{#if asta.avviata && !backupHandle}
+		<div class="panel" role="status">Backup su file non attivo. {backupAutoSupportato ? 'Attivalo con “Backup file”, anche dopo ogni riapertura.' : 'Scarica periodicamente un backup con il pulsante Backup.'}</div>
 	{/if}
 
 	{#if mostraSnapshot}
@@ -311,7 +333,7 @@
 				<button style="font-size:11px;" onclick={() => (mostraSnapshot = false)}>Chiudi</button>
 			</div>
 			<p class="muted" style="font-size:11px;margin:4px 0 8px;">
-				Copie salvate in automatico a ogni acquisto/rimozione (ultime {backup.length}). Ripristinare è annullabile con Annulla.
+				Copie salvate in automatico dopo ogni modifica (ultime {backup.length}). Ripristinare è annullabile con Annulla.
 			</p>
 			{#if !backup.length}
 				<p class="muted" style="font-size:12px;">Ancora nessuno snapshot.</p>
@@ -369,7 +391,9 @@
 		</div>
 	{/if}
 
-	{#if statoDati === 'carico'}
+	{#if asta.recuperoNecessario}
+		<div class="panel">Il salvataggio originale è conservato. Usa “Ripristina” per caricare un backup valido.</div>
+	{:else if statoDati === 'carico'}
 		<div class="panel">Carico i dati…</div>
 	{:else if statoDati === 'errore'}
 		<div class="panel" style="border-color:var(--bad);">
@@ -393,6 +417,10 @@
 		{#if mostraSetup}
 			<div class="panel" style="margin-bottom:12px;">
 				<h2 style="margin-top:0;font-size:16px;">Setup asta</h2>
+				{#if asta.avviata}
+					<button onclick={() => { if (setupSbloccato || confirm('Modificare le impostazioni di un’asta già avviata?')) setupSbloccato = !setupSbloccato; }}>{setupSbloccato ? 'Proteggi impostazioni' : 'Sblocca impostazioni'}</button>
+				{/if}
+				<fieldset disabled={setupProtetto} style="border:0;padding:0;margin:10px 0;min-width:0;">
 				<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
 					<label>Modalità
 						<select value={asta.config.modalita} onchange={(e) => impostaModalita((e.target as HTMLSelectElement).value)} style="display:block;">
@@ -450,7 +478,7 @@
 								oninput={(e) => (asta.config.squadre[i].colore = (e.target as HTMLInputElement).value)}
 								title="Colore squadra" style="width:26px;height:26px;padding:0;border:none;background:none;cursor:pointer;" />
 							<Crest nome={sq.stemma || sq.nome} tipo="stemmi" size={24} />
-							<input bind:value={asta.config.squadre[i].nome} style="flex:1;min-width:0;" />
+							<input value={sq.nome} onchange={(e) => rinominaSquadra(i, e)} style="flex:1;min-width:0;" />
 							<select value={sq.stemma ?? ''}
 								onchange={(e) => (asta.config.squadre[i].stemma = (e.target as HTMLSelectElement).value || undefined)}
 								title="Stemma" style="width:38px;padding:4px 2px;">
@@ -465,10 +493,11 @@
 					{/each}
 				</div>
 				<button style="font-size:11px;margin-top:6px;" onclick={() => asta.config.squadre.forEach((s) => (s.colore = undefined))}>Colori automatici</button>
+				</fieldset>
 				<div style="margin-top:12px;display:flex;gap:8px;">
-					<button class="primary" onclick={() => (mostraSetup = false)}>Inizia l'asta</button>
+					<button class="primary" onclick={() => { mostraSetup = false; setupSbloccato = false; }}>Chiudi impostazioni</button>
 					{#if asta.acquisti.length}
-						<button onclick={() => { if (confirm('Cancellare tutti gli acquisti?')) asta.reset(); }} style="color:var(--bad);">Azzera asta</button>
+						<button disabled={setupProtetto} onclick={() => { if (confirm('Cancellare tutti gli acquisti?')) asta.reset(); }} style="color:var(--bad);">Azzera asta</button>
 					{/if}
 				</div>
 			</div>
@@ -504,11 +533,11 @@
 						{error instanceof Error ? error.message : String(error)}
 					</p>
 					<p style="font-size:12px;">
-						L'asta è salva: acquisti e budget sono nel salvataggio locale. Scarica un backup e riprova.
+						Scarica un backup dello stato attuale prima di riprovare. Controlla anche l’indicatore del salvataggio nel browser.
 					</p>
 					<div style="display:flex;gap:8px;flex-wrap:wrap;">
 						<button onclick={reset}>↻ Riprova</button>
-						<button onclick={() => scarica(asta.esporta(), `asta-${oggi()}.json`, 'application/json')}>⬇︎ Scarica backup</button>
+						<button disabled={asta.recuperoNecessario} onclick={() => scarica(asta.esporta(), `asta-${oggi()}.json`, 'application/json')}>⬇︎ Scarica backup</button>
 						<button onclick={() => (tab = 'draft')}>← Torna al Draft</button>
 						<button onclick={() => location.reload()}>⟳ Ricarica app</button>
 					</div>
