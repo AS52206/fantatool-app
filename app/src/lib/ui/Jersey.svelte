@@ -39,6 +39,11 @@
 			.replace(/[^a-z]/g, '');
 		return KIT[k] ?? KIT[Object.keys(KIT).find((n) => k.includes(n) || n.includes(k)) ?? ''] ?? { base: '#555c68', alt: '#2c313a', type: 'tinta' };
 	}
+
+	/** Colore maglia casalinga di un club (per accenti UI). */
+	export function kitColore(club: string | undefined): string {
+		return kitDi(club).base;
+	}
 </script>
 
 <script lang="ts">

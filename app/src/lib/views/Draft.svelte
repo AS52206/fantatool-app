@@ -19,6 +19,7 @@
 	import Crest from '$lib/ui/Crest.svelte';
 	import BudgetBar from '$lib/ui/BudgetBar.svelte';
 	import FormationPitch from '$lib/ui/FormationPitch.svelte';
+	import Jersey, { kitColore } from '$lib/ui/Jersey.svelte';
 	import type { Giocatore, Ruolo } from '$lib/domain/types';
 
 	const RUOLI: Ruolo[] = ['P', 'D', 'C', 'A'];
@@ -259,6 +260,11 @@
 
 	const operation = $derived(selezionato ? asta.controllaAcquisto(selezionato, prezzoInput, proprietarioScelto) : null);
 	const ownOperation = $derived(selezionato ? asta.controllaAcquisto(selezionato, prezzoInput, asta.miaSquadra) : null);
+	const kit = $derived(selezionato ? kitColore(selezionato.squadra) : '#555c68');
+
+	// Lampo "aggiudicato" dopo un'assegnazione: informativo, non bloccante.
+	let aggiudicato = $state<{ nome: string; club: string; team: string; prezzo: number; kit: string } | null>(null);
+	let aggiudicatoTimer: ReturnType<typeof setTimeout> | undefined;
 	let ultimoSelId = $state(-1);
 	$effect(() => {
 		if (selezionato && val && selezionato.id !== ultimoSelId) {
@@ -277,7 +283,13 @@
 	function assegna() {
 		if (!selezionato) return;
 		try {
-			asta.assegna(selezionato, prezzoInput, proprietarioScelto);
+			const g = selezionato;
+			const prezzo = prezzoInput;
+			const team = proprietarioScelto;
+			asta.assegna(g, prezzo, team);
+			aggiudicato = { nome: g.nome, club: g.squadra, team, prezzo, kit: kitColore(g.squadra) };
+			clearTimeout(aggiudicatoTimer);
+			aggiudicatoTimer = setTimeout(() => (aggiudicato = null), 1600);
 			selezionato = null;
 			query = '';
 			flagScelto = '';
@@ -292,6 +304,15 @@
 </script>
 
 <svelte:window onkeydown={daTastiera} />
+
+{#if aggiudicato}
+	<div class="aggiudicato" style="--kit:{aggiudicato.kit};" role="status">
+		<span class="agg-stamp">Aggiudicato</span>
+		<span class="agg-name">{aggiudicato.nome}</span>
+		<span class="agg-line"><Crest nome={aggiudicato.club} size={16} /> → {aggiudicato.team}</span>
+		<span class="agg-price">{aggiudicato.prezzo}<small> cr</small></span>
+	</div>
+{/if}
 
 {#if asta.isMantra && !live}
 	<div class="panel" style="margin-bottom:16px;border-color:color-mix(in srgb, var(--accent) 30%, var(--border));">
@@ -409,8 +430,9 @@
 
 		{#if selezionato && val}
 			{@const sc = val.scarsita.livello === 'CRITICA' ? 'CRITICO' : val.scarsita.livello === 'ALTA' ? 'ATTENZIONE' : 'OK'}
-			<div class="panel active-player" style="border-color:color-mix(in srgb, {coloreAzione(val.decisione.azione)} 55%, var(--border));">
-				<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+			<div class="panel active-player" style="--kit:{kit};border-color:color-mix(in srgb, {coloreAzione(val.decisione.azione)} 55%, var(--border));">
+				<span class="kit-watermark" aria-hidden="true"><Jersey club={selezionato.squadra} size={150} /></span>
+				<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:relative;">
 					<span class="club-medallion"><Crest nome={selezionato.squadra} size={30} /></span>
 					<div class="player-heading"><span>GIOCATORE IN CHIAMATA</span><h2>{selezionato.nome}</h2></div>
 					<RoleTag ruolo={selezionato.ruolo} ruoloMantra={selezionato.ruoloMantra} />
@@ -1012,8 +1034,10 @@
 	.section-eyebrow { display:flex; justify-content:space-between; margin:0 0 10px; font-size:9px; letter-spacing:1.5px; color:var(--accent); font-weight:750; }
 	.section-eyebrow span { color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; font-size:10px; }
 	.search-panel input { min-width:0; }
-	.active-player { overflow:hidden; border-width:1px; box-shadow:0 10px 40px #0002; }
-	.active-player::after { content:''; position:absolute; top:0; left:18px; width:42px; height:3px; background:var(--accent); border-radius:0 0 4px 4px; }
+	.active-player { position:relative; overflow:hidden; border-width:1px; box-shadow:0 18px 50px -12px #0008, 0 0 0 1px color-mix(in srgb,var(--kit) 26%,transparent); background:linear-gradient(150deg, color-mix(in srgb,var(--kit) 26%,var(--panel)) 0%, var(--panel) 44%, var(--panel-3) 100%); }
+	.active-player::after { content:''; position:absolute; inset:0 auto 0 0; width:5px; background:linear-gradient(180deg,var(--kit),color-mix(in srgb,var(--kit) 35%,transparent)); }
+	.active-player > *:not(.kit-watermark) { position:relative; z-index:1; }
+	.kit-watermark { position:absolute; z-index:0; top:-38px; right:-30px; opacity:0.22; transform:rotate(10deg); filter:drop-shadow(0 8px 22px #000a); pointer-events:none; }
 	.club-medallion { display:flex; width:48px; height:48px; flex:none; align-items:center; justify-content:center; border:1px solid var(--border-strong); border-radius:12px; background:var(--panel-3); }
 	.player-heading > span { font:700 8px/1 var(--display); letter-spacing:1.8px; color:var(--muted); text-transform:uppercase; }
 	.player-heading h2 { display:block; margin:3px 0 0; font:700 32px/0.9 var(--display); text-transform:uppercase; letter-spacing:0.4px; }
@@ -1031,5 +1055,24 @@
 	.analytics-toggle { text-align:left; padding:12px 14px; color:var(--accent); font-size:11px; border-style:dashed; }
 	@media (max-width:1000px) { .market-header { gap:20px; } .market-caption { display:none; } .market-title h2 { font-size:34px; } .view-switch { margin:0; } }
 	@media (max-width:700px) { .market-header { flex-wrap:wrap; padding:15px; gap:15px; } .market-title { width:100%; } .view-switch { margin-left:auto; } .market-stat b { font-size:30px; } }
+
+	/* Lampo "AGGIUDICATO" — appare a centro schermo dopo un'assegnazione. */
+	.aggiudicato {
+		position:fixed; left:50%; top:38%; z-index:200; transform:translate(-50%,-50%);
+		display:grid; justify-items:center; gap:5px; padding:26px 46px;
+		border-radius:18px; pointer-events:none; text-align:center;
+		background:linear-gradient(150deg, color-mix(in srgb,var(--kit) 62%,#0a0a0a), #0c1712 80%);
+		border:1px solid color-mix(in srgb,var(--kit) 55%,#fff);
+		box-shadow:0 40px 100px -20px #000e, 0 0 0 1px #0007, 0 0 60px -10px color-mix(in srgb,var(--kit) 50%,transparent), inset 0 1px 0 #ffffff26;
+		animation:agg-in 0.3s cubic-bezier(.2,1.4,.4,1) both, agg-out 0.4s ease-in 1.3s forwards;
+	}
+	.agg-stamp { font:700 13px/1 var(--display); letter-spacing:6px; text-transform:uppercase; color:#fff; opacity:.65; }
+	.agg-name { font:700 40px/0.9 var(--display); text-transform:uppercase; letter-spacing:0.5px; color:#fff; }
+	.agg-line { display:inline-flex; align-items:center; gap:7px; font:600 13px/1 var(--sans); color:#ffffffcc; }
+	.agg-price { margin-top:2px; font:700 56px/0.85 var(--display); letter-spacing:1px; color:#fff; -webkit-text-stroke:2px color-mix(in srgb,var(--accent) 65%,transparent); }
+	.agg-price small { -webkit-text-stroke:0; font-size:16px; opacity:.7; margin-left:2px; }
+	@keyframes agg-in { from { opacity:0; transform:translate(-50%,-50%) scale(0.82) rotate(-4deg); } to { opacity:1; transform:translate(-50%,-50%) scale(1) rotate(-2deg); } }
+	@keyframes agg-out { to { opacity:0; transform:translate(-50%,-62%) scale(0.96) rotate(-2deg); } }
+	@media (prefers-reduced-motion:reduce) { .aggiudicato { animation:none; } }
 
 </style>
