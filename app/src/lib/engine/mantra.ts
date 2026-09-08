@@ -282,10 +282,14 @@ export interface AnalisiRosa {
 export function analizzaRosaMantra(ruoliGiocatori: GiocatoreMantraInput[]): AnalisiRosa {
 	const val = Object.keys(MODULI_MANTRA).map((m) => valutaModuloMantra(ruoliGiocatori, m));
 	val.sort((a, b) => (b.coperti !== a.coperti ? b.coperti - a.coperti : a.modulo < b.modulo ? -1 : 1));
-	// NB: come in mantra.py, il conteggio portieri normalizza il valore GREZZO.
-	// Se gli elementi sono dict (non stringhe di ruoli) il conteggio resta 0,
-	// esattamente come nel Python originale.
-	const portieri = ruoliGiocatori.filter((r) => normalizzaRuoliMantra(r).includes('Por')).length;
+	// estrae la stringa ruoli sia da stringa che da oggetto {ruoli|ruolo_mantra|…}
+	const estraiRuoli = (r: GiocatoreMantraInput): unknown =>
+		typeof r === 'string'
+			? r
+			: (r?.ruoli ?? r?.ruolo_mantra ?? r?.Ruoli_Mantra_Clean ?? '');
+	const portieri = ruoliGiocatori.filter((r) =>
+		normalizzaRuoliMantra(estraiRuoli(r)).includes('Por')
+	).length;
 	return {
 		giocatori: ruoliGiocatori.length,
 		portieri,
