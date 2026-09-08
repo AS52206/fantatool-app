@@ -1,22 +1,22 @@
 /* Fantatool — tema "Trading Terminal": scuro, numeri in monospace,
    un colore fisso per ruolo, glow riservato al prezzo consigliato. */
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Oxanium:wght@600;700;800&family=Anton&display=swap');
+
 
 :root {
-	--bg: #080b10;
-	--bg-2: #0b0f16;
-	--panel: #0c121b;
-	--panel-2: #121a25;
-	--panel-3: #0f1620;
-	--border: #23303f;
-	--border-strong: #33475a;
-	--text: #dfe6ee;
-	--text-strong: #f6f8fb;
-	--muted: #8a99ab;
-	--muted-dim: #64748b;
+	--bg: #071410;
+	--bg-2: #0b1d17;
+	--panel: #10221c;
+	--panel-2: #19362b;
+	--panel-3: #0b1b15;
+	--border: #284337;
+	--border-strong: #3d6050;
+	--text: #e3ede4;
+	--text-strong: #f5f7ea;
+	--muted: #a3b8ab;
+	--muted-dim: #829d8d;
 
-	--accent: #5eff9c;
-	--accent-soft: rgba(94, 255, 156, 0.14);
+	--accent: #c0f56a;
+	--accent-soft: rgba(192, 245, 106, 0.13);
 	--accent2: #ff4d3d;
 	--accent2-soft: rgba(255, 77, 61, 0.16);
 	--cyan: #5ce1ff;
@@ -29,9 +29,9 @@
 	--role-c: #3f8cff;
 	--role-a: #ff5c5c;
 
-	--mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-	--sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-	--display: 'Anton', 'Oxanium', var(--sans);
+	--mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+	--sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	--display: 'Arial Narrow', Impact, var(--sans);
 
 	--r: 14px;
 	--r-sm: 9px;
@@ -45,9 +45,9 @@
 		radial-gradient(1200px 900px at 50% 120%, rgba(92, 225, 255, 0.045), transparent 60%);
 	--bg-grid: rgba(129, 151, 177, 0.02);
 	--panel-hi: rgba(255, 255, 255, 0.07);
-	--primary-bg: linear-gradient(180deg, #17332a, #12241d);
-	--primary-border: #2f5a45;
-	--primary-text: #eafff3;
+	--primary-bg: linear-gradient(135deg, #d5fc8b, #b8ed62);
+	--primary-border: #cbf98b;
+	--primary-text: #142613;
 	--tag-bg: rgba(255, 255, 255, 0.03);
 
 	/* densità (override in [data-density='compatta']) */
@@ -60,23 +60,23 @@
 
 /* ---------------- TEMA CHIARO ---------------- */
 :root[data-theme='chiaro'] {
-	--bg: #eef1f6;
-	--bg-2: #e6eaf1;
+	--bg: #f1f2e9;
+	--bg-2: #e7ecdf;
 	--panel: #ffffff;
-	--panel-2: #f4f6fa;
-	--panel-3: #eef1f6;
+	--panel-2: #f6f7ef;
+	--panel-3: #f0f3e8;
 	--border: #d6dce6;
 	--border-strong: #c2cad6;
 	--text: #232a35;
 	--text-strong: #0f1723;
-	--muted: #64748b;
+	--muted: #53695a;
 	--muted-dim: #94a3b8;
 
-	--accent: #10b76a;
+	--accent: #397712;
 	--accent-soft: rgba(16, 183, 106, 0.16);
 	--accent2: #e0402e;
 	--accent2-soft: rgba(224, 64, 46, 0.14);
-	--cyan: #0e8fc7;
+	--cyan: #08758b;
 	--warn: #c98a00;
 	--bad: #d64545;
 	--ok: #10b76a;
@@ -94,7 +94,7 @@
 		radial-gradient(1200px 900px at 50% 120%, rgba(14, 143, 199, 0.06), transparent 60%);
 	--bg-grid: rgba(40, 60, 90, 0.045);
 	--panel-hi: rgba(20, 40, 70, 0.06);
-	--primary-bg: linear-gradient(180deg, #16a765, #12935a);
+	--primary-bg: linear-gradient(180deg, #276841, #195332);
 	--primary-border: #0e7a49;
 	--primary-text: #ffffff;
 	--tag-bg: rgba(20, 40, 70, 0.04);
@@ -119,10 +119,7 @@ html {
 body {
 	margin: 0;
 	background-color: var(--bg);
-	background-image:
-		var(--bg-radials),
-		repeating-linear-gradient(118deg, var(--bg-grid) 0 1px, transparent 1px 54px),
-		repeating-linear-gradient(28deg, var(--bg-grid) 0 1px, transparent 1px 54px);
+	background-image: radial-gradient(ellipse at 15% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 55%);
 	background-size: 100% 100%, 100% 100%, 100% 100%;
 	background-attachment: fixed;
 	color: var(--text);
@@ -141,8 +138,8 @@ h2,
 h3 {
 	font-family: var(--display);
 	color: var(--text-strong);
-	letter-spacing: 0.3px;
-	font-weight: 400;
+	letter-spacing: 0.2px;
+	font-weight: 800;
 	text-wrap: balance;
 }
 
@@ -154,18 +151,9 @@ h3 {
 	text-transform: uppercase;
 	letter-spacing: 0.8px;
 }
-h2::before,
-h3::before {
-	content: '';
-	flex: none;
-	width: 6px;
-	align-self: stretch;
-	background: linear-gradient(180deg, var(--accent), var(--cyan));
-	clip-path: polygon(35% 0, 100% 0, 65% 100%, 0 100%);
-}
-h3::before {
-	background: linear-gradient(180deg, var(--accent2), var(--warn));
-}
+h2::before, h3::before { display: none; }
+h2 { font-family: var(--sans); font-weight: 750; text-transform: none; letter-spacing: -0.3px; }
+h3 { font-family: var(--sans); font-weight: 700; font-size: 13px; text-transform: none; }
 
 /* ---------------- APP BAR ---------------- */
 .appbar {
@@ -191,7 +179,7 @@ h3::before {
 	right: 0;
 	bottom: -2px;
 	height: 2px;
-	background: linear-gradient(90deg, var(--accent), var(--cyan) 45%, var(--accent2) 85%);
+	background: linear-gradient(90deg, var(--accent), var(--accent) 18%, transparent 70%);
 	opacity: 0.85;
 }
 .brand {
@@ -200,9 +188,9 @@ h3::before {
 	gap: 9px;
 	margin: 0;
 	font-family: var(--display);
-	font-size: 21px;
+	font-size: 25px;
 	font-weight: 400;
-	letter-spacing: 1.5px;
+	letter-spacing: -0.5px;
 	text-transform: uppercase;
 }
 .brand .mark {
@@ -238,8 +226,8 @@ button {
 	color: var(--text);
 	background: linear-gradient(180deg, var(--panel-2), var(--panel-3));
 	border: 1px solid var(--border-strong);
-	border-radius: var(--r-sm);
-	padding: 8px 13px;
+	border-radius: 8px;
+	padding: 9px 13px;
 	cursor: pointer;
 	transition:
 		border-color 0.16s ease,
@@ -298,11 +286,9 @@ select:focus {
 
 .panel {
 	position: relative;
-	background:
-		radial-gradient(120% 120% at 0% 0%, var(--panel-hi), transparent 42%),
-		linear-gradient(180deg, var(--panel), var(--panel-3));
+	background: linear-gradient(145deg, var(--panel), color-mix(in srgb, var(--panel) 80%, var(--panel-3)));
 	border: 1px solid var(--border);
-	border-radius: var(--r);
+	border-radius: 16px;
 	padding: var(--pad);
 	box-shadow: var(--shadow);
 }
@@ -340,8 +326,8 @@ select:focus {
 .pill {
 	display: inline-block;
 	padding: 5px 16px 3px;
-	border-radius: 999px;
-	font: 400 15px/1.3 var(--display);
+	border-radius: 6px;
+	font: 800 12px/1.4 var(--sans);
 	letter-spacing: 1.2px;
 	text-transform: uppercase;
 	border: 1px solid currentColor;
@@ -506,14 +492,13 @@ select:focus {
 	background: var(--panel-hi);
 }
 .tabbar button.on {
-	background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 15%, var(--panel-2)), var(--panel-3));
-	border-color: color-mix(in srgb, var(--accent) 34%, var(--border-strong));
-	color: var(--text-strong);
-	box-shadow:
-		inset 0 1px 0 color-mix(in srgb, var(--accent) 20%, transparent),
-		0 8px 22px -14px var(--ring),
-		0 2px 0 0 var(--accent2);
+	background: var(--accent);
+	border-color: var(--accent);
+	color: var(--bg);
+	box-shadow: 0 3px 14px -7px var(--accent);
 }
+:root[data-theme='chiaro'] .tabbar button.on { color: #fff; }
+
 
 table {
 	font-family: var(--mono);
@@ -553,3 +538,24 @@ table tbody tr:nth-child(even) td:first-child {
 	*, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 	html { scroll-behavior: auto; }
 }
+
+/* Shared visual rhythm across the auction, squads, scenarios and comparisons. */
+button { min-height:30px; }
+button.primary { box-shadow:0 3px 12px -8px var(--accent); }
+input, select { min-height:34px; }
+input::placeholder { color:var(--muted); opacity:.8; }
+.panel > h2:first-child, .panel > div > h2 { letter-spacing:-.4px; }
+.row-player { background:transparent; border-color:transparent; border-bottom-color:var(--border); border-radius:7px; }
+.row-player.sel { background:var(--accent-soft); border-color:color-mix(in srgb,var(--accent) 45%,var(--border)); }
+.row-player strong { color:var(--text-strong); font-weight:700; }
+.bar { border:0; background:color-mix(in srgb,var(--muted) 15%,var(--panel-3)); }
+.bar > i { box-shadow:inset 0 1px #ffffff28; }
+.tabbar { padding:4px; border-radius:10px; box-shadow:none; }
+.budgetchip { border-radius:8px; background:var(--accent-soft); }
+.appbar .tag { font-size:10px; letter-spacing:0; }
+.brand .sub { font:600 11px var(--sans); letter-spacing:2px; margin-left:4px; padding-left:12px; border-left:1px solid var(--border-strong); }
+.dataset-label { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
+table th { padding:10px 8px; background:var(--panel-3); }
+table td { padding:var(--pad-row) 8px; }
+:root[data-theme='chiaro'] { --border:#d2dccd; --border-strong:#b6c8b2; --panel-hi:#153c1910; }
+@media (max-width:700px) { .brand { font-size:22px; } .dataset-label { display:none; } .tabbar { width:100%; } .tabbar button { flex:1; padding:9px; } }

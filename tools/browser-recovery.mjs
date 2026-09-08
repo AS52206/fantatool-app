@@ -6,10 +6,10 @@ import { pathToFileURL } from 'node:url';
 
 const runtime = process.env.PLAYWRIGHT_PATH ?? '/Users/adrianoschiavon/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright/index.mjs';
 const { chromium } = await import(pathToFileURL(runtime).href);
-const url = process.env.TEST_URL ?? 'http://localhost:8771';
-const mode = process.env.TEST_MODE === 'mantra' ? 'mantra' : 'classic';
-const output = resolve(process.env.TEST_REPORT ?? 'artifacts/browser-recovery.json');
-const hours = Number(process.env.SOAK_HOURS ?? 0);
+const url = process.argv.find((a) => a.startsWith('--url='))?.slice(6) ?? process.env.TEST_URL ?? 'http://localhost:8771';
+const mode = process.argv.includes('--mantra') || process.env.TEST_MODE === 'mantra' ? 'mantra' : 'classic';
+const output = resolve(process.argv.find((a) => a.startsWith('--report='))?.slice(9) ?? process.env.TEST_REPORT ?? `artifacts/browser-recovery-${mode}.json`);
+const hours = Number(process.argv.find((a) => a.startsWith('--soak-hours='))?.slice(13) ?? process.env.SOAK_HOURS ?? 0);
 assert(Number.isFinite(hours) && hours >= 0, 'SOAK_HOURS must be nonnegative');
 const report = { started: new Date().toISOString(), url, requestedSoakHours: hours, mode, status: 'running', checks: [], samples: [], pageErrors: [] };
 async function record(name, details = {}) {
@@ -46,6 +46,8 @@ const browser = await chromium.launch({ headless: process.env.HEADED !== '1', ex
 const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, acceptDownloads: true,
 	storageState: { cookies: [], origins: [{ origin: new URL(url).origin, localStorage: [{ name: 'fantatool.asta.v1', value: JSON.stringify(snapshot) }] }] }
 });
+await mkdir(dirname(output), { recursive: true });
+await context.exposeFunction('__writeBackupToDisk', async (text) => writeFile(output.replace(/\.json$/, '') + '.backup.json', text));
 context.on('page', (page) => {
 	page.on('pageerror', (error) => report.pageErrors.push(error.message));
 	page.on('dialog', (dialog) => dialog.accept());
@@ -59,7 +61,7 @@ await context.addInitScript(() => {
 		window.__backupMaxActive = Math.max(window.__backupMaxActive, window.__backupActive);
 		let text;
 		return { write: async (value) => { text = value; await new Promise((r) => setTimeout(r, 15)); },
-			close: async () => { window.__backupWrites.push(text); window.__backupActive--; },
+			close: async () => { await window.__writeBackupToDisk(text); window.__backupWrites.push(text); window.__backupWrites = window.__backupWrites.slice(-2); window.__backupActive--; },
 			abort: async () => { window.__backupActive--; } };
 	} });
 });
@@ -118,20 +120,88 @@ try {
 	await waitCount(initialCount); await waitBackup(initialCount);
 	assert.equal(await page.evaluate(() => window.__backupMaxActive), 1);
 	assert.equal((await state()).acquisti[0].proprietario, 'Test Rinominata');
+	assert.equal(JSON.parse(await readFile(output.replace(/\.json$/, '') + '.backup.json', 'utf8'))[mode].acquisti.length, initialCount);
 	await record('file backup captures purchase and undo with no overlapping writes');
+	// Same-count edits must update both owners/budget and the external backup.
+	const editPlayer = (mode === 'mantra' ? seedPlayers.find((x) => x.owner === 0 && x.p.ruolo !== 'P') : seedPlayers[0]).p;
+	const beforeEdit = (await state()).acquisti;
+	const previous = beforeEdit.find((a) => a.giocatoreId === editPlayer.id);
+	await page.getByRole('button', { name: `Correggi acquisto ${editPlayer.nome}`, exact: true }).first().click();
+	const editor = page.getByRole('dialog');
+	await editor.getByLabel('Nuova squadra').selectOption({ label: teams[1].nome });
+	await editor.getByLabel('Nuovo prezzo').fill(String(previous.prezzo + 1));
+	await editor.getByRole('button', { name: 'Salva correzione', exact: true }).click();
+	await page.waitForFunction(({key,id,price,owner}) => {
+		const a = JSON.parse(localStorage.getItem(key)).acquisti.find((a) => a.giocatoreId === id);
+		return a.prezzo === price && a.proprietario === owner;
+	}, {key,id:editPlayer.id,price:previous.prezzo+1,owner:teams[1].nome});
+	await page.waitForFunction(({mode,id,price}) => {
+		const b = JSON.parse(window.__backupWrites.at(-1));
+		return b[mode].acquisti.find((a) => a.giocatoreId === id).prezzo === price;
+	}, {mode,id:editPlayer.id,price:previous.prezzo+1});
+	const corrected = (await state()).acquisti.find((a) => a.giocatoreId === editPlayer.id);
+	assert.equal(corrected.ordine, previous.ordine); assert.equal(corrected.timestamp, previous.timestamp);
+	await page.getByRole('button', { name: '↩︎ Annulla', exact: true }).click();
+	await page.waitForFunction(({key,id,price}) => JSON.parse(localStorage.getItem(key)).acquisti.find((a) => a.giocatoreId === id).prezzo === price, {key,id:editPlayer.id,price:previous.prezzo});
+	assert.deepEqual((await state()).acquisti, beforeEdit);
+	await record('price/owner correction preserves purchase identity, updates backup and is undoable');
+	await page.getByPlaceholder('Cerca giocatore o squadra…  ( / )').fill(selected[2].nome);
+	await page.locator('.row-player').filter({ has: page.locator('strong', { hasText: selected[2].nome }) }).first().click();
+	await page.getByText('Valore di riferimento', { exact: true }).waitFor();
+	await page.getByText('Limite strategico · tua squadra', { exact: true }).waitFor();
+	await page.getByLabel('Prezzo pagato / offerta').fill('99999');
+	assert(await page.getByRole('button', { name: 'Assegna →', exact: true }).isDisabled());
+	await page.getByLabel('Prezzo pagato / offerta').fill('7');
+	assert(await page.getByRole('button', { name: 'Assegna →', exact: true }).isEnabled());
+	await page.evaluate(() => window.scrollTo(0,0));
+	await page.screenshot({ path: output.replace(/\.json$/, '') + '.live.png', animations: 'disabled' });
+	if (process.argv.includes('--visuals')) {
+		await page.getByTitle('Tema chiaro / scuro', { exact: true }).click();
+		await page.screenshot({ path: output.replace(/\.json$/, '') + '.light.png', animations: 'disabled' });
+		await page.getByTitle('Tema chiaro / scuro', { exact: true }).click();
+	}
+	const assignmentBox = await page.getByRole('button', { name: 'Assegna →', exact: true }).boundingBox();
+	assert(assignmentBox && assignmentBox.y + assignmentBox.height <= 1000, 'Assignment controls should be visible in live desktop viewport');
+	await page.getByRole('button', { name: 'Cambia giocatore', exact: true }).click();
+	await record('live price distinctions visible and impossible offer blocked');
+	if (process.argv.includes('--visuals')) {
+		await page.getByRole('button', { name: '📊 Rose', exact: true }).click();
+		await page.screenshot({ path: output.replace(/\.json$/, '') + '.rose.png', animations: 'disabled' });
+		await page.setViewportSize({ width: 1024, height: 900 });
+		await page.screenshot({ path: output.replace(/\.json$/, '') + '.laptop.png', animations: 'disabled' });
+		assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), 'No horizontal overflow at laptop width');
+		await page.setViewportSize({ width: 1440, height: 1000 });
+		await page.getByRole('button', { name: '📢 Draft', exact: true }).click();
+	}
+
+	if (mode === 'mantra') {
+		await page.getByRole('button', { name: 'Apri analisi tattiche e chiusura', exact: true }).click();
+		await page.waitForFunction(() => !document.body.innerText.includes('Calcolo dei percorsi in corso…'));
+		assert(page.workers().length > 0, 'Real worker must run endgame');
+		assert(!await page.getByText('Percorsi non disponibili.', { exact: false }).count());
+		await record('Mantra endgame completes in a real browser worker');
+	}
 	if (hours > 0) {
 		const started = Date.now();
 		const deadline = started + hours * 3_600_000;
 		let cycle = 0;
+		let previousAction = started;
+		report.soakStarted = new Date(started).toISOString();
+		report.expectedFinish = new Date(deadline).toISOString();
 		const cdp = await context.newCDPSession(page);
 		await cdp.send('Performance.enable');
 		while (Date.now() < deadline) {
 			const t = Date.now();
+			assert(t - previousAction < 90_000, 'Test interrupted by sleep or a long pause; eight continuous hours not verified');
+			previousAction = t;
 			await purchase(page, selected[2]); await waitCount(initialCount + 1); await waitBackup(initialCount + 1);
 			await page.getByRole('button', { name: '↩︎ Annulla', exact: true }).click();
 			await waitCount(initialCount); await waitBackup(initialCount);
+			await page.waitForFunction(() => !document.body.innerText.includes('Calcolo dei percorsi in corso…'));
+			assert(!await page.getByText('Percorsi non disponibili.', { exact: false }).count());
+			if (cycle % 10 === 0) await cdp.send('HeapProfiler.collectGarbage');
 			const metrics = Object.fromEntries((await cdp.send('Performance.getMetrics')).metrics.map(({ name, value }) => [name, value]));
-			report.samples.push({ cycle: ++cycle, elapsedMs: Date.now() - started, actionMs: Date.now() - t, heapUsed: metrics.JSHeapUsedSize, nodes: metrics.Nodes });
+			report.samples.push({ cycle: ++cycle, elapsedMs: Date.now() - started, actionMs: Date.now() - t, heapUsed: metrics.JSHeapUsedSize, nodes: metrics.Nodes, forcedGC: (cycle - 1) % 10 === 0 });
 			assert.equal(report.pageErrors.length, 0, 'Unexpected browser error during soak');
 			await save();
 			console.log(JSON.stringify({ soak: report.samples.at(-1) }));
@@ -150,6 +220,25 @@ try {
 	assert(exported[mode].acquisti.some((p) => p.giocatoreId === selected[3].id && p.prezzo === 9));
 	assert.equal((await state()).acquisti.length, initialCount);
 	await record('storage failure visible; emergency download preserves current unsaved purchase');
+	await page.reload(); await ready(page); await waitCount(initialCount);
+	await page.locator('input[type=file][accept=".json"]').setInputFiles({ name: 'restore.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(exported)) });
+	await waitCount(initialCount + 1);
+	assert.deepEqual((await state()).acquisti, exported[mode].acquisti);
+	await record('emergency backup restores the missing purchase after reload');
+	const beforeInvalid = await state();
+	const invalid = structuredClone(exported); invalid[mode].acquisti[0].prezzo = -1;
+	await page.locator('input[type=file][accept=".json"]').setInputFiles({ name: 'invalid.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(invalid)) });
+	assert.deepEqual(await state(), beforeInvalid);
+	await record('invalid restore is rejected without changing saved auction');
+	await page.evaluate((key) => localStorage.setItem(key, '{broken'), key);
+	await page.reload();
+	await page.getByText('Il salvataggio originale è conservato.', { exact: false }).waitFor();
+	assert.equal(await page.evaluate((key) => localStorage.getItem(key), key), '{broken');
+	await page.locator('input[type=file][accept=".json"]').setInputFiles({ name: 'recover.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(exported)) });
+	await ready(page); await waitCount(initialCount + 1);
+	assert.deepEqual((await state()).acquisti, exported[mode].acquisti);
+	await record('corrupted storage is preserved and recovered using a valid backup');
+	await page.screenshot({ path: output.replace(/\.json$/, '') + '.png', fullPage: true });
 	assert.deepEqual(report.pageErrors, []);
 	report.status = 'passed';
 } catch (error) {

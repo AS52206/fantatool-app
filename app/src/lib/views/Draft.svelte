@@ -14,6 +14,7 @@
 	} from '$lib/campo';
 	import { ricambiMantraDaModuli, ricambiClassicDa } from '$lib/ricambi';
 	import { coperturaGiocatoreModuli, famigliaDelModulo, spiegaSceltaModulo } from '$lib/mantraHints';
+	import EditPurchase from '$lib/ui/EditPurchase.svelte';
 	import RoleTag from '$lib/ui/RoleTag.svelte';
 	import Crest from '$lib/ui/Crest.svelte';
 	import BudgetBar from '$lib/ui/BudgetBar.svelte';
@@ -32,6 +33,8 @@
 		CRITICO: 'var(--bad)'
 	};
 
+	let live = $state(true);
+	let analisiAperta = $state(false);
 	let query = $state('');
 	let ruoloFiltro = $state<string>('TUTTI');
 	$effect(() => {
@@ -195,6 +198,7 @@
 
 	function daTastiera(e: KeyboardEvent) {
 		const t = e.target as HTMLElement | null;
+		if (asta.altraSchedaAttiva || t?.closest('dialog')) return;
 		const tag = t?.tagName;
 		const inCampo = tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA';
 		const inRicerca = t === ricercaEl;
@@ -253,6 +257,8 @@
 		valBase ? { ...valBase, decisione: asta.decisionePrezzo(valBase, prezzoInput) } : null
 	);
 
+	const operation = $derived(selezionato ? asta.controllaAcquisto(selezionato, prezzoInput, proprietarioScelto) : null);
+	const ownOperation = $derived(selezionato ? asta.controllaAcquisto(selezionato, prezzoInput, asta.miaSquadra) : null);
 	let ultimoSelId = $state(-1);
 	$effect(() => {
 		if (selezionato && val && selezionato.id !== ultimoSelId) {
@@ -287,7 +293,7 @@
 
 <svelte:window onkeydown={daTastiera} />
 
-{#if asta.isMantra}
+{#if asta.isMantra && !live}
 	<div class="panel" style="margin-bottom:16px;border-color:color-mix(in srgb, var(--accent) 30%, var(--border));">
 		<button
 			onclick={toggleGuida}
@@ -330,10 +336,18 @@
 	</div>
 {/if}
 
-<div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:start;">
+<section class="market-header" aria-label="Panoramica dell’asta">
+	<div class="market-title"><span class="eyebrow"><i></i> {asta.config.modalita} / {asta.config.stagione}</span><h2>{live ? 'Asta live.' : 'Visione completa.'}</h2><span class="market-caption">La prossima scelta fa la differenza.</span></div>
+	<div class="market-stat"><span>Squadre</span><b>{asta.config.squadre.length.toString().padStart(2, '0')}</b></div>
+	<div class="market-stat"><span>Acquisti registrati</span><b>{asta.acquisti.length}<small> / {asta.config.squadre.length * asta.config.limiti.TOT}</small></b><div class="market-progress"><i style:width={`${Math.min(100, 100 * asta.acquisti.length / Math.max(1, asta.config.squadre.length * asta.config.limiti.TOT))}%`}></i></div></div>
+	<button class="view-switch" aria-pressed={live} onclick={() => live = !live}>{live ? 'Apri vista completa' : 'Torna ad asta live'} <span aria-hidden="true">↗</span></button>
+</section>
+<div class="draft-grid" class:live>
+
 	<!-- SINISTRA: ricerca + consiglio -->
 	<div style="display:flex;flex-direction:column;gap:16px;">
-		<div class="panel">
+		<div class="panel search-panel">
+			<div class="section-eyebrow">SCOUTING <span>Cerca la prossima chiamata</span></div>
 			<div style="display:flex;gap:8px;margin-bottom:8px;">
 				<input bind:this={ricercaEl} placeholder="Cerca giocatore o squadra…  ( / )" bind:value={query} style="flex:1;" />
 				<select bind:value={ruoloFiltro}>
@@ -348,7 +362,7 @@
 			<div class="muted" style="font-size:10px;margin-bottom:8px;letter-spacing:0.3px;">
 				<kbd>/</kbd> cerca · <kbd>↑↓</kbd> scorri · <kbd>invio</kbd> seleziona / assegna · <kbd>+</kbd><kbd>−</kbd> prezzo · <kbd>m</kbd> a me · <kbd>esc</kbd> annulla scelta
 			</div>
-			<div bind:this={listaEl} style="max-height:280px;overflow:auto;">
+			<div bind:this={listaEl} style="max-height:{live && selezionato ? 72 : 280}px;overflow:auto;">
 				{#each risultati as g, i (g.id)}
 					<div
 						class="row-player {selezionato?.id === g.id || evidenziato === i ? 'sel' : ''}"
@@ -395,41 +409,37 @@
 
 		{#if selezionato && val}
 			{@const sc = val.scarsita.livello === 'CRITICA' ? 'CRITICO' : val.scarsita.livello === 'ALTA' ? 'ATTENZIONE' : 'OK'}
-			{@const span = Math.max(1, val.fascia.max - val.fascia.min)}
-			{@const markerPct = Math.max(0, Math.min(100, (100 * (prezzoInput - val.fascia.min)) / span))}
-			<div class="panel" style="border-color:color-mix(in srgb, {coloreAzione(val.decisione.azione)} 55%, var(--border));">
-				<div style="display:flex;align-items:center;gap:10px;">
-					<Crest nome={selezionato.squadra} size={26} />
-					<h2 style="margin:0;font-size:19px;">{selezionato.nome}</h2>
+			<div class="panel active-player" style="border-color:color-mix(in srgb, {coloreAzione(val.decisione.azione)} 55%, var(--border));">
+				<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+					<span class="club-medallion"><Crest nome={selezionato.squadra} size={30} /></span>
+					<div class="player-heading"><span>GIOCATORE IN CHIAMATA</span><h2>{selezionato.nome}</h2></div>
 					<RoleTag ruolo={selezionato.ruolo} ruoloMantra={selezionato.ruoloMantra} />
 					<span class="muted">{selezionato.squadra}</span>
-					<span class="mono muted" style="margin-left:auto;font-size:11px;">
+					{#if !live}<span class="mono muted" style="margin-left:auto;font-size:11px;">
 						Qt {selezionato.quotazione}{#if selezionato.fc}· PMA {selezionato.fc.pma} · PFC {selezionato.fc.pfc} · Slot {selezionato.fc.slot ?? '—'} · tit {Math.round(selezionato.fc.expectedTitolarita)}%{/if}{#if selezionato.fantalab}· FL {selezionato.fantalab.prezzo_atteso} ({selezionato.fantalab.pma_pct}%){/if}
-					</span>
+					</span>{/if}
+					<button style="margin-left:auto;font-size:11px;" onclick={() => selezionato = null}>Cambia giocatore</button>
 				</div>
 
-				<div style="display:flex;align-items:center;gap:22px;margin:14px 0 6px;flex-wrap:wrap;">
-					<div style="min-width:140px;">
-						<div class="muted" style="font-size:10px;letter-spacing:1.5px;">CONSIGLIATO · {val.fonte}</div>
-						<div class="prezzo-hero">{val.fascia.riferimento}</div>
-					</div>
-					<div style="flex:1;min-width:200px;">
-						<div style="position:relative;height:26px;">
-							<div class="bar" style="height:6px;margin-top:10px;">
-								<i style="width:100%;background:linear-gradient(90deg,var(--ok),var(--warn) 60%,var(--bad));opacity:0.45;"></i>
-							</div>
-							<div style="position:absolute;left:calc({markerPct}% - 1px);top:2px;width:2px;height:22px;background:var(--cyan);box-shadow:0 0 8px var(--cyan);"></div>
-							<div style="position:absolute;left:calc({(100 * (val.fascia.riferimento - val.fascia.min)) / span}% - 3px);top:6px;width:6px;height:6px;border-radius:50%;background:var(--text-strong);border:2px solid var(--panel);"></div>
-						</div>
-						<div style="display:flex;justify-content:space-between;font-size:10px;" class="mono muted">
-							<span>{val.fascia.min}</span><span>fascia · base {val.fascia.base}</span><span>{val.fascia.max}</span>
-						</div>
-					</div>
-					<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;">
-						<span class="pill {pillClass(val.decisione.azione)}">{val.decisione.azione}</span>
-						<span class="muted" style="font-size:11px;max-width:170px;">{val.decisione.motivo}</span>
-					</div>
+				<div class="price-grid">
+					<div><span>Valore di riferimento</span><b>{val.fascia.riferimento} <small>cr</small></b><small>Stima · {val.fonte}</small></div>
+					<div><span>Limite strategico · tua squadra</span><b>{val.poteri.strategico} <small>cr</small></b><small>Consiglio per distribuire il budget</small></div>
+					<div><span>Massimo da budget · {proprietarioScelto}</span><b>{operation?.maximum ?? 0} <small>cr</small></b><small>Conserva 1 credito per ogni posto restante</small></div>
 				</div>
+				<div class="decision-summary">
+					<span class="pill {pillClass(val.decisione.azione)}">{val.decisione.azione}</span>
+					<b>Per la tua squadra: {val.decisione.motivo}</b>
+					{#if val.mantra?.delta_copertura}<span>Copertura dei moduli: +{val.mantra.delta_copertura}.</span>{:else if val.mantra}<span>Non aumenta la copertura dei moduli target.</span>{/if}
+					{#if ownOperation}<span>A {prezzoInput ?? '—'} crediti, ti resterebbero {ownOperation.remainingAfter} crediti per {Math.max(0, ownOperation.slots - 1)} posti.</span>{/if}
+				</div>
+				<p class="source-note">Fonte della stima: <b>{val.fonte}</b>.
+					{#if val.fonte === 'PMA'}Valore editoriale, adattato alla situazione dell’asta.
+					{:else if val.fonte === 'PFC'}Confronto PFC: riferimento PMA non disponibile.
+					{:else if val.fonte === 'FANTALAB'}Percentuale Fantalab scelta dal motore e rapportata al tuo budget; il PMA Fantacrediti resta un confronto separato.
+					{:else}Stima sostitutiva: PMA/PFC non disponibili. Trattala con maggiore cautela.{/if}
+					{#if !selezionato.fc?.expectedTitolarita} Dato di titolarità non disponibile o pari a zero.{/if}
+				</p>
+				{#if !live}
 
 				<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;">
 					<span class="chip"><b>{val.fase.etichetta}</b><span>fase</span></span>
@@ -458,6 +468,7 @@
 					</div>
 				{/if}
 
+				{/if}
 				<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;">
 					<label>Flag
 						<select bind:value={flagScelto} style="display:block;">
@@ -472,14 +483,16 @@
 							{#each asta.squadreNomi as s}<option value={s}>{s}</option>{/each}
 						</select>
 					</label>
-					<button class="primary" onclick={assegna}>Assegna →</button>
+					<button class="primary" onclick={assegna} disabled={!!operation?.error}>Assegna →</button>
 					<button
 						title={asta.inCoda(selezionato.id) ? 'Togli dalla coda' : 'Aggiungi alla coda chiamate'}
 						onclick={() => (asta.inCoda(selezionato!.id) ? asta.rimuoviCoda(selezionato!.id) : asta.aggiungiCoda(selezionato!.id))}
 					>{asta.inCoda(selezionato.id) ? '★ in coda' : '☆ coda'}</button>
 				</div>
 
-				{#if val.profili.length}
+				{#if operation?.error}<p role="alert" style="color:var(--bad);font-size:12px;">{operation.error}</p>
+				{:else if operation}<p class="muted" style="font-size:12px;">{proprietarioScelto}: {operation.remaining} crediti disponibili · dopo l’acquisto {operation.remainingAfter} per {Math.max(0, operation.slots - 1)} posti.</p>{/if}
+				{#if val.profili.length && !live}
 					<div style="margin-top:14px;">
 						<div class="muted" style="font-size:11px;margin-bottom:4px;">RIVALI PROBABILI SU QUESTO GIOCATORE</div>
 						{#each val.profili.slice(0, 5) as p}
@@ -520,6 +533,9 @@
 			</div>
 		{/if}
 
+		{#if live}<button class="analytics-toggle" aria-expanded={analisiAperta} onclick={() => analisiAperta = !analisiAperta}>{analisiAperta ? 'Nascondi analisi tattiche' : 'Apri analisi tattiche e chiusura'}</button>{/if}
+		{#if !live || analisiAperta}
+
 		{#if asta.acquisti.length}
 			{@const al = asta.allarmiChiusura}
 			<div class="panel" style="border-color:{coloreLivello[al.livello]};">
@@ -552,7 +568,7 @@
 						</div>
 					{/each}
 				</div>
-			{:else if cf.stato === 'PRESTO'}
+			{:else if ['PRESTO', 'ATTESA', 'ERRORE'].includes(cf.stato)}
 				<div class="muted" style="font-size:11px;padding:0 4px;">Chiusura rosa: {cf.motivo}</div>
 			{/if}
 		{/if}
@@ -837,7 +853,9 @@
 			</div>
 		</div>
 
-		<div class="panel">
+		{/if}
+
+		<div class="panel league-card">
 			<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
 				<h2 style="margin:0;font-size:16px;">Squadre</h2>
 				<div style="display:flex;gap:6px;">
@@ -850,11 +868,12 @@
 				{@const primo = i === 0}
 				{@const ultimo = i === squadreOrdinate.length - 1}
 				<div
-					animate:flip={{ duration: 260 }}
+					animate:flip={{ duration: 160 }}
+					class="league-row"
 					style="padding:7px 0 7px 8px;border-top:1px solid var(--border);border-left:3px solid {asta.coloreDi(sq.nome)};margin-left:-8px;"
 				>
 					<div style="display:flex;align-items:center;gap:7px;font-size:13px;">
-						<span style="width:8px;height:8px;border-radius:2px;background:{asta.coloreDi(sq.nome)};flex:0 0 auto;"></span>
+						<span class="rank">{String(i + 1).padStart(2, '0')}</span>
 						<Crest nome={sq.stemma || sq.nome} tipo="stemmi" size={18} />
 						<span style={sq.isMia ? 'font-weight:700;color:var(--text-strong);' : ''}>{sq.nome}</span>
 						{#if sq.isMia}<span style="color:var(--accent);">★</span>{/if}
@@ -878,7 +897,7 @@
 					<div style="display:flex;gap:7px;align-items:center;font-size:12px;padding:2px 0;border-top:1px solid var(--border);">
 						<RoleTag ruolo={a.ruolo || 'C'} />
 						<Crest nome={a.squadraSerieA} size={14} />
-						<span>{a.nome}</span>
+						<span>{a.nome}</span><EditPurchase acquisto={a} />
 						<span style="color:{asta.coloreDi(a.proprietario)};">→ {a.proprietario}</span>
 						<span class="mono" style="margin-left:auto;color:var(--cyan);">{a.prezzo}</span>
 						{#if delta != null}
@@ -903,7 +922,7 @@
 					{#each gr as a}
 						<div style="display:flex;gap:8px;font-size:13px;padding:3px 0;border-bottom:1px solid var(--border);align-items:center;">
 							<Crest nome={a.squadraSerieA} size={15} />
-							<span>{a.nome}</span>
+							<span>{a.nome}</span><EditPurchase acquisto={a} />
 							{#if asta.isMantra && a.player?.ruoloMantra}<span class="muted mono" style="font-size:11px;">{a.player.ruoloMantra}</span>{/if}
 							<span class="muted">{a.squadraSerieA}</span>
 							<span class="mono" style="margin-left:auto;color:var(--cyan);">{a.prezzo}</span>
@@ -962,4 +981,54 @@
 		border-radius: 3px;
 		padding: 0 3px;
 	}
+
+	.draft-grid { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:16px; align-items:start; }
+	.price-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:14px 0; }
+	.price-grid > div { padding:12px; border:1px solid var(--border); border-radius:12px; background:var(--panel-3); }
+	.price-grid span, .price-grid small { display:block; font-size:10px; color:var(--muted); }
+	.price-grid b { display:block; font-size:40px; font-weight:800; line-height:1.1; letter-spacing:-1.5px; color:var(--text-strong); margin:6px 0; }
+	.price-grid b small { display:inline; }
+	.decision-summary { display:flex; flex-direction:column; align-items:flex-start; gap:6px; font-size:12px; }
+	.source-note { font-size:11px; color:var(--muted); line-height:1.5; }
+	@media (max-width:850px) { .draft-grid { grid-template-columns:1fr; } }
+	@media (max-width:480px) { .price-grid { grid-template-columns:1fr; } }
+
+	.market-header { position:relative; overflow:hidden; display:flex; align-items:center; gap:30px; margin:2px 0 18px; padding:18px 22px; border-radius:16px; border:1px solid var(--border); background:linear-gradient(110deg,var(--panel-2),var(--panel)); }
+	.market-header::after { content:''; position:absolute; pointer-events:none; width:170px; height:170px; border:1px solid color-mix(in srgb,var(--accent) 12%,transparent); border-radius:50%; right:180px; top:-65px; box-shadow:0 0 0 35px color-mix(in srgb,var(--accent) 3%,transparent); }
+	.market-title { margin-right:auto; position:relative; }
+	.market-title h2 { display:block; font:850 32px/1 var(--sans); letter-spacing:-1.6px; margin:7px 0 5px; }
+	.eyebrow { display:flex; align-items:center; gap:7px; font-size:9px; font-weight:750; letter-spacing:1.8px; text-transform:uppercase; color:var(--accent); }
+	.eyebrow i { width:6px; height:6px; border-radius:50%; background:var(--accent); }
+	.market-caption { font-size:11px; color:var(--muted); }
+	.market-stat { min-width:70px; position:relative; z-index:1; }
+	.market-stat > span { display:block; font-size:10px; color:var(--muted); margin-bottom:4px; }
+	.market-stat b { font:750 28px/1.2 var(--sans); letter-spacing:-1px; color:var(--text-strong); }
+	.market-stat small { font-size:13px; font-weight:500; color:var(--muted); }
+	.market-progress { height:3px; background:var(--border); margin-top:6px; border-radius:5px; overflow:hidden; }
+	.market-progress i { display:block; height:100%; background:var(--accent); }
+	.view-switch { position:relative; font-size:11px; margin-left:14px; }
+	.view-switch span { margin-left:14px; color:var(--accent); }
+	.section-eyebrow { display:flex; justify-content:space-between; margin:0 0 10px; font-size:9px; letter-spacing:1.5px; color:var(--accent); font-weight:750; }
+	.section-eyebrow span { color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; font-size:10px; }
+	.search-panel input { min-width:0; }
+	.active-player { overflow:hidden; border-width:1px; box-shadow:0 10px 40px #0002; }
+	.active-player::after { content:''; position:absolute; top:0; left:18px; width:42px; height:3px; background:var(--accent); border-radius:0 0 4px 4px; }
+	.club-medallion { display:flex; width:48px; height:48px; flex:none; align-items:center; justify-content:center; border:1px solid var(--border-strong); border-radius:12px; background:var(--panel-3); }
+	.player-heading > span { font-size:8px; letter-spacing:1.6px; color:var(--muted); font-weight:700; }
+	.player-heading h2 { display:block; margin:2px 0 0; font:850 25px/1.1 var(--sans); letter-spacing:-.8px; }
+	.price-grid > div:first-child { background:linear-gradient(140deg,#d3fa8e,#b6ed68); border-color:#c7f789; }
+	.price-grid > div:first-child b { color:#153016; }
+	.price-grid > div:first-child span, .price-grid > div:first-child small { color:#34532b; }
+	.price-grid > div:nth-child(2) { background:color-mix(in srgb,var(--cyan) 8%,var(--panel-3)); border-color:color-mix(in srgb,var(--cyan) 28%,var(--border)); }
+	.price-grid > div:nth-child(2) b { color:var(--cyan); }
+	.price-grid > div:nth-child(3) b { color:var(--text-strong); }
+	.price-grid span { min-height:25px; line-height:1.25; }
+	.decision-summary { border-left:2px solid var(--accent); padding-left:10px; margin:12px 0; }
+	.source-note { font-size:10px; line-height:1.4; }
+	.rank { font:600 11px var(--mono); color:var(--muted); width:20px; }
+	.league-row:hover { background:var(--accent-soft); border-radius:6px; }
+	.analytics-toggle { text-align:left; padding:12px 14px; color:var(--accent); font-size:11px; border-style:dashed; }
+	@media (max-width:1000px) { .market-header { gap:20px; } .market-caption { display:none; } .market-title h2 { font-size:27px; } .view-switch { margin:0; } }
+	@media (max-width:700px) { .market-header { flex-wrap:wrap; padding:15px; gap:15px; } .market-title { width:100%; } .view-switch { margin-left:auto; } .market-stat b { font-size:24px; } }
+
 </style>

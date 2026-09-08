@@ -1,3 +1,4 @@
+import { checkPurchase } from '../engine/operation';
 import { identifyTeams } from '../persistence/teams';
 import { WriterLock } from '../persistence/writerLock';
 /**
@@ -161,8 +162,9 @@ export class Asta {
 	private disposeEffects?: () => void;
 	private storageListener?: (e: StorageEvent) => void;
 	private lastSaved = "";
-	/** Ultimo risultato endgame (calcolato in worker); null = usa il ripiego sincrono. */
-	private chiusuraStato = $state<OttimizzaResult | null>(null);
+	/** Only results for the current auction input are displayed. */
+	private chiusuraStato = $state<OttimizzaResult>({ attivo: false, stato: "ATTESA", motivo: "Preparazione dei percorsi…", percorsi: [] });
+	private endgameRevision = 0;
 	private endgameClient: EndgameClient | null = null;
 
 	/** true durante il caricamento/switch: sospende l'autosave. */
@@ -194,25 +196,21 @@ export class Asta {
 				this.persisti(snap);
 			});
 
-			// endgame: quando si avvicina la chiusura, la beam search gira nel worker.
+			// Serialize reactive proxies before postMessage; never calculate a heavy fallback on the UI thread.
 			$effect(() => {
-				const input = this.chiusuraInput; // traccia le dipendenze reattive
+				const input: OttimizzaInput = JSON.parse(JSON.stringify(this.chiusuraInput));
+				const revision = ++this.endgameRevision;
 				const vuoti = Math.max(0, Math.trunc(input.slotVuoti));
-				const soglia = input.sogliaAttivazione ?? 10;
-				if (vuoti === 0 || vuoti > soglia || input.budgetResiduo < vuoti || typeof Worker === 'undefined') {
-					this.chiusuraStato = ottimizzaFinaleAsta(input); // ripiego sincrono, qui è economico
+				if (vuoti === 0 || vuoti > (input.sogliaAttivazione ?? 10) || input.budgetResiduo < vuoti) {
+					this.chiusuraStato = ottimizzaFinaleAsta(input); // only constant-time early exits
 					return;
 				}
-				(this.endgameClient ??= new EndgameClient()).compute(
-					input,
-					(r) => (this.chiusuraStato = r),
-					() => {
-						try {
-							this.chiusuraStato = ottimizzaFinaleAsta(input);
-						} catch {
-							/* tieni l'ultimo risultato valido */
-						}
-					}
+				this.chiusuraStato = { attivo: false, stato: 'ATTESA', motivo: 'Calcolo dei percorsi in corso…', percorsi: [] };
+				(this.endgameClient ??= new EndgameClient()).compute(input,
+					(result) => { if (revision === this.endgameRevision) this.chiusuraStato = result; },
+					() => { if (revision === this.endgameRevision) this.chiusuraStato = {
+						attivo: false, stato: 'ERRORE', motivo: 'Percorsi non disponibili. Puoi continuare a registrare l’asta.', percorsi: []
+					}; }
 				);
 			});
 		});
@@ -252,6 +250,7 @@ export class Asta {
 		this.altraSchedaAttiva = true;
 		this.writer.dispose();
 		this.disposeEffects?.();
+		this.endgameRevision++;
 		this.endgameClient?.dispose();
 		this.endgameClient = null;
 		if (this.storageListener && typeof window !== 'undefined') window.removeEventListener('storage', this.storageListener);
@@ -841,7 +840,10 @@ export class Asta {
 		const fonte = fascia.fonte === 'PMA' && fontePma === 'FANTALAB' ? 'FANTALAB' : fascia.fonte;
 
 		const poteri = calcolaPoteriAcquisto(bMia, ruolo, this.config.limiti, budget, QUOTE_RUOLO);
-		const slotRuoloVuoti = Math.max(0, (this.config.limiti[ruolo] ?? 0) - (bMia.perRuolo[ruolo] ?? 0));
+		const slotRuoloVuoti = this.isMantra
+			? Math.max(0, ruolo === 'P' ? this.config.limiti.P - bMia.perRuolo.P
+				: this.config.limiti.TOT - this.config.limiti.P - (this.acquisti.filter((a) => a.proprietario === this.miaSquadra && a.ruolo !== 'P').length))
+			: Math.max(0, (this.config.limiti[ruolo] ?? 0) - (bMia.perRuolo[ruolo] ?? 0));
 
 		const profili = profilaRivali(
 			bilanci,
@@ -952,14 +954,8 @@ export class Asta {
 		};
 	}
 
-	/**
-	 * Percorsi di chiusura rosa (endgame). La beam search (~0.4s con 10 slot) gira
-	 * in un Web Worker: qui si legge l'ultimo risultato, con calcolo sincrono come
-	 * ripiego iniziale o se il worker non è disponibile.
-	 */
-	get chiusuraFinale(): OttimizzaResult {
-		return this.chiusuraStato ?? ottimizzaFinaleAsta(this.chiusuraInput);
-	}
+	/** Reading the latest result never runs the optimizer on the UI thread. */
+	get chiusuraFinale(): OttimizzaResult { return this.chiusuraStato; }
 
 	/** Allarmi di chiusura per la mia squadra. */
 	get allarmiChiusura() {
@@ -987,9 +983,28 @@ export class Asta {
 		});
 	}
 
+	controllaAcquisto(g: { id: number; ruolo: Ruolo | '' }, prezzo: number, proprietario: string, editing?: number) {
+		return checkPurchase({ teams: this.config.squadre, purchases: this.acquisti, budget: this.config.budgetMax,
+			limits: this.config.limiti, mantra: this.isMantra, playerId: g.id, role: g.ruolo, owner: proprietario, price: prezzo, editing });
+	}
+
+	correggiAcquisto(id: number, prezzo: number, proprietario: string) {
+		this.verificaScrittura();
+		const old = this.acquisti.find((a) => a.giocatoreId === id);
+		if (!old) throw new Error('Acquisto non trovato.');
+		const check = this.controllaAcquisto({ id, ruolo: old.ruolo }, prezzo, proprietario, id);
+		if (check.error) throw new Error(check.error);
+		if (old.prezzo === prezzo && old.proprietario === proprietario) return;
+		this.registra();
+		const team = this.config.squadre.find((s) => s.nome === proprietario)!;
+		this.acquisti = this.acquisti.map((a) => a.giocatoreId === id
+			? { ...a, prezzo, proprietario: team.nome, proprietarioId: team.id } : a);
+	}
+
 	assegna(g: Giocatore, prezzo: number, proprietario: string) {
 		this.verificaScrittura();
-		if (this.giocatoreIdPresi.has(g.id)) throw new Error(`${g.nome} è già stato assegnato`);
+		const check = this.controllaAcquisto(g, prezzo, proprietario);
+		if (check.error) throw new Error(check.error);
 		if (!Number.isFinite(prezzo) || prezzo < 1) throw new Error('Prezzo non valido.');
 		const team = this.config.squadre.find((s) => s.nome === proprietario);
 		if (!team) throw new Error('Squadra non valida.');

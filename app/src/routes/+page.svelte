@@ -273,7 +273,7 @@
 		<h1 class="brand">
 			<span class="mark"><Logo size={30} /></span> Fantatool <span class="sub">/ asta</span>
 		</h1>
-		<span class="muted mono" style="font-size:11px;">{metaTxt}</span>
+		<span class="dataset-label" title={metaTxt}>{asta.config.modalita} / {asta.config.stagione} · {asta.giocatori.length} giocatori</span>
 		<div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
 			<span class="tag" title="Salvataggio automatico locale">💾 Browser {ora(asta.ultimoSalvataggio)}</span>
 			{#if backupAutoSupportato}

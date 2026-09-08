@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { asta } from '$lib/stores/auction.svelte';
+	import EditPurchase from '$lib/ui/EditPurchase.svelte';
 	import Crest from '$lib/ui/Crest.svelte';
 	import BudgetBar from '$lib/ui/BudgetBar.svelte';
 	import SlotDots from '$lib/ui/SlotDots.svelte';
@@ -7,7 +8,7 @@
 	const rc = { P: 'var(--role-p)', D: 'var(--role-d)', C: 'var(--role-c)', A: 'var(--role-a)' } as Record<string, string>;
 	const RUOLI: Ruolo[] = ['P', 'D', 'C', 'A'];
 
-	let vista = $state<'reparto' | 'giocatore'>('reparto');
+	let vista = $state<'reparto' | 'giocatore'>('giocatore');
 	const pct = (v: number) => `${((100 * v) / Math.max(1, asta.config.budgetMax)).toFixed(1)}%`;
 </script>
 
@@ -22,11 +23,11 @@
 		{@const b = asta.bilanci[sq.nome]}
 		{@const rosa = asta.rosa(sq.nome)}
 		{@const speso = asta.config.budgetMax - b.c_rimasti}
-		<div class="panel" style="border-top:3px solid {asta.coloreDi(sq.nome)};">
+		<div class="panel squad-card" class:mine={sq.isMia} style="--club-color:{asta.coloreDi(sq.nome)};border-top:3px solid {asta.coloreDi(sq.nome)};">
 			<div style="display:flex;justify-content:space-between;align-items:center;">
 				<h2 style="margin:0;font-size:15px;display:flex;align-items:center;gap:6px;">
 					<span style="width:9px;height:9px;border-radius:2px;background:{asta.coloreDi(sq.nome)};"></span>
-					<Crest nome={sq.stemma || sq.nome} tipo="stemmi" size={22} />
+					<span class="squad-crest"><Crest nome={sq.stemma || sq.nome} tipo="stemmi" size={32} /></span>
 					{sq.nome}{sq.isMia ? ' ★' : ''}
 				</h2>
 				<span class="muted mono" style="font-size:12px;">
@@ -51,7 +52,7 @@
 						{@const tit = a.player?.fc?.expectedTitolarita ?? 0}
 						<div style="display:flex;gap:6px;font-size:12px;padding:2px 0;align-items:center;">
 							<Crest nome={a.squadraSerieA} size={14} />
-							<span>{a.nome}</span>
+							<span>{a.nome}</span><EditPurchase acquisto={a} />
 							{#if asta.isMantra && a.player?.ruoloMantra}<span class="muted mono" style="font-size:10px;">{a.player.ruoloMantra}</span>{/if}
 							{#if tit}<span class="mono" style="font-size:10px;color:{tit >= 70 ? 'var(--ok)' : tit >= 45 ? 'var(--warn)' : 'var(--bad)'};">{Math.round(tit)}%</span>{/if}
 							{#if a.player?.fantalab?.prezzo_atteso}<span class="mono muted" style="font-size:10px;">FL{a.player.fantalab.prezzo_atteso}</span>{/if}
@@ -65,3 +66,10 @@
 		</div>
 	{/each}
 </div>
+
+<style>
+	.squad-card { overflow:hidden; }
+	.squad-card::after { content:''; position:absolute; top:-42px; right:-40px; width:140px; height:140px; border:22px solid color-mix(in srgb,var(--club-color) 7%,transparent); border-radius:50%; pointer-events:none; }
+	.squad-card.mine { background:linear-gradient(135deg,var(--accent-soft),transparent 70%),var(--panel); }
+	.squad-crest { display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; background:var(--panel-3); border-radius:10px; border:1px solid var(--border); }
+</style>
