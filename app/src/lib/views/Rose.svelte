@@ -69,7 +69,7 @@
 
 <style>
 	.squad-card { overflow:hidden; }
-	.squad-card::after { content:''; position:absolute; top:-42px; right:-40px; width:140px; height:140px; border:22px solid color-mix(in srgb,var(--club-color) 7%,transparent); border-radius:50%; pointer-events:none; }
-	.squad-card.mine { background:linear-gradient(135deg,var(--accent-soft),transparent 70%),var(--panel); }
-	.squad-crest { display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; background:var(--panel-3); border-radius:10px; border:1px solid var(--border); }
+	.squad-card::after { content:''; position:absolute; top:-46px; right:-44px; width:150px; height:150px; border:24px solid color-mix(in srgb,var(--club-color) 9%,transparent); border-radius:50%; pointer-events:none; }
+	.squad-card.mine { background:linear-gradient(135deg,var(--accent-soft),transparent 70%),var(--panel); box-shadow:var(--shadow),inset 0 0 0 1px color-mix(in srgb,var(--accent) 30%,transparent); }
+	.squad-crest { display:inline-flex; align-items:center; justify-content:center; width:46px; height:46px; background:var(--panel-3); border-radius:50%; border:1px solid color-mix(in srgb,var(--club-color) 40%,var(--border)); }
 </style>

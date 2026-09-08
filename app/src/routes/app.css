@@ -1,6 +1,20 @@
-/* Fantatool — tema "Trading Terminal": scuro, numeri in monospace,
-   un colore fisso per ruolo, glow riservato al prezzo consigliato. */
+/* Fantatool — tema "Matchday": verde stadio, tipografia condensata da
+   telecronaca (Barlow Condensed, self-hosted), righe di campo sullo sfondo. */
 
+@font-face {
+	font-family: 'Barlow Condensed';
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url('/fonts/barlow-condensed-600.woff2') format('woff2');
+}
+@font-face {
+	font-family: 'Barlow Condensed';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('/fonts/barlow-condensed-700.woff2') format('woff2');
+}
 
 :root {
 	--bg: #071410;
@@ -31,7 +45,8 @@
 
 	--mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 	--sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-	--display: 'Arial Narrow', Impact, var(--sans);
+	--display: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', Impact, sans-serif;
+	--pitch-stripe: rgba(255, 255, 255, 0.014);
 
 	--r: 14px;
 	--r-sm: 9px;
@@ -98,6 +113,7 @@
 	--primary-border: #0e7a49;
 	--primary-text: #ffffff;
 	--tag-bg: rgba(20, 40, 70, 0.04);
+	--pitch-stripe: rgba(20, 60, 40, 0.022);
 	color-scheme: light;
 }
 
@@ -119,8 +135,13 @@ html {
 body {
 	margin: 0;
 	background-color: var(--bg);
-	background-image: radial-gradient(ellipse at 15% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 55%);
-	background-size: 100% 100%, 100% 100%, 100% 100%;
+	background-image:
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='900' viewBox='0 0 1200 900'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.05' stroke-width='2'%3E%3Cline x1='600' y1='40' x2='600' y2='860'/%3E%3Ccircle cx='600' cy='450' r='130'/%3E%3Ccircle cx='600' cy='450' r='5' fill='%23ffffff'/%3E%3Crect x='40' y='250' width='170' height='400'/%3E%3Crect x='990' y='250' width='170' height='400'/%3E%3Crect x='40' y='355' width='64' height='190'/%3E%3Crect x='1096' y='355' width='64' height='190'/%3E%3Cpath d='M210 372 A96 96 0 0 1 210 528'/%3E%3Cpath d='M990 372 A96 96 0 0 0 990 528'/%3E%3C/g%3E%3C/svg%3E"),
+		repeating-linear-gradient(90deg, transparent 0 96px, var(--pitch-stripe) 96px 192px),
+		radial-gradient(ellipse at 15% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 55%);
+	background-position: center 76px, 0 0, 0 0;
+	background-repeat: no-repeat, repeat, no-repeat;
+	background-size: min(1180px, 94%) auto, auto, 100% 100%;
 	background-attachment: fixed;
 	color: var(--text);
 	font: 400 var(--fs) / 1.55 var(--sans);
@@ -188,9 +209,9 @@ h3 { font-family: var(--sans); font-weight: 700; font-size: 13px; text-transform
 	gap: 9px;
 	margin: 0;
 	font-family: var(--display);
-	font-size: 25px;
-	font-weight: 400;
-	letter-spacing: -0.5px;
+	font-size: 27px;
+	font-weight: 700;
+	letter-spacing: 0.6px;
 	text-transform: uppercase;
 }
 .brand .mark {
@@ -313,8 +334,11 @@ select:focus {
 	border-radius: 6px;
 	background: var(--tag-bg);
 	border: 1px solid var(--border-strong);
-	font: 700 11px/1.4 var(--mono);
-	letter-spacing: 0.5px;
+	font: 700 12px/1 var(--display);
+	letter-spacing: 0.6px;
+	text-transform: uppercase;
+	min-width: 26px;
+	justify-content: center;
 	color: var(--muted);
 }
 .tag[data-ruolo='P'] { color: var(--role-p); border-color: color-mix(in srgb, var(--role-p) 40%, transparent); background: color-mix(in srgb, var(--role-p) 10%, transparent); }
@@ -325,10 +349,10 @@ select:focus {
 /* --- pillola decisione --- */
 .pill {
 	display: inline-block;
-	padding: 5px 16px 3px;
+	padding: 5px 14px 4px;
 	border-radius: 6px;
-	font: 800 12px/1.4 var(--sans);
-	letter-spacing: 1.2px;
+	font: 700 14px/1.2 var(--display);
+	letter-spacing: 1.4px;
 	text-transform: uppercase;
 	border: 1px solid currentColor;
 	background: color-mix(in srgb, currentColor 12%, transparent);
@@ -337,16 +361,13 @@ select:focus {
 .pill--consider { color: var(--warn); }
 .pill--stop { color: var(--bad); }
 
-/* --- prezzo consigliato (unico elemento con glow) --- */
+/* --- prezzo consigliato: numero da maglia --- */
 .prezzo-hero {
-	font: 400 50px/1 var(--display);
-	color: var(--cyan);
-	background: linear-gradient(180deg, color-mix(in srgb, var(--cyan) 55%, #ffffff), var(--cyan));
-	-webkit-background-clip: text;
-	background-clip: text;
-	-webkit-text-fill-color: transparent;
-	filter: drop-shadow(0 0 24px color-mix(in srgb, var(--cyan) 45%, transparent));
-	letter-spacing: 0.5px;
+	font: 700 58px/0.85 var(--display);
+	color: var(--text-strong);
+	letter-spacing: 1px;
+	-webkit-text-stroke: 1.5px color-mix(in srgb, var(--accent) 50%, transparent);
+	text-shadow: 0 0 30px color-mix(in srgb, var(--accent) 28%, transparent);
 }
 
 /* --- chip metrica --- */
@@ -449,14 +470,16 @@ select:focus {
 	padding: 7px 12px;
 	border-radius: 11px;
 	background: linear-gradient(180deg, var(--panel-3), var(--panel));
-	border: 1px solid color-mix(in srgb, var(--cyan) 30%, var(--border));
-	font: 700 15px/1 var(--mono);
+	border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--border));
+	font: 700 15px/1 var(--display);
+	letter-spacing: 0.4px;
 	color: var(--text-strong);
 	white-space: nowrap;
 }
 .budgetchip b {
-	color: var(--cyan);
-	font-size: 17px;
+	color: var(--text-strong);
+	font-size: 20px;
+	letter-spacing: 0.5px;
 }
 .budgetchip.neg {
 	border-color: var(--bad);
@@ -505,12 +528,12 @@ table {
 	border-collapse: collapse;
 }
 table th {
-	font-family: var(--sans);
-	font-weight: 800;
+	font-family: var(--display);
+	font-weight: 700;
 	color: var(--muted);
 	text-transform: uppercase;
-	font-size: 10px;
-	letter-spacing: 0.8px;
+	font-size: 12px;
+	letter-spacing: 1px;
 	padding-bottom: 6px;
 	border-bottom: 2px solid var(--border-strong);
 }
@@ -558,4 +581,44 @@ input::placeholder { color:var(--muted); opacity:.8; }
 table th { padding:10px 8px; background:var(--panel-3); }
 table td { padding:var(--pad-row) 8px; }
 :root[data-theme='chiaro'] { --border:#d2dccd; --border-strong:#b6c8b2; --panel-hi:#153c1910; }
-@media (max-width:700px) { .brand { font-size:22px; } .dataset-label { display:none; } .tabbar { width:100%; } .tabbar button { flex:1; padding:9px; } }
+@media (max-width:700px) { .brand { font-size:23px; } .dataset-label { display:none; } .tabbar { width:100%; } .tabbar button { flex:1; padding:9px; } }
+
+/* ===================== MATCHDAY — identità calcistica ===================== */
+
+/* Distintivo "LIVE" da regia TV. */
+.live-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 2px 7px 1px;
+	border-radius: 4px;
+	font: 700 11px/1 var(--display);
+	letter-spacing: 1.5px;
+	text-transform: uppercase;
+	color: #fff;
+	background: var(--accent2);
+}
+.live-badge::before {
+	content: '';
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: #fff;
+	animation: live-pulse 1.4s ease-in-out infinite;
+}
+@keyframes live-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) { .live-badge::before { animation: none; } }
+
+/* Logo: alone verde-lime coerente con l'accent. */
+.brand .mark { filter: drop-shadow(0 2px 12px color-mix(in srgb, var(--accent) 45%, transparent)); }
+
+/* Barra tab come tabellone: attiva in caps condensati. */
+.tabbar button { font-family: var(--display); font-size: 14px; letter-spacing: 0.6px; text-transform: uppercase; }
+.tabbar button.on { box-shadow: 0 4px 16px -6px color-mix(in srgb, var(--accent) 70%, transparent); }
+
+/* Numeri (prezzi, crediti, percentuali) in condensato tabellare. */
+.chip b, .market-stat b, .price-grid b, .prezzo-hero { font-feature-settings: 'tnum' 1; }
+.chip b { font-family: var(--display); font-size: 16px; letter-spacing: 0.3px; }
+
+/* Crest come coccarda di club. */
+.squad-crest, .club-medallion { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 12%, transparent), 0 2px 8px -4px #0007; }
