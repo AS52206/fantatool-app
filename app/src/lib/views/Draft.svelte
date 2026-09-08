@@ -57,7 +57,9 @@
 				: list.filter((g) => g.ruolo === ruoloFiltro);
 		}
 		if (q) list = list.filter((g) => g.chiave.includes(q) || normalizzaNome(g.squadra).includes(q));
-		return [...list].sort((a, b) => b.quotazione - a.quotazione).slice(0, 40);
+		// senza ricerca né filtro ruolo mostra i 40 più quotati; appena filtri, tutti.
+		const limite = q || ruoloFiltro !== 'TUTTI' ? 300 : 40;
+		return [...list].sort((a, b) => b.quotazione - a.quotazione).slice(0, limite);
 	});
 	$effect(() => {
 		void risultati;
@@ -384,6 +386,11 @@
 					<p class="muted">Nessun risultato.</p>
 				{/each}
 			</div>
+			{#if query === '' && ruoloFiltro === 'TUTTI' && risultati.length >= 40}
+				<div class="muted" style="font-size:10px;margin-top:4px;">
+					Mostrati i 40 più quotati · scrivi un nome o scegli un ruolo per vedere tutti gli altri (tab <b>Liberi</b> per la lista completa)
+				</div>
+			{/if}
 		</div>
 
 		{#if selezionato && val}
