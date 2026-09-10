@@ -51,6 +51,36 @@
 	function prezzoDefault(g: { fantalab?: { prezzo_atteso: number } | null }, consigliato: number | null) {
 		return Math.max(1, Math.round(g.fantalab?.prezzo_atteso || consigliato || 1));
 	}
+	let selezioneMultipla = $state<string[]>([]);
+	let prezziMultipli = $state<Record<string, number>>({});
+	const giocatoriMultipli = $derived(
+		asta.giocatori.filter((g) => selezioneMultipla.includes(g.chiave) && !(g.chiave in (asta.scenari[attivo] ?? {})))
+	);
+	function cambiaSelezioneMultipla(g: { chiave: string; fantalab?: { prezzo_atteso: number } | null }) {
+		if (selezioneMultipla.includes(g.chiave)) {
+			selezioneMultipla = selezioneMultipla.filter((chiave) => chiave !== g.chiave);
+			return;
+		}
+		const consigliato = asta.valutazione(g as never).fascia.riferimento;
+		selezioneMultipla = [...selezioneMultipla, g.chiave];
+		prezziMultipli = { ...prezziMultipli, [g.chiave]: prezzoDefault(g, consigliato) };
+	}
+	function aggiornaPrezzoMultiplo(chiave: string, prezzo: number) {
+		prezziMultipli = { ...prezziMultipli, [chiave]: prezzo };
+	}
+	function svuotaSelezioneMultipla() {
+		selezioneMultipla = [];
+		prezziMultipli = {};
+	}
+	function aggiungiMultipli() {
+		if (!attivo || !giocatoriMultipli.length) return;
+		asta.setTargetScenarioMultipli(
+			attivo,
+			giocatoriMultipli.map((g) => ({ chiave: g.chiave, prezzoMax: prezziMultipli[g.chiave] }))
+		);
+		svuotaSelezioneMultipla();
+		query = '';
+	}
 	function aggiungi(chiave: string, prezzo: number) {
 		asta.setTargetScenario(attivo, chiave, prezzo);
 		query = '';
@@ -367,18 +397,43 @@
 						{#each suggerimenti as g}
 							{@const cons = asta.valutazione(g).fascia.riferimento}
 							{@const def = prezzoDefault(g, cons)}
-							<button class="row-player" onclick={() => aggiungi(g.chiave, def)}>
+							<div class="row-player scenario-suggestion">
+								<input
+									class="scenario-check"
+									type="checkbox"
+									checked={selezioneMultipla.includes(g.chiave)}
+									aria-label={`Seleziona ${g.nome} per il piano`}
+									onchange={() => cambiaSelezioneMultipla(g)}
+								/>
 								<RoleTag ruolo={g.ruolo} ruoloMantra={g.ruoloMantra} />
 								<Crest nome={g.squadra} size={15} />
 								<strong>{g.nome}</strong><span class="muted">{g.squadra}</span>
 								<span class="muted mono" style="margin-left:auto;">
 									{#if g.fantalab?.prezzo_atteso}FL {g.fantalab.prezzo_atteso} · {/if}cons. {cons} → <span style="color:var(--cyan);">{def}</span>
 								</span>
-							</button>
+								<button class="scenario-add-one" title={`Aggiungi solo ${g.nome}`} onclick={() => aggiungi(g.chiave, def)}>＋</button>
+							</div>
 						{/each}
 					</div>
 				{/if}
 			</div>
+
+			{#if giocatoriMultipli.length}
+				<div class="scenario-batch" aria-label="Aggiunta multipla al piano">
+					<div class="scenario-batch-head"><span>Aggiunta multipla</span><b>{giocatoriMultipli.length} nel piano</b><button onclick={svuotaSelezioneMultipla}>Svuota</button></div>
+					<div class="scenario-batch-list">
+						{#each giocatoriMultipli as g (g.chiave)}
+							<div>
+								<RoleTag ruolo={g.ruolo} ruoloMantra={g.ruoloMantra} /><Crest nome={g.squadra} size={15} />
+								<strong>{g.nome}</strong><span>{g.squadra}</span>
+								<label>Max <input type="number" min="1" value={prezziMultipli[g.chiave]} oninput={(e) => aggiornaPrezzoMultiplo(g.chiave, Number(e.currentTarget.value))} /></label>
+								<button aria-label={`Rimuovi ${g.nome} dalla selezione`} onclick={() => cambiaSelezioneMultipla(g)}>×</button>
+							</div>
+						{/each}
+					</div>
+					<button class="primary" onclick={aggiungiMultipli}>Aggiungi {giocatoriMultipli.length} al piano →</button>
+				</div>
+			{/if}
 
 			<table style="width:100%;border-collapse:collapse;font-size:13px;">
 				<thead><tr style="text-align:left;"><th title="Numero progressivo">#</th><th>R</th><th>Giocatore</th><th>Max</th><th title="Quota del budget di lega ({asta.config.budgetMax} cr)">%Bud</th><th>Cons.</th><th title="PMA Fantalab">FL</th><th title="% titolarità">%TIT</th><th>Stato</th><th></th></tr></thead>
@@ -490,7 +545,15 @@
 					{#each candidatiPicker as g (g.chiave)}
 						{@const cons = asta.valutazione(g).fascia.riferimento}
 						{@const def = prezzoDefault(g, cons)}
-						<button class="row-player" onclick={() => aggiungiDaPicker(g)}>
+						<div class="row-player picker-suggestion" role="button" tabindex="-1" onclick={() => aggiungiDaPicker(g)} onkeydown={(e) => e.key === 'Enter' && aggiungiDaPicker(g)}>
+							<input
+								class="scenario-check"
+								type="checkbox"
+								checked={selezioneMultipla.includes(g.chiave)}
+								aria-label={`Seleziona ${g.nome} per il piano`}
+								onclick={(e) => e.stopPropagation()}
+								onchange={() => cambiaSelezioneMultipla(g)}
+							/>
 							<RoleTag ruolo={g.ruolo} ruoloMantra={g.ruoloMantra} />
 							<Crest nome={g.squadra} size={15} />
 							<strong>{g.nome}</strong><span class="muted">{g.squadra}</span>
@@ -498,11 +561,17 @@
 							<span class="muted mono" style="margin-left:auto;">
 								{#if g.fantalab?.prezzo_atteso}FL {g.fantalab.prezzo_atteso} · {/if}cons. {cons} → <span style="color:var(--cyan);">{def}</span>
 							</span>
-						</button>
+						</div>
 					{:else}
 						<p class="muted" style="font-size:12px;">Nessun giocatore disponibile per questo ruolo.</p>
 					{/each}
 				</div>
+				{#if giocatoriMultipli.length}
+					<div class="picker-batch">
+						<span><b>{giocatoriMultipli.length}</b> selezionati · potrai modificare i massimali nella tabella</span>
+						<button class="primary" onclick={() => { aggiungiMultipli(); picker = null; }}>Aggiungi al piano →</button>
+					</div>
+				{/if}
 			</div>
 		</div>
 	{/if}
@@ -529,4 +598,25 @@
 		display: flex;
 		flex-direction: column;
 	}
+	.picker-suggestion { cursor:pointer; }
+	.picker-batch { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); color:var(--muted); font-size:11px; }
+	.picker-batch b { color:var(--cyan); }
+	.picker-batch .primary { flex:none; font-size:11px; }
+	.scenario-suggestion { cursor:default; }
+	.scenario-check { width:14px; height:14px; flex:none; accent-color:var(--cyan); cursor:pointer; }
+	.scenario-add-one { min-width:26px; padding:3px 6px; color:var(--cyan); font-size:15px; line-height:1; }
+	.scenario-batch { display:grid; gap:8px; margin:0 0 10px; padding:10px; border:1px solid color-mix(in srgb,var(--cyan) 45%,var(--border)); border-radius:9px; background:linear-gradient(135deg,color-mix(in srgb,var(--cyan) 8%,var(--panel)),var(--panel)); }
+	.scenario-batch-head { display:flex; align-items:center; gap:8px; }
+	.scenario-batch-head span { color:var(--cyan); font:700 9px var(--display); letter-spacing:1.2px; text-transform:uppercase; }
+	.scenario-batch-head b { font:700 16px var(--display); text-transform:uppercase; }
+	.scenario-batch-head button { margin-left:auto; font-size:10px; }
+	.scenario-batch-list { display:grid; max-height:170px; overflow:auto; border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+	.scenario-batch-list > div { display:grid; grid-template-columns:auto auto minmax(80px,1fr) minmax(48px,.5fr) auto auto; align-items:center; gap:6px; min-height:34px; border-bottom:1px solid color-mix(in srgb,var(--border) 75%,transparent); font-size:11px; }
+	.scenario-batch-list > div:last-child { border-bottom:0; }
+	.scenario-batch-list span { color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+	.scenario-batch-list label { display:flex; align-items:center; gap:3px; color:var(--muted); font:700 10px var(--mono); }
+	.scenario-batch-list input { width:55px; padding:4px 5px; font-size:12px; }
+	.scenario-batch-list button { min-width:24px; padding:3px 6px; color:var(--muted); border-color:transparent; font-size:16px; line-height:1; }
+	.scenario-batch > .primary { justify-self:end; font-size:11px; }
+	@media (max-width:700px) { .scenario-batch-list > div { grid-template-columns:auto auto minmax(70px,1fr) auto auto; } .scenario-batch-list span { display:none; } .scenario-batch > .primary { justify-self:stretch; } .picker-batch { align-items:stretch; flex-direction:column; } .picker-batch .primary { width:100%; } }
 </style>

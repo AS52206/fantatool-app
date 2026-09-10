@@ -1257,6 +1257,16 @@ export class Asta {
 		this.scenari = { ...this.scenari, [nome]: piano };
 	}
 
+	/** Aggiunge più obiettivi allo stesso piano con una sola scrittura. */
+	setTargetScenarioMultipli(nome: string, obiettivi: { chiave: string; prezzoMax: number }[]) {
+		this.verificaScrittura();
+		if (!nome || !obiettivi.length) return;
+		const piano = { ...(this.scenari[nome] ?? {}) };
+		for (const { chiave, prezzoMax } of obiettivi)
+			piano[chiave] = Math.max(1, Math.round(prezzoMax));
+		this.scenari = { ...this.scenari, [nome]: piano };
+	}
+
 	rimuoviDaScenario(nome: string, chiave: string) {
 		this.verificaScrittura();
 		const { [chiave]: _, ...piano } = this.scenari[nome] ?? {};

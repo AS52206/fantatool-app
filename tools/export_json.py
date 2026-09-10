@@ -137,6 +137,45 @@ def leggi_fantacrediti(percorso: Path) -> dict[str, dict]:
     return mappa
 
 
+def leggi_ballottaggi(percorso: Path, stagione: str) -> dict[tuple[str, str], dict]:
+    """Legge il foglio di importazione dei ballottaggi.
+
+    La chiave usa nome normalizzato + squadra: non abbiniamo mai un giocatore
+    soltanto per nome, perché il listone può essere indietro sui trasferimenti.
+    """
+    if not percorso.exists():
+        return {}
+    try:
+        df = pd.read_excel(percorso, sheet_name="Import_Ballottaggi", skiprows=2)
+    except (OSError, ValueError) as exc:
+        print(f"  ! impossibile leggere {percorso.name}: {exc}", file=sys.stderr)
+        return {}
+    richieste = {"Stagione", "Squadra", "Nome giocatore", "Contendente", "expectedTitolarita"}
+    if not richieste.issubset(set(df.columns)):
+        print(f"  ! colonne ballottaggi non valide in {percorso.name}", file=sys.stderr)
+        return {}
+    righe: dict[tuple[str, str], dict] = {}
+    for _, r in df.iterrows():
+        if str(r.get("Stagione", "")).strip() != stagione:
+            continue
+        nome = normalizza_nome(r.get("Nome giocatore"))
+        squadra = normalizza_nome(r.get("Squadra"))
+        if not nome or not squadra:
+            continue
+        percentuale = num(r.get("expectedTitolarita"))
+        if 0 < percentuale <= 1:
+            percentuale *= 100
+        rilevato = r.get("Rilevato il")
+        righe[(nome, squadra)] = {
+            "contendente": str(r.get("Contendente", "") or "").strip(),
+            "rischio": str(r.get("Rischio coppia", "") or "").strip(),
+            "expectedTitolarita": round(percentuale, 2),
+            "rilevatoIl": rilevato.isoformat() if hasattr(rilevato, "isoformat") else str(rilevato or ""),
+            "fonte": str(r.get("Fonte", "") or "").strip(),
+        }
+    return righe
+
+
 def leggi_mantra_post(percorso: Path) -> dict[str, dict]:
     """Listone Mantra "post mercato": un foglio Excel per ruolo atomico
     (Por, Dc, B, Ds, Dd, E, M, C, W, T, A, Pc). Ogni giocatore compare in un
@@ -245,6 +284,7 @@ def costruisci(stagione: str, modalita: str, partecipanti: int) -> dict:
     p_fc = base / "fantacrediti" / f"{partecipanti}-partecipanti.xlsx"
     p_fantalab = RADICE / "data" / stagione / "fantalab" / "serie_a_listone.json"
     p_mantra_post = base / "mantra-post.xlsx"
+    p_ballottaggi = RADICE / "data" / stagione / "ballottaggi.xlsx"
 
     if not p_listone.exists():
         sys.exit(f"listone mancante: {p_listone}")
@@ -264,6 +304,7 @@ def costruisci(stagione: str, modalita: str, partecipanti: int) -> dict:
 
     fc = leggi_fantacrediti(p_fc) if p_fc.exists() else {}
     fc_per_id = fc.pop("__per_id__", {}) if fc else {}
+    ballottaggi = leggi_ballottaggi(p_ballottaggi, stagione)
 
     # fantalab: pma testuale (percentuale titolarità) per nome
     fantalab: dict[str, dict] = {}
@@ -301,6 +342,15 @@ def costruisci(stagione: str, modalita: str, partecipanti: int) -> dict:
         pid = int(num(r.get(c_id), 0)) if c_id else 0
         chiave = normalizza_nome(nome)
         m = fc_per_id.get(pid) or fc.get(chiave) or {}
+
+        ballottaggio = ballottaggi.get((chiave, normalizza_nome(r.get(c_squadra))))
+        if ballottaggio and m:
+            m = {
+                **m,
+                "expectedTitolarita": ballottaggio["expectedTitolarita"],
+                "playerStatus": "B",
+                "ballottaggio": ballottaggio,
+            }
         fl = fantalab.get(chiave, {})
         mp = mantra_post.get(chiave)
         ruolo_mantra_post = None
@@ -340,6 +390,7 @@ def costruisci(stagione: str, modalita: str, partecipanti: int) -> dict:
             "pg": pg,
             "fmOld": round(fm_old, 2),
             "pgOld": pg_old,
+            "ballottaggio": ballottaggio or None,
             "fc": {
                 "pma": m.get("pma", 0.0),
                 "pfc": m.get("pfc", 0.0),
@@ -351,6 +402,7 @@ def costruisci(stagione: str, modalita: str, partecipanti: int) -> dict:
                 "playerStatus": m.get("playerStatus", ""),
                 "fasciaFc": m.get("fasciaFc", ""),
                 "newArrival": m.get("newArrival", False),
+                "ballottaggio": m.get("ballottaggio"),
             } if m else None,
             "fantalab": fl or None,
         })
@@ -367,11 +419,13 @@ def costruisci(stagione: str, modalita: str, partecipanti: int) -> dict:
                 "fantalab": {"file": p_fantalab.name, "impronta": impronta(p_fantalab)} if p_fantalab.exists() else None,
                 "mantra_post": {"file": p_mantra_post.name, "impronta": impronta(p_mantra_post)} if mantra_post else None,
                 "fantalab_mantra": {"file": p_fantalab_mantra.name, "impronta": impronta(p_fantalab_mantra)} if fantalab_mantra else None,
+                "ballottaggi": {"file": p_ballottaggi.name, "impronta": impronta(p_ballottaggi)} if ballottaggi else None,
             },
             "totale_giocatori": len(players),
             "con_fantacrediti": sum(1 for p in players if p["fc"]),
             "con_mantra_post": sum(1 for p in players if mantra_post.get(p["chiave"])) if mantra_post else 0,
             "con_fantalab_mantra": sum(1 for p in players if fantalab_mantra.get(p["chiave"])) if fantalab_mantra else 0,
+            "con_ballottaggi": sum(1 for p in players if p.get("ballottaggio")),
         },
         "players": players,
     }

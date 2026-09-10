@@ -261,6 +261,15 @@
 	const operation = $derived(selezionato ? asta.controllaAcquisto(selezionato, prezzoInput, proprietarioScelto) : null);
 	const ownOperation = $derived(selezionato ? asta.controllaAcquisto(selezionato, prezzoInput, asta.miaSquadra) : null);
 	const kit = $derived(selezionato ? kitColore(selezionato.squadra) : '#555c68');
+	const capienzaAsta = $derived(Math.max(1, asta.config.squadre.length * asta.config.limiti.TOT));
+	const avanzamentoAsta = $derived(Math.min(100, Math.round((asta.acquisti.length / capienzaAsta) * 100)));
+	const faseAsta = $derived.by(() => {
+		if (avanzamentoAsta < 34)
+			return { nome: 'Apertura', nota: 'Costruisci le fondamenta', tono: 'open' };
+		if (avanzamentoAsta < 72)
+			return { nome: 'Partita centrale', nota: 'Il budget decide il ritmo', tono: 'middle' };
+		return { nome: 'Finale', nota: 'Ogni credito pesa', tono: 'final' };
+	});
 
 	// Lampo "aggiudicato" dopo un'assegnazione: informativo, non bloccante.
 	let aggiudicato = $state<{ nome: string; club: string; team: string; prezzo: number; kit: string } | null>(null);
@@ -360,7 +369,11 @@
 <section class="market-header" aria-label="Panoramica dell’asta">
 	<div class="market-title"><span class="eyebrow">{#if live}<span class="live-badge">Live</span>{:else}<i></i>{/if} {asta.config.modalita} / {asta.config.stagione}</span><h2>{live ? 'Asta live' : 'Visione completa'}</h2><span class="market-caption">La prossima scelta fa la differenza.</span></div>
 	<div class="market-stat"><span>Squadre</span><b>{asta.config.squadre.length.toString().padStart(2, '0')}</b></div>
-	<div class="market-stat"><span>Acquisti registrati</span><b>{asta.acquisti.length}<small> / {asta.config.squadre.length * asta.config.limiti.TOT}</small></b><div class="market-progress"><i style:width={`${Math.min(100, 100 * asta.acquisti.length / Math.max(1, asta.config.squadre.length * asta.config.limiti.TOT))}%`}></i></div></div>
+	<div class="market-stat"><span>Acquisti registrati</span><b>{asta.acquisti.length}<small> / {capienzaAsta}</small></b><div class="market-progress"><i style:width={`${avanzamentoAsta}%`}></i></div></div>
+	<div class="auction-phase" data-tone={faseAsta.tono} aria-label={`Fase d'asta: ${faseAsta.nome}, ${avanzamentoAsta}% completata`}>
+		<div class="phase-dial"><span>{avanzamentoAsta}</span><small>%</small></div>
+		<div><span>Fase d'asta</span><b>{faseAsta.nome}</b><small>{faseAsta.nota}</small></div>
+	</div>
 	<button class="view-switch" aria-pressed={live} onclick={() => live = !live}>{live ? 'Apri vista completa' : 'Torna ad asta live'} <span aria-hidden="true">↗</span></button>
 </section>
 <div class="draft-grid" class:live>
@@ -427,7 +440,6 @@
 				</div>
 			{/if}
 		</div>
-
 		{#if selezionato && val}
 			{@const sc = val.scarsita.livello === 'CRITICA' ? 'CRITICO' : val.scarsita.livello === 'ALTA' ? 'ATTENZIONE' : 'OK'}
 			<div class="panel active-player" style="--kit:{kit};border-color:color-mix(in srgb, {coloreAzione(val.decisione.azione)} 55%, var(--border));">
@@ -442,6 +454,17 @@
 					</span>{/if}
 					<button style="margin-left:auto;font-size:11px;" onclick={() => selezionato = null}>Cambia giocatore</button>
 				</div>
+
+				{#if selezionato.ballottaggio}
+					<div class="ballottaggio-callout" aria-label={`Ballottaggio con ${selezionato.ballottaggio.contendente}`}>
+						<span class="ballottaggio-callout__icon" aria-hidden="true">⏱</span>
+						<div>
+							<span class="ballottaggio-callout__eyebrow">Ballottaggio {selezionato.ballottaggio.rischio}</span>
+							<strong>Si gioca il posto con {selezionato.ballottaggio.contendente}</strong>
+							<small>Titolarità stimata <b>{Math.round(selezionato.ballottaggio.expectedTitolarita)}%</b> · rilevato il {selezionato.ballottaggio.rilevatoIl.slice(0, 10).split('-').reverse().join('/')}</small>
+						</div>
+					</div>
+				{/if}
 
 				<div class="price-grid">
 					<div><span>Valore di riferimento</span><b>{val.fascia.riferimento} <small>cr</small></b><small>Stima · {val.fonte}</small></div>
@@ -1029,6 +1052,17 @@
 	.market-stat small { font-size:13px; font-weight:500; color:var(--muted); }
 	.market-progress { height:3px; background:var(--border); margin-top:6px; border-radius:5px; overflow:hidden; }
 	.market-progress i { display:block; height:100%; background:var(--accent); }
+	.auction-phase { --phase:var(--accent); min-width:158px; display:flex; align-items:center; gap:9px; position:relative; z-index:1; padding:7px 10px 7px 7px; border:1px solid color-mix(in srgb,var(--phase) 35%,var(--border)); border-radius:11px; background:color-mix(in srgb,var(--phase) 7%,var(--panel-3)); }
+	.auction-phase[data-tone='middle'] { --phase:var(--cyan); }
+	.auction-phase[data-tone='final'] { --phase:#ffbd61; }
+	.phase-dial { width:40px; height:40px; flex:none; display:flex; align-items:baseline; justify-content:center; position:relative; border:2px solid color-mix(in srgb,var(--phase) 65%,var(--border)); border-radius:50%; color:var(--phase); background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--phase) 19%,var(--panel-2)),var(--panel-3) 68%); }
+	.phase-dial::before { content:''; position:absolute; inset:3px; border-top:2px solid var(--phase); border-radius:50%; transform:rotate(32deg); opacity:.9; }
+	.phase-dial span { font:700 17px/40px var(--display); letter-spacing:-.2px; }
+	.phase-dial small { margin-left:1px; font:700 8px var(--display); }
+	.auction-phase > div:last-child { display:grid; gap:1px; }
+	.auction-phase > div:last-child > span { font:700 8px/1 var(--display); letter-spacing:1.2px; color:var(--muted); text-transform:uppercase; }
+	.auction-phase b { font:700 16px/1 var(--display); letter-spacing:.3px; text-transform:uppercase; color:var(--text-strong); }
+	.auction-phase > div:last-child small { font-size:9px; color:var(--muted); white-space:nowrap; }
 	.view-switch { position:relative; font-size:11px; margin-left:14px; }
 	.view-switch span { margin-left:14px; color:var(--accent); }
 	.section-eyebrow { display:flex; justify-content:space-between; margin:0 0 10px; font-size:9px; letter-spacing:1.5px; color:var(--accent); font-weight:750; }
@@ -1041,6 +1075,13 @@
 	.club-medallion { display:flex; width:48px; height:48px; flex:none; align-items:center; justify-content:center; border:1px solid var(--border-strong); border-radius:12px; background:var(--panel-3); }
 	.player-heading > span { font:700 8px/1 var(--display); letter-spacing:1.8px; color:var(--muted); text-transform:uppercase; }
 	.player-heading h2 { display:block; margin:3px 0 0; font:700 32px/0.9 var(--display); text-transform:uppercase; letter-spacing:0.4px; }
+	.ballottaggio-callout { display:flex; align-items:center; gap:10px; margin:14px 0 2px; padding:10px 12px; border:1px solid color-mix(in srgb,var(--warn) 52%,var(--border)); border-left:3px solid var(--warn); border-radius:10px; background:color-mix(in srgb,var(--warn) 10%,var(--panel-3)); }
+	.ballottaggio-callout__icon { display:grid; place-items:center; width:31px; height:31px; flex:none; border-radius:8px; background:color-mix(in srgb,var(--warn) 18%,transparent); font-size:16px; }
+	.ballottaggio-callout__eyebrow, .ballottaggio-callout small { display:block; font-size:10px; color:var(--muted); }
+	.ballottaggio-callout__eyebrow { margin-bottom:2px; font:700 9px/1 var(--display); letter-spacing:1.2px; text-transform:uppercase; color:var(--warn); }
+	.ballottaggio-callout strong { display:block; font-size:13px; color:var(--text-strong); }
+	.ballottaggio-callout small { margin-top:3px; }
+	.ballottaggio-callout small b { color:var(--warn); }
 	.price-grid > div:first-child { background:linear-gradient(140deg,#d3fa8e,#b6ed68); border-color:#c7f789; }
 	.price-grid > div:first-child b { color:#153016; }
 	.price-grid > div:first-child span, .price-grid > div:first-child small { color:#34532b; }
@@ -1049,11 +1090,11 @@
 	.price-grid > div:nth-child(3) b { color:var(--text-strong); }
 	.price-grid span { min-height:25px; line-height:1.25; }
 	.decision-summary { border-left:2px solid var(--accent); padding-left:10px; margin:12px 0; }
-	.source-note { font-size:10px; line-height:1.4; }
+	.source-note { margin:7px 0; font-size:10px; line-height:1.4; }
 	.rank { font:600 11px var(--mono); color:var(--muted); width:20px; }
 	.league-row:hover { background:var(--accent-soft); border-radius:6px; }
 	.analytics-toggle { text-align:left; padding:12px 14px; color:var(--accent); font-size:11px; border-style:dashed; }
-	@media (max-width:1000px) { .market-header { gap:20px; } .market-caption { display:none; } .market-title h2 { font-size:34px; } .view-switch { margin:0; } }
+	@media (max-width:1000px) { .market-header { gap:20px; } .market-caption { display:none; } .market-title h2 { font-size:34px; } .view-switch { margin:0; } .auction-phase { display:none; } }
 	@media (max-width:700px) { .market-header { flex-wrap:wrap; padding:15px; gap:15px; } .market-title { width:100%; } .view-switch { margin-left:auto; } .market-stat b { font-size:30px; } }
 
 	/* Lampo "AGGIUDICATO" — appare a centro schermo dopo un'assegnazione. */

@@ -2,6 +2,14 @@
 
 export type Ruolo = 'P' | 'D' | 'C' | 'A';
 
+export interface BallottaggioInfo {
+	contendente: string;
+	rischio: string;
+	expectedTitolarita: number;
+	rilevatoIl: string;
+	fonte: string;
+}
+
 export interface FantacreditiInfo {
 	pma: number;
 	pfc: number;
@@ -13,6 +21,7 @@ export interface FantacreditiInfo {
 	playerStatus: string;
 	fasciaFc: string;
 	newArrival: boolean;
+	ballottaggio?: BallottaggioInfo | null;
 }
 
 export interface Giocatore {
@@ -28,6 +37,7 @@ export interface Giocatore {
 	pg: number;
 	fmOld: number;
 	pgOld: number;
+	ballottaggio?: BallottaggioInfo | null;
 	fc: FantacreditiInfo | null;
 	fantalab: { prezzo_atteso: number; pma_pct: number } | null;
 }

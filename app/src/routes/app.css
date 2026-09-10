@@ -92,14 +92,14 @@
 	--accent2: #e0402e;
 	--accent2-soft: rgba(224, 64, 46, 0.14);
 	--cyan: #08758b;
-	--warn: #c98a00;
-	--bad: #d64545;
-	--ok: #10b76a;
+	--warn: #926100;
+	--bad: #b93540;
+	--ok: #167140;
 
-	--role-p: #c98a00;
-	--role-d: #10995a;
-	--role-c: #2b6fd6;
-	--role-a: #d64545;
+	--role-p: #8a6200;
+	--role-d: #116b43;
+	--role-c: #245eb0;
+	--role-a: #a83038;
 
 	--ring: rgba(16, 183, 106, 0.32);
 	--shadow: 0 1px 3px rgba(20, 40, 70, 0.1), 0 16px 40px -20px rgba(20, 40, 70, 0.34);
@@ -622,3 +622,5 @@ table td { padding:var(--pad-row) 8px; }
 
 /* Crest come coccarda di club. */
 .squad-crest, .club-medallion { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 12%, transparent), 0 2px 8px -4px #0007; }
+
+.brand { font-family:var(--sans); font-weight:850; letter-spacing:-1px; }

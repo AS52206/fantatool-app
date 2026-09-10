@@ -38,6 +38,12 @@ describe('badgeStato', () => {
 	it('nuovo arrivo', () => {
 		expect(badgeStato(fc({ newArrival: true })).some((x) => x.icona === '✨')).toBe(true);
 	});
+	it('usa il dettaglio del file ballottaggi anche senza metriche Fantacrediti', () => {
+		const ballottaggio = { contendente: 'Rivale', rischio: 'Pesante', expectedTitolarita: 55, rilevatoIl: '2026-09-10T18:45:00', fonte: 'https://example.test' };
+		const badge = badgeStato(null, ballottaggio);
+		expect(badge).toMatchObject([{ icona: '⏱', titolo: expect.stringContaining('contro Rivale (55%)') }]);
+		expect(affidabile(null, 55, ballottaggio)).toBe(true);
+	});
 });
 
 describe('affidabile', () => {

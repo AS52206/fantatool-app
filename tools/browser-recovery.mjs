@@ -35,6 +35,10 @@ const seedPlayers = mode === 'classic' ? selected.slice(0, 2).map((p, i) => ({ p
 	return [...mine.map((p) => ({ p, owner: 0 })), ...rivals.map((p, i) => ({ p, owner: 1 + i % 7 }))];
 })();
 const initialCount = seedPlayers.length;
+const scenarioPlayers = ['D', 'C'].map((role) => players.find((p) =>
+	p.ruolo === role && !seedPlayers.some(({ p: seeded }) => seeded.id === p.id) && !selected.some((selectedPlayer) => selectedPlayer.id === p.id)
+));
+assert(scenarioPlayers.every(Boolean), 'Two free players must be available for the scenario batch test');
 report.workload = { teams: 8, initialPurchases: initialCount, ownPurchases: seedPlayers.filter((x) => x.owner === 0).length, repeatedAction: 'search, assign one free player, undo; external backup on each mutation' };
 const snapshot = {
 	config: { budgetMax: 500, limiti: mode === 'classic' ? { P: 3, D: 8, C: 8, A: 6, TOT: 25 } : { P: 3, D: 11, C: 8, A: 8, TOT: 30 }, squadre: teams, stagione: '2026-2027', modalita: mode, partecipanti: 8, moduliTarget: ['3-4-1-2'] },
@@ -145,6 +149,35 @@ try {
 	await page.waitForFunction(({key,id,price}) => JSON.parse(localStorage.getItem(key)).acquisti.find((a) => a.giocatoreId === id).prezzo === price, {key,id:editPlayer.id,price:previous.prezzo});
 	assert.deepEqual((await state()).acquisti, beforeEdit);
 	await record('price/owner correction preserves purchase identity, updates backup and is undoable');
+	await page.getByRole('button', { name: '🧪 Scenari', exact: true }).click();
+	await page.getByRole('button', { name: '+ Nuovo piano', exact: true }).click();
+	await page.locator('.slot-add').first().click();
+	const pickerChecks = page.locator('.picker-suggestion input[type=checkbox]');
+	await pickerChecks.nth(0).check(); await pickerChecks.nth(1).check();
+	await page.getByText('2 selezionati', { exact: false }).waitFor();
+	if (process.argv.includes('--visuals'))
+		await page.screenshot({ path: output.replace(/\.json$/, '') + '.scenario-picker-batch.png', animations: 'disabled' });
+	await page.getByRole('button', { name: 'Aggiungi al piano →', exact: true }).click();
+	await page.getByRole('dialog').waitFor({ state: 'hidden' });
+	assert.equal((await state()).acquisti.length, initialCount, 'Scenario picker must not create real purchases');
+	for (const player of scenarioPlayers) {
+		await page.getByPlaceholder('Aggiungi giocatore al piano…').fill(player.nome);
+		await page.getByLabel(`Seleziona ${player.nome} per il piano`).check();
+	}
+	await page.getByText('2 nel piano', { exact: true }).waitFor();
+	if (process.argv.includes('--visuals'))
+		await page.screenshot({ path: output.replace(/\.json$/, '') + '.scenario-batch.png', animations: 'disabled' });
+	const scenarioPrices = page.locator('.scenario-batch-list input[type=number]');
+	await scenarioPrices.nth(0).fill('4'); await scenarioPrices.nth(1).fill('5');
+	await page.getByRole('button', { name: 'Aggiungi 2 al piano →', exact: true }).click();
+	await page.waitForFunction(({key, ids}) => {
+		const snap = JSON.parse(localStorage.getItem(key));
+		return Object.values(snap.scenari ?? {}).some((piano) => ids.every((id) => id in piano));
+	}, { key, ids: scenarioPlayers.map((p) => p.chiave) });
+	assert.equal((await state()).acquisti.length, initialCount, 'Scenario targets must not create real purchases');
+	await page.getByRole('button', { name: '📢 Draft', exact: true }).click();
+	await ready(page);
+	await record('scenario batch adds multiple planned targets without modifying the auction');
 	await page.getByPlaceholder('Cerca giocatore o squadra…  ( / )').fill(selected[2].nome);
 	await page.locator('.row-player').filter({ has: page.locator('strong', { hasText: selected[2].nome }) }).first().click();
 	await page.getByText('Valore di riferimento', { exact: true }).waitFor();

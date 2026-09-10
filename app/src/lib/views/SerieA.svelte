@@ -33,7 +33,9 @@
 	const pma = (g: (typeof asta.giocatori)[number]) =>
 		g.fc?.pma != null ? Math.round(g.fc.pma) : null;
 	const tit = (g: (typeof asta.giocatori)[number]) =>
-		g.fc?.expectedTitolarita != null ? Math.round(g.fc.expectedTitolarita) : null;
+		g.fc?.expectedTitolarita != null
+			? Math.round(g.fc.expectedTitolarita)
+			: g.ballottaggio ? Math.round(g.ballottaggio.expectedTitolarita) : null;
 	const coloreTit = (t: number | null) =>
 		t == null ? 'var(--muted)' : t >= 80 ? 'var(--ok)' : t >= 60 ? 'var(--text)' : 'var(--warn)';
 
@@ -56,7 +58,7 @@
 					if (q && !normalizzaNome(g.nome).includes(q) && !normalizzaNome(club).includes(q))
 						return false;
 					if (preso && !mostraPresi) return false;
-					if (!preso && soloAffidabili && !affidabile(g.fc)) return false;
+					if (!preso && soloAffidabili && !affidabile(g.fc, 55, g.ballottaggio)) return false;
 					if (ruoloFiltro !== 'TUTTI') {
 						return asta.isMantra
 							? tokenRuoliMantra(g.ruoloMantra).includes(ruoloFiltro)
@@ -143,7 +145,7 @@
 				</div>
 				{#each rep.players as g (g.id)}
 					{@const a = acqById.get(g.id)}
-					{@const badge = badgeStato(g.fc)}
+					{@const badge = badgeStato(g.fc, g.ballottaggio)}
 					{@const serve = !a && asta.isMantra && tokenRuoliMantra(g.ruoloMantra).some((t) => ruoliServono.has(t))}
 					<div class="riga" class:presa={a}>
 						<span class="tag" data-ruolo={g.ruolo || 'C'}>
