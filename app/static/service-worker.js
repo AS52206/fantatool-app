@@ -1,5 +1,5 @@
 /* Cache locale per l'uso in assenza di rete. */
-const CACHE_VERSION = 'fantatool-offline-v1';
+const CACHE_VERSION = 'fantatool-offline-v2';
 const ROOT = new URL('./', self.registration.scope).href;
 
 const CORE_PATHS = [
