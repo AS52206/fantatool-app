@@ -52,6 +52,32 @@
 		return o;
 	});
 	const evSet = $derived(new Set(evidenzia));
+	type DettaglioGiocatore = {
+		nome: string;
+		club?: string;
+		ruolo?: string;
+		titolarita?: number | null;
+		prezzo?: number | null;
+		tipo: 'TITOLARE' | 'RICAMBIO';
+		riserve?: RiservaCampo[];
+	};
+	let dettaglio = $state<DettaglioGiocatore | null>(null);
+
+	function mostraTitolare(s: SlotCampo) {
+		if (!s.nome) return;
+		dettaglio = {
+			nome: s.nome,
+			club: s.club,
+			ruolo: s.ruolo ?? s.etichetta,
+			titolarita: s.titolarita,
+			prezzo: s.prezzo,
+			tipo: 'TITOLARE',
+			riserve: s.riserve
+		};
+	}
+	function mostraRiserva(r: RiservaCampo) {
+		dettaglio = { ...r, tipo: 'RICAMBIO' };
+	}
 
 	let frameEl: HTMLDivElement | undefined = $state();
 	let linePts = $state('');
@@ -119,16 +145,18 @@
 						{@const fi = offsets[li] + si}
 						<div class="slot" class:libero={st === 'LIBERO'} class:evid={evSet.has(fi)}>
 							{#if s.nome}
-								<div class="kit" title={s.club ?? ''}>
-									<Jersey club={s.club} size={44} />
-									<span class="dot" style="background:{colStato[st]};"></span>
-								</div>
-								<div class="name">{s.nome}</div>
-								<div class="sub">
-									{#if s.etichetta}<span class="muted">{s.etichetta}</span>{/if}
-									{#if s.prezzo != null}<span style="color:var(--cyan);">{s.prezzo}</span>{/if}
-									{#if s.titolarita != null && s.titolarita > 0}<span style="color:{titColor(s.titolarita)};">{Math.round(s.titolarita)}%</span>{/if}
-								</div>
+								<button class="slot-player" type="button" onclick={() => mostraTitolare(s)} aria-label={`Mostra ${s.nome}, ${s.ruolo ?? s.etichetta ?? 'ruolo non disponibile'}`}>
+									<div class="kit">
+										<Jersey club={s.club} size={44} />
+										<span class="dot" style="background:{colStato[st]};"></span>
+									</div>
+									<div class="name">{s.nome}</div>
+									<div class="sub">
+										{#if s.etichetta}<span class="muted">{s.etichetta}</span>{/if}
+										{#if s.prezzo != null}<span style="color:var(--cyan);">{s.prezzo}</span>{/if}
+										{#if s.titolarita != null && s.titolarita > 0}<span style="color:{titColor(s.titolarita)};">{Math.round(s.titolarita)}%</span>{/if}
+									</div>
+								</button>
 								{#if s.riserve?.length}
 									<div
 										class="riserve"
@@ -143,15 +171,18 @@
 												.join(' · ')}
 									>
 										{#each s.riserve.slice(0, 4) as r, ri}
-											<span
+											<button
+												type="button"
 												class="ris"
 												style="z-index:{20 - ri};"
+												onclick={() => mostraRiserva(r)}
+												aria-label={`Mostra ricambio ${r.nome}, ${r.ruolo ?? 'ruolo non disponibile'}`}
 												title={r.nome +
 													(r.ruolo ? ` — ${r.ruolo}` : '') +
 													(r.titolarita ? ` · ${Math.round(r.titolarita)}%` : '')}
 											>
 												<Jersey club={r.club} size={26} />
-											</span>
+											</button>
 										{/each}
 										{#if s.riserve.length > 4}<span class="ris-more">+{s.riserve.length - 4}</span>{/if}
 									</div>
@@ -174,6 +205,27 @@
 				</div>
 			{/each}
 		</div>
+		{#if dettaglio}
+			<div class="player-detail" role="status">
+				<div class="detail-head">
+					<span>{dettaglio.tipo}</span>
+					<button type="button" onclick={() => (dettaglio = null)} aria-label="Chiudi dettagli giocatore">Chiudi ×</button>
+				</div>
+				<strong>{dettaglio.nome}</strong>
+				<span class="detail-role">{dettaglio.ruolo ?? 'ruolo non disponibile'}</span>
+				{#if dettaglio.club}<span class="muted">{dettaglio.club}</span>{/if}
+				{#if dettaglio.prezzo != null}<span class="detail-stat">{dettaglio.prezzo} cr</span>{/if}
+				{#if dettaglio.titolarita != null && dettaglio.titolarita > 0}<span class="detail-stat">{Math.round(dettaglio.titolarita)}% tit.</span>{/if}
+				{#if dettaglio.riserve?.length}
+					<div class="detail-riserve">
+						<span>Ricambi nello slot:</span>
+						{#each dettaglio.riserve as r}
+							<button type="button" onclick={() => mostraRiserva(r)}>{r.nome} · {r.ruolo ?? '—'}</button>
+						{/each}
+					</div>
+				{/if}
+			</div>
+		{/if}
 	</div>
 </div>
 
@@ -311,6 +363,24 @@
 	.slot.libero {
 		opacity: 0.72;
 	}
+	.slot-player {
+		width: 100%;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: inherit;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 3px;
+		cursor: pointer;
+		border-radius: 9px;
+	}
+	.slot-player:focus-visible,
+	.ris:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+	}
 	.slot-add {
 		background: transparent;
 		border: 1px dashed transparent;
@@ -369,8 +439,10 @@
 		justify-content: center;
 		margin-left: -9px;
 		padding: 2px;
+		border: 0;
 		border-radius: 50%;
 		background: rgba(6, 20, 14, 0.72);
+		cursor: pointer;
 		box-shadow:
 			0 0 0 1px rgba(255, 255, 255, 0.35),
 			0 2px 4px rgba(0, 0, 0, 0.5);
@@ -390,5 +462,59 @@
 		font: 700 11px/1 var(--mono);
 		color: rgba(255, 255, 255, 0.5);
 		letter-spacing: 1px;
+	}
+	.player-detail {
+		position: absolute;
+		z-index: 5;
+		left: 10px;
+		right: 10px;
+		bottom: 10px;
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		flex-wrap: wrap;
+		padding: 8px 10px;
+		border: 1px solid rgba(180, 255, 205, 0.55);
+		border-radius: 10px;
+		background: rgba(5, 24, 15, 0.96);
+		box-shadow: 0 8px 28px rgba(0, 0, 0, 0.42);
+		font-size: 12px;
+		color: #f6f8fb;
+	}
+	.detail-head { display: contents; }
+	.detail-head > span {
+		font: 700 9px/1 var(--mono);
+		letter-spacing: 0.8px;
+		color: var(--cyan);
+	}
+	.detail-head > button {
+		margin-left: auto;
+		border: 0;
+		background: transparent;
+		color: rgba(255,255,255,0.78);
+		font: 600 10px/1 var(--mono);
+		padding: 3px;
+		cursor: pointer;
+	}
+	.detail-role { color: var(--ok); font-family: var(--mono); }
+	.detail-stat { color: var(--cyan); font: 600 10px/1 var(--mono); }
+	.detail-riserve {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		flex-wrap: wrap;
+		padding-top: 3px;
+		border-top: 1px solid rgba(255,255,255,0.13);
+		font-size: 10px;
+	}
+	.detail-riserve > button {
+		border: 1px solid rgba(180,255,205,0.34);
+		border-radius: 6px;
+		background: rgba(255,255,255,0.06);
+		color: #fff;
+		font: 600 10px/1 var(--mono);
+		padding: 3px 5px;
+		cursor: pointer;
 	}
 </style>
