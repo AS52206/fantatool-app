@@ -54,4 +54,22 @@ describe('ricambiMantraDa / DaModuli', () => {
 		expect(r.find((x) => x.chiave === 'Dd/Ds')!.presenti).toBe(1);
 		expect(r.find((x) => x.chiave === 'E')!.presenti).toBe(1);
 	});
+
+	it('tre C non possono dichiarare coperto anche il fabbisogno M', () => {
+		const r = ricambiMantraDa(['C', 'C', 'C'], 30, '4-3-3', 3);
+		const centrocampo = r.find((x) => x.chiave === 'M/C')!;
+		const m = centrocampo.mancantiPerRuolo.find((x) => x.ruolo === 'M');
+		const c = centrocampo.mancantiPerRuolo.find((x) => x.ruolo === 'C');
+		expect(centrocampo.criterioCoperto).toBe(false);
+		expect(m?.mancanti).toBe(centrocampo.obiettivo);
+		expect(c?.mancanti).toBe(centrocampo.obiettivo - 3);
+	});
+
+	it('un M/C reale contribuisce a entrambi i controlli atomici', () => {
+		const r = ricambiMantraDa(['M/C'], 4, '4-3-3', 1);
+		const centrocampo = r.find((x) => x.chiave === 'M/C')!;
+		expect(centrocampo.obiettivo).toBe(1);
+		expect(centrocampo.mancantiPerRuolo).toEqual([]);
+		expect(centrocampo.criterioCoperto).toBe(true);
+	});
 });

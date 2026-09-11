@@ -867,18 +867,20 @@
 							</span>
 						</h3>
 						<p class="muted" style="font-size:10px;margin:0 0 6px;">
-							{#if asta.isMantra}quanti tenerne per profilo sui moduli target {moduliRagionamento.join(' / ')} · tabella BABBOFANTACALCIO scalata alla rosa da {asta.config.limiti.TOT} · un polivalente (es. Dd;E) conta in ogni profilo{:else}giocatori per reparto per la rosa completa{/if}
+							{#if asta.isMantra}quanti tenerne per profilo sui moduli target {moduliRagionamento.join(' / ')} · tabella BABBOFANTACALCIO scalata alla rosa da {asta.config.limiti.TOT} · un C non copre M, né Dd copre Ds{:else}giocatori per reparto per la rosa completa{/if}
 						</p>
 						<div style="display:flex;flex-direction:column;gap:4px;">
 							{#each ricambiMio as p}
-								<div style="display:flex;align-items:center;gap:6px;font-size:12px;background:var(--panel-3);border:1px solid var(--border);border-radius:var(--r-sm);padding:var(--pad-row) 10px;{p.mancanti === 0 ? 'opacity:0.6;' : ''}">
+								<div style="display:flex;align-items:center;gap:6px;font-size:12px;background:var(--panel-3);border:1px solid var(--border);border-radius:var(--r-sm);padding:var(--pad-row) 10px;{p.criterioCoperto ? 'opacity:0.6;' : ''}">
 									<span class="tag" data-ruolo={asta.isMantra ? undefined : p.chiave}>{asta.isMantra ? p.chiave : p.etichetta}</span>
 									{#if asta.isMantra}<span class="muted" style="font-size:11px;">{p.etichetta}</span>{/if}
 									<span class="mono" style="margin-left:auto;">
-										<span style:color={p.presenti >= p.obiettivo ? 'var(--ok)' : 'var(--text)'}>{p.presenti}</span
+										<span style:color={p.criterioCoperto ? 'var(--ok)' : 'var(--text)'}>{p.presenti}</span
 										><span class="muted">/{p.obiettivo}</span>
 									</span>
-									{#if p.mancanti > 0}
+									{#if p.mancantiPerRuolo.length}
+										<span class="mono" style="color:var(--cyan);text-align:right;">{p.mancantiPerRuolo.map((r) => `${r.ruolo} +${r.mancanti}`).join(' · ')}</span>
+									{:else if p.mancanti > 0}
 										<span class="mono" style="color:var(--cyan);width:34px;text-align:right;">+{p.mancanti}</span>
 									{:else}
 										<span class="mono" style="color:var(--ok);width:34px;text-align:right;">✓</span>
@@ -886,10 +888,9 @@
 								</div>
 							{/each}
 						</div>
-						{#if asta.isMantra && ricambiMio.every((p) => p.mancanti === 0) && totalePianoMio < asta.config.limiti.TOT}
+						{#if asta.isMantra && ricambiMio.every((p) => p.criterioCoperto) && totalePianoMio < asta.config.limiti.TOT}
 							<div class="muted" style="font-size:10px;margin-top:5px;border-top:1px solid var(--border);padding-top:4px;">
-								Tutti i profili coperti con <b>{totalePianoMio}</b> giocatori (i polivalenti contano
-								su più profili). Restano <b>{asta.config.limiti.TOT - totalePianoMio}</b> slot
+								Tutti i profili coperti con <b>{totalePianoMio}</b> giocatori. Restano <b>{asta.config.limiti.TOT - totalePianoMio}</b> slot
 								che nessun ruolo richiede: riserve extra o scommesse.
 							</div>
 						{/if}

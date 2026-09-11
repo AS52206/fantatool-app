@@ -49,6 +49,13 @@ export interface Ricambio {
 	presenti: number;
 	obiettivo: number;
 	mancanti: number;
+	/**
+	 * Controllo prudenziale dei singoli ruoli contenuti nel profilo. Il totale
+	 * del profilo resta quello della tabella, ma C non può più far sparire il
+	 * fabbisogno di M, né Dd quello di Ds.
+	 */
+	mancantiPerRuolo: { ruolo: string; presenti: number; mancanti: number }[];
+	criterioCoperto: boolean;
 }
 
 const tokensRuolo = (rm: unknown) =>
@@ -77,7 +84,8 @@ function pesiProfiloPerModulo(modulo: string): Record<string, number> {
 }
 
 /** Costruisce le righe Ricambio da un piano (profilo → obiettivo) e dai ruoli
- *  dei giocatori posseduti. Un polivalente (es. Dd;E) conta in ogni profilo. */
+ *  dei giocatori posseduti. Un polivalente conta nel profilo, ma il controllo
+ *  prudenziale non permette che un ruolo puro copra gli altri ruoli del gruppo. */
 function costruisciRicambi(
 	piano: Record<string, number>,
 	ruoliMantra: (string | null | undefined)[]
@@ -86,13 +94,21 @@ function costruisciRicambi(
 	return PROFILI_ROSA_MANTRA.map(([chiave, etichetta, roli]) => {
 		const obiettivo = piano[chiave] ?? 0;
 		const presenti = tokensPerGiocatore.filter((toks) => toks.some((t) => roli.includes(t))).length;
+		const mancantiPerRuolo = roli
+			.map((ruolo) => {
+				const presentiRuolo = tokensPerGiocatore.filter((toks) => toks.includes(ruolo)).length;
+				return { ruolo, presenti: presentiRuolo, mancanti: Math.max(0, obiettivo - presentiRuolo) };
+			})
+			.filter((r) => r.mancanti > 0);
 		return {
 			chiave,
 			etichetta,
 			roli: [...roli],
 			presenti,
 			obiettivo,
-			mancanti: Math.max(0, obiettivo - presenti)
+			mancanti: Math.max(0, obiettivo - presenti),
+			mancantiPerRuolo,
+			criterioCoperto: mancantiPerRuolo.length === 0
 		};
 	});
 }
@@ -172,6 +188,16 @@ export function ricambiClassicDa(ruoli: (string | null | undefined)[], limiti: L
 	return RUOLI.map((r) => {
 		const presenti = ruoli.filter((x) => x === r).length;
 		const obiettivo = limiti[r] ?? 0;
-		return { chiave: r, etichetta: r, roli: [r], presenti, obiettivo, mancanti: Math.max(0, obiettivo - presenti) };
+		const mancanti = Math.max(0, obiettivo - presenti);
+		return {
+			chiave: r,
+			etichetta: r,
+			roli: [r],
+			presenti,
+			obiettivo,
+			mancanti,
+			mancantiPerRuolo: mancanti ? [{ ruolo: r, presenti, mancanti }] : [],
+			criterioCoperto: mancanti === 0
+		};
 	});
 }
