@@ -13,4 +13,10 @@ if [[ ! -f build/index.html ]]; then
 fi
 
 # Il server rifiuta una porta occupata senza arrestare altri processi.
-exec node serve.mjs 8770 --open
+URL="http://localhost:8770"
+if curl --silent --fail --max-time 1 "$URL" >/dev/null 2>&1; then
+	open -a "Brave Browser" "$URL"
+	exit 0
+fi
+
+exec node serve.mjs 8770 --open --brave

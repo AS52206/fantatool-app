@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), 'build');
 const PORT = Number(process.argv[2] ?? 8770);
+const APRI_BRAVE = process.argv.includes('--brave');
 if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
 	console.error('Porta non valida.');
 	process.exit(1);
@@ -86,7 +87,11 @@ server.on('error', (error) => {
 server.listen(PORT, '127.0.0.1', () => {
 	console.log(`Fantatool servito su http://localhost:${PORT}  (Ctrl+C per fermare)`);
 	if (process.argv.includes('--open') && process.platform === 'darwin') {
-		const browser = spawn('open', [`http://localhost:${PORT}`], { stdio: 'ignore' });
+		const browser = spawn(
+			'open',
+			APRI_BRAVE ? ['-a', 'Brave Browser', `http://localhost:${PORT}`] : [`http://localhost:${PORT}`],
+			{ stdio: 'ignore' }
+		);
 		browser.on('error', () => console.error(`Apri manualmente http://localhost:${PORT}`));
 	}
 });
